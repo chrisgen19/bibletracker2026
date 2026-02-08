@@ -8,6 +8,7 @@
     "start": "bun run db:migrate:safe && next start",
     "db:migrate:safe": "sh ./scripts/db-migrate-safe.sh",
     "migrate:deploy": "prisma migrate deploy",
+    "db:seed": "bun prisma/seed.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "bun run lint && bun run typecheck",
