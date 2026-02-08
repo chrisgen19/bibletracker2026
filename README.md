@@ -147,3 +147,47 @@ src/
 - **Route Protection** - Dashboard requires authentication
 - **ULID IDs** - Time-sortable unique identifiers for users
 - **Form Validation** - Client and server-side validation with Zod
+
+## Roadmap
+
+### Phase 1 - Core Functionality (Next)
+
+- [ ] **Connect dashboard to database** - Replace mock data with real Prisma queries (CRUD for reading entries)
+- [ ] **Associate entries with users** - Add `userId` foreign key to a `ReadingEntry` model in Prisma
+- [ ] **Server actions / API routes** - Create endpoints for creating, reading, and deleting entries
+- [ ] **Persist streak and stats** - Calculate streaks and stats from actual database records
+
+### Phase 2 - User Experience
+
+- [ ] **Profile page** - View and edit account details (name, avatar, country, etc.)
+- [ ] **Password reset flow** - Forgot password with email verification
+- [ ] **Email verification** - Verify email address on signup
+- [ ] **Loading skeletons** - Add loading states for calendar and activity log
+- [ ] **Toast notifications** - Success/error feedback for user actions
+- [ ] **Mobile responsive nav** - Expand the mobile hamburger menu with full navigation
+
+### Phase 3 - Reading Features
+
+- [ ] **Reading plans** - Predefined plans (e.g., Bible in a year, Gospels in 30 days)
+- [ ] **Chapter-level tracking** - Track exactly which chapters have been read per book
+- [ ] **Progress bar per book** - Visual completion percentage for each book
+- [ ] **Favorites / bookmarks** - Save favorite verses or passages
+- [ ] **Search entries** - Search through past reflections and notes
+- [ ] **Export data** - Download reading history as CSV or PDF
+
+### Phase 4 - Social & Community
+
+- [ ] **Public profiles** - Share reading stats with others
+- [ ] **Reading groups** - Join or create accountability groups
+- [ ] **Shared reading plans** - Follow plans together with friends
+- [ ] **Leaderboard** - Optional streak and progress leaderboards
+
+### Phase 5 - Polish & Deployment
+
+- [ ] **Dark mode** - Toggle between light and dark themes
+- [ ] **PWA support** - Install as a mobile app with offline access
+- [ ] **Push notifications** - Daily reading reminders
+- [ ] **Analytics dashboard** - Reading trends, weekly/monthly summaries
+- [ ] **Rate limiting** - Protect auth endpoints from brute force
+- [ ] **CI/CD pipeline** - Automated testing and deployment
+- [ ] **Deploy to production** - Vercel, Railway, or self-hosted with Docker
