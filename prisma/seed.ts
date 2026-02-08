@@ -1,67 +1,216 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { ulid } from "ulidx";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const OLD_READINGS = [
-  { book: "Romans", chapters: "8", verses: "1-39", date: "2025-08-08" },
-  { book: "Romans", chapters: "9", verses: "1-33", date: "2025-08-09" },
-  { book: "Romans", chapters: "10", verses: "1-21", date: "2025-08-10" },
-  { book: "Romans", chapters: "11", verses: "1-36", date: "2025-08-11" },
-  { book: "Romans", chapters: "12", verses: "1-21", date: "2025-08-12" },
-  { book: "1 Corinthians", chapters: "1", verses: "1-31", date: "2025-08-28" },
-  { book: "1 Corinthians", chapters: "2", verses: "1-16", date: "2025-09-01" },
-  { book: "1 Corinthians", chapters: "3", verses: "1-23", date: "2025-09-02" },
-  { book: "1 Corinthians", chapters: "4", verses: "1-21", date: "2025-09-03" },
-  { book: "1 Corinthians", chapters: "5", verses: "1-13", date: "2025-09-05" },
-  { book: "1 Corinthians", chapters: "6", verses: "1-20", date: "2025-09-07" },
-  { book: "1 Corinthians", chapters: "7", verses: "1-40", date: "2025-09-08" },
-  { book: "1 Corinthians", chapters: "8", verses: "1-13", date: "2025-09-09" },
-  { book: "1 Corinthians", chapters: "9", verses: "1-27", date: "2025-09-11" },
-  { book: "1 Corinthians", chapters: "10", verses: "1-33", date: "2025-09-12" },
-  { book: "1 Corinthians", chapters: "11", verses: "1-34", date: "2025-09-13" },
-  { book: "1 Corinthians", chapters: "12", verses: "1-31", date: "2025-09-14" },
-  { book: "1 Corinthians", chapters: "13", verses: "1-13", date: "2025-09-15" },
-  { book: "1 Corinthians", chapters: "14", verses: "1-40", date: "2025-09-19" },
-  { book: "1 Corinthians", chapters: "15", verses: "1-58", date: "2025-09-23" },
-  { book: "1 Corinthians", chapters: "16", verses: "1-24", date: "2025-09-24" },
-  { book: "2 Corinthians", chapters: "1", verses: "1-24", date: "2025-09-28" },
-  { book: "2 Corinthians", chapters: "2", verses: "1-17", date: "2025-09-30" },
-  { book: "2 Corinthians", chapters: "3", verses: "1-18", date: "2025-10-01" },
-  { book: "2 Corinthians", chapters: "4", verses: "1-18", date: "2025-10-02" },
-  { book: "2 Corinthians", chapters: "5", verses: "1-21", date: "2025-10-03" },
-  { book: "2 Corinthians", chapters: "6", verses: "1-18", date: "2025-10-04" },
-  { book: "2 Corinthians", chapters: "7", verses: "1-16", date: "2025-10-05" },
-  { book: "2 Corinthians", chapters: "8", verses: "1-24", date: "2025-10-06" },
-  { book: "2 Corinthians", chapters: "9", verses: "1-15", date: "2025-10-07" },
-  { book: "2 Corinthians", chapters: "10", verses: "1-18", date: "2025-10-08" },
-  { book: "2 Corinthians", chapters: "11", verses: "1-33", date: "2025-10-10" },
-  { book: "2 Corinthians", chapters: "12", verses: "1-21", date: "2025-10-11" },
-  { book: "2 Corinthians", chapters: "13", verses: "1-14", date: "2025-10-12" },
-  { book: "Galatians", chapters: "1", verses: "1-24", date: "2025-10-13" },
-  { book: "Galatians", chapters: "2", verses: "1-21", date: "2025-10-14" },
-  { book: "Galatians", chapters: "3", verses: "1-29", date: "2025-10-15" },
-  { book: "Galatians", chapters: "4", verses: "1-31", date: "2025-10-16" },
-  { book: "Galatians", chapters: "5", verses: "1-26", date: "2025-10-17" },
-  { book: "Galatians", chapters: "6", verses: "1-18", date: "2025-10-18" },
-  { book: "Ephesians", chapters: "1", verses: "1-23", date: "2025-10-19" },
-  { book: "Ephesians", chapters: "2", verses: "1-22", date: "2025-10-20" },
-  { book: "Ephesians", chapters: "3", verses: "1-20", date: "2025-10-21" },
-  { book: "Ephesians", chapters: "4", verses: "1-32", date: "2025-10-22" },
-  { book: "Ephesians", chapters: "5", verses: "1-33", date: "2025-10-23" },
-  { book: "Ephesians", chapters: "6", verses: "1-24", date: "2025-10-24" },
-  { book: "Philippians", chapters: "1", verses: "1-30", date: "2025-10-25" },
-  { book: "Philippians", chapters: "2", verses: "1-30", date: "2025-10-26" },
-  { book: "Philippians", chapters: "3", verses: "1-21", date: "2025-10-27" },
-];
+type LegacyReadingRow = {
+  id: string;
+  userId: string;
+  bibleBook: string;
+  chapters: string;
+  verses: string | null;
+  dateRead: string;
+  completed: boolean;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
-const TARGET_EMAIL = "chrisgen19@gmail.com";
+const TARGET_EMAIL = process.env.SEED_TARGET_EMAIL ?? "chrisgen19@gmail.com";
+const SOURCE_USER_ID = process.env.SEED_SOURCE_USER_ID;
+const CLEAR_EXISTING = process.env.SEED_CLEAR_EXISTING === "true";
+const SEED_SQL_FILE =
+  process.env.SEED_SQL_FILE ?? path.resolve(process.cwd(), "bible_readings.sql");
+
+function parseSqlValue(raw: string): string | null {
+  const value = raw.trim();
+  if (value.toUpperCase() === "NULL") return null;
+  if (value.startsWith("'") && value.endsWith("'")) {
+    return value.slice(1, -1).replaceAll("''", "'");
+  }
+  return value;
+}
+
+function splitSqlFields(tuple: string): string[] {
+  const fields: string[] = [];
+  let current = "";
+  let inString = false;
+
+  for (let i = 0; i < tuple.length; i++) {
+    const ch = tuple[i];
+
+    if (ch === "'") {
+      current += ch;
+      const next = tuple[i + 1];
+      if (inString && next === "'") {
+        current += next;
+        i++;
+        continue;
+      }
+      inString = !inString;
+      continue;
+    }
+
+    if (ch === "," && !inString) {
+      fields.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += ch;
+  }
+
+  fields.push(current.trim());
+  return fields;
+}
+
+function extractTupleBodies(valuesBlock: string): string[] {
+  const tuples: string[] = [];
+  let inString = false;
+  let depth = 0;
+  let start = -1;
+
+  for (let i = 0; i < valuesBlock.length; i++) {
+    const ch = valuesBlock[i];
+
+    if (ch === "'") {
+      const next = valuesBlock[i + 1];
+      if (inString && next === "'") {
+        i++;
+        continue;
+      }
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (ch === "(") {
+      if (depth === 0) start = i + 1;
+      depth++;
+      continue;
+    }
+
+    if (ch === ")") {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        tuples.push(valuesBlock.slice(start, i));
+        start = -1;
+      }
+    }
+  }
+
+  return tuples;
+}
+
+function parseLegacyRows(sql: string): LegacyReadingRow[] {
+  const match = sql.match(
+    /INSERT INTO\s+"bible_readings"\s*\([^)]+\)\s*VALUES\s*([\s\S]*?);/i
+  );
+  if (!match) {
+    throw new Error("Could not find INSERT INTO bible_readings VALUES block.");
+  }
+
+  const tupleBodies = extractTupleBodies(match[1]);
+  if (tupleBodies.length === 0) {
+    throw new Error("No values found in bible_readings.sql.");
+  }
+
+  return tupleBodies.map((tuple, index) => {
+    const fields = splitSqlFields(tuple).map(parseSqlValue);
+    if (fields.length !== 10) {
+      throw new Error(
+        `Unexpected column count in tuple #${index + 1}. Expected 10, got ${fields.length}.`
+      );
+    }
+
+    const [
+      id,
+      userId,
+      bibleBook,
+      chapters,
+      verses,
+      dateRead,
+      completed,
+      notes,
+      createdAt,
+      updatedAt,
+    ] = fields;
+
+    if (!id || !userId || !bibleBook || !chapters || !dateRead || !createdAt || !updatedAt) {
+      throw new Error(`Missing required value in tuple #${index + 1}.`);
+    }
+
+    return {
+      id,
+      userId,
+      bibleBook,
+      chapters,
+      verses,
+      dateRead,
+      completed: completed === "1" || completed?.toLowerCase() === "true",
+      notes,
+      createdAt,
+      updatedAt,
+    };
+  });
+}
+
+function parseTimestamp(value: string): Date {
+  const iso = value.includes("T") ? value : value.replace(" ", "T");
+  const withZone = /Z$|[+-]\d{2}:\d{2}$/.test(iso) ? iso : `${iso}Z`;
+  const parsed = new Date(withZone);
+
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid timestamp value: ${value}`);
+  }
+
+  return parsed;
+}
+
+function chooseSourceUserId(rows: LegacyReadingRow[]): string {
+  if (SOURCE_USER_ID) return SOURCE_USER_ID;
+
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    counts.set(row.userId, (counts.get(row.userId) ?? 0) + 1);
+  }
+
+  let selected = "";
+  let maxCount = -1;
+  for (const [userId, count] of counts) {
+    if (count > maxCount) {
+      selected = userId;
+      maxCount = count;
+    }
+  }
+
+  if (!selected) {
+    throw new Error("Could not determine source user ID from bible_readings.sql.");
+  }
+
+  return selected;
+}
 
 async function main() {
+  const sql = await readFile(SEED_SQL_FILE, "utf8");
+  const legacyRows = parseLegacyRows(sql);
+
+  const sourceUserId = chooseSourceUserId(legacyRows);
+  const sourceRows = legacyRows.filter((row) => row.userId === sourceUserId);
+  const incompleteCount = sourceRows.filter((row) => !row.completed).length;
+
+  console.log(
+    `Parsed ${legacyRows.length} rows from ${path.basename(SEED_SQL_FILE)}. ` +
+      `Using source user ${sourceUserId} with ${sourceRows.length} rows ` +
+      `(${incompleteCount} marked incomplete in legacy data).`
+  );
+
   const user = await prisma.user.findUnique({
     where: { email: TARGET_EMAIL },
   });
@@ -73,31 +222,50 @@ async function main() {
 
   console.log(`Found user: ${user.firstName} ${user.lastName} (${user.id})`);
 
-  // Check for existing entries to avoid duplicates
   const existing = await prisma.readingEntry.count({
     where: { userId: user.id },
   });
 
-  if (existing > 0) {
-    console.log(`User already has ${existing} entries. Skipping seed to avoid duplicates.`);
-    console.log("To re-seed, delete existing entries first.");
+  if (existing > 0 && !CLEAR_EXISTING) {
+    console.log(
+      `User already has ${existing} entries. ` +
+        "Set SEED_CLEAR_EXISTING=true to replace entries from bible_readings.sql."
+    );
     return;
   }
 
-  const entries = OLD_READINGS.map((r) => ({
-    id: ulid(),
+  if (CLEAR_EXISTING && existing > 0) {
+    const deleted = await prisma.readingEntry.deleteMany({
+      where: { userId: user.id },
+    });
+    console.log(`Deleted ${deleted.count} existing entries for ${TARGET_EMAIL}.`);
+  }
+
+  const entries = sourceRows.map((row) => ({
+    id: row.id,
     userId: user.id,
-    date: new Date(`${r.date}T00:00:00.000Z`),
-    book: r.book,
-    chapters: r.chapters,
-    verses: r.verses,
-    notes: "",
-    createdAt: new Date(`${r.date}T00:00:00.000Z`),
-    updatedAt: new Date(`${r.date}T00:00:00.000Z`),
+    date: parseTimestamp(row.dateRead),
+    book: row.bibleBook,
+    chapters: row.chapters,
+    verses: row.verses ?? "",
+    notes: row.notes ?? "",
+    createdAt: parseTimestamp(row.createdAt),
+    updatedAt: parseTimestamp(row.updatedAt),
   }));
 
-  const result = await prisma.readingEntry.createMany({ data: entries });
-  console.log(`Seeded ${result.count} reading entries for ${TARGET_EMAIL}`);
+  const result = await prisma.readingEntry.createMany({
+    data: entries,
+    skipDuplicates: true,
+  });
+
+  const total = await prisma.readingEntry.count({
+    where: { userId: user.id },
+  });
+
+  console.log(
+    `Seeded ${result.count} entries for ${TARGET_EMAIL} from legacy user ${sourceUserId}.`
+  );
+  console.log(`User now has ${total} reading entries.`);
 }
 
 main()
