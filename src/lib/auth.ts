@@ -4,10 +4,12 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
+import { env } from "@/env";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   trustHost: true,
+  secret: env.AUTH_SECRET,
   session: {
     strategy: "jwt",
   },
