@@ -6,7 +6,7 @@ import { Calendar } from "@/components/calendar";
 import { Stats } from "@/components/stats";
 import { ActivityLog } from "@/components/activity-log";
 import { EntryForm } from "@/components/entry-form";
-import { createEntry, deleteEntry } from "@/app/dashboard/actions";
+import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import type { ReadingEntry, EntryFormData, Stats as StatsType } from "@/lib/types";
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
@@ -73,6 +73,7 @@ export function DashboardClient({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const [formData, setFormData] = useState<EntryFormData>({
     book: "Genesis",
@@ -103,28 +104,65 @@ export function DashboardClient({
     );
   };
 
+  const handleEditEntry = (entry: ReadingEntry) => {
+    setEditingEntryId(entry.id);
+    setFormData({
+      book: entry.book,
+      chapters: entry.chapters,
+      verses: entry.verses,
+      notes: entry.notes,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingEntryId(null);
+    setFormData({ book: "Genesis", chapters: "", verses: "", notes: "" });
+  };
+
   const handleSaveEntry = () => {
-    const dateStr = selectedDate.toISOString();
     const data = { ...formData };
 
-    // Optimistic: add to local state with a temp ID
-    const tempEntry: ReadingEntry = {
-      id: `temp-${Date.now()}`,
-      date: dateStr,
-      ...data,
-    };
-    setEntries((prev) => [...prev, tempEntry]);
-    setFormData({ book: "Genesis", chapters: "", verses: "", notes: "" });
-    setIsModalOpen(false);
+    if (editingEntryId) {
+      // Optimistic update
+      const originalEntry = entries.find((e) => e.id === editingEntryId);
+      setEntries((prev) =>
+        prev.map((e) => (e.id === editingEntryId ? { ...e, ...data } : e))
+      );
+      handleCloseModal();
 
-    startTransition(async () => {
-      try {
-        await createEntry(data, dateStr);
-      } catch {
-        // Revert on error
-        setEntries((prev) => prev.filter((e) => e.id !== tempEntry.id));
-      }
-    });
+      startTransition(async () => {
+        try {
+          await updateEntry(editingEntryId, data);
+        } catch {
+          if (originalEntry) {
+            setEntries((prev) =>
+              prev.map((e) => (e.id === originalEntry.id ? originalEntry : e))
+            );
+          }
+        }
+      });
+    } else {
+      const dateStr = selectedDate.toISOString();
+
+      // Optimistic: add to local state with a temp ID
+      const tempEntry: ReadingEntry = {
+        id: `temp-${Date.now()}`,
+        date: dateStr,
+        ...data,
+      };
+      setEntries((prev) => [...prev, tempEntry]);
+      handleCloseModal();
+
+      startTransition(async () => {
+        try {
+          await createEntry(data, dateStr);
+        } catch {
+          setEntries((prev) => prev.filter((e) => e.id !== tempEntry.id));
+        }
+      });
+    }
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -169,6 +207,7 @@ export function DashboardClient({
               selectedDate={selectedDate}
               entries={selectedDateEntries}
               onAddEntry={() => setIsModalOpen(true)}
+              onEditEntry={handleEditEntry}
               onDeleteEntry={handleDeleteEntry}
             />
           </div>
@@ -177,10 +216,11 @@ export function DashboardClient({
 
       <EntryForm
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         formData={formData}
         onFormChange={setFormData}
         onSave={handleSaveEntry}
+        isEditing={!!editingEntryId}
       />
     </div>
   );

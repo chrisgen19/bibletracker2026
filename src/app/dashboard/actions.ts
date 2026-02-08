@@ -46,6 +46,28 @@ export async function createEntry(formData: EntryFormData, date: string) {
   revalidatePath("/dashboard");
 }
 
+export async function updateEntry(entryId: string, formData: EntryFormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.readingEntry.update({
+    where: {
+      id: entryId,
+      userId: session.user.id,
+    },
+    data: {
+      book: formData.book,
+      chapters: formData.chapters,
+      verses: formData.verses,
+      notes: formData.notes,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
 export async function deleteEntry(entryId: string) {
   const session = await auth();
   if (!session?.user?.id) {

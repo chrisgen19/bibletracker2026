@@ -10,6 +10,7 @@ interface EntryFormProps {
   formData: EntryFormData;
   onFormChange: (data: EntryFormData) => void;
   onSave: () => void;
+  isEditing?: boolean;
 }
 
 export function EntryForm({
@@ -18,9 +19,10 @@ export function EntryForm({
   formData,
   onFormChange,
   onSave,
+  isEditing = false,
 }: EntryFormProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Log Reading">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Entry" : "Log Reading"}>
       <div className="space-y-5">
         <div>
           <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
@@ -97,7 +99,7 @@ export function EntryForm({
 
         <div className="pt-2">
           <Button onClick={onSave} className="w-full py-3 text-lg" icon={Check}>
-            Save Entry
+            {isEditing ? "Update Entry" : "Save Entry"}
           </Button>
         </div>
       </div>

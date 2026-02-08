@@ -7,6 +7,7 @@ interface ActivityLogProps {
   selectedDate: Date;
   entries: ReadingEntry[];
   onAddEntry: () => void;
+  onEditEntry: (entry: ReadingEntry) => void;
   onDeleteEntry: (id: string) => void;
 }
 
@@ -14,6 +15,7 @@ export function ActivityLog({
   selectedDate,
   entries,
   onAddEntry,
+  onEditEntry,
   onDeleteEntry,
 }: ActivityLogProps) {
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
@@ -64,6 +66,7 @@ export function ActivityLog({
               <EntryCard
                 key={entry.id}
                 entry={entry}
+                onEdit={onEditEntry}
                 onDelete={onDeleteEntry}
               />
             ))
