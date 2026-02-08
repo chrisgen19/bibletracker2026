@@ -3,7 +3,7 @@ import type { ReadingEntry } from "@/lib/types";
 
 interface EntryCardProps {
   entry: ReadingEntry;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export function EntryCard({ entry, onDelete }: EntryCardProps) {

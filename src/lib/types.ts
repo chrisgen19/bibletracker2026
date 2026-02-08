@@ -1,5 +1,5 @@
 export interface ReadingEntry {
-  id: number;
+  id: string;
   date: string;
   book: string;
   chapters: string;

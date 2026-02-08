@@ -7,7 +7,7 @@ export function generateMockData(): ReadingEntry[] {
 
   return [
     {
-      id: 1,
+      id: "1",
       date: new Date(year, month, 2).toISOString(),
       book: "Genesis",
       chapters: "1-3",
@@ -15,7 +15,7 @@ export function generateMockData(): ReadingEntry[] {
       notes: "In the beginning... truly striking how much order God brought out of chaos.",
     },
     {
-      id: 2,
+      id: "2",
       date: new Date(year, month, 3).toISOString(),
       book: "Genesis",
       chapters: "4",
@@ -23,7 +23,7 @@ export function generateMockData(): ReadingEntry[] {
       notes: "Cain and Abel. The first instance of jealousy destroying a family.",
     },
     {
-      id: 3,
+      id: "3",
       date: new Date(year, month, 5).toISOString(),
       book: "Psalms",
       chapters: "23",
@@ -31,7 +31,7 @@ export function generateMockData(): ReadingEntry[] {
       notes: "Needed comfort today. 'He restores my soul' - exactly what I needed.",
     },
     {
-      id: 4,
+      id: "4",
       date: new Date(year, month, 6).toISOString(),
       book: "John",
       chapters: "1",
@@ -39,7 +39,7 @@ export function generateMockData(): ReadingEntry[] {
       notes: "The Word became flesh. The concept of Logos is so deep.",
     },
     {
-      id: 5,
+      id: "5",
       date: new Date(year, month, 8).toISOString(),
       book: "Romans",
       chapters: "8",
@@ -47,7 +47,7 @@ export function generateMockData(): ReadingEntry[] {
       notes: "Nothing can separate us from the love of God. Powerful.",
     },
     {
-      id: 6,
+      id: "6",
       date: new Date(year, month, today.getDate()).toISOString(),
       book: "James",
       chapters: "1",

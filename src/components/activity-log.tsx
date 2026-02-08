@@ -7,7 +7,7 @@ interface ActivityLogProps {
   selectedDate: Date;
   entries: ReadingEntry[];
   onAddEntry: () => void;
-  onDeleteEntry: (id: number) => void;
+  onDeleteEntry: (id: string) => void;
 }
 
 export function ActivityLog({
