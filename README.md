@@ -87,7 +87,8 @@ src/
 │   ├── layout.tsx                  # Root layout with SessionProvider
 │   ├── globals.css                 # Global styles
 │   ├── dashboard/
-│   │   └── page.tsx                # Main tracker (protected)
+│   │   ├── page.tsx                # Dashboard (Server Component, fetches entries)
+│   │   └── actions.ts              # Server actions (CRUD for reading entries)
 │   ├── signup/
 │   │   └── page.tsx                # Registration page
 │   ├── login/
@@ -103,17 +104,18 @@ src/
 │   ├── providers/
 │   │   └── session-provider.tsx    # NextAuth session wrapper
 │   ├── navbar.tsx                  # Navigation bar
+│   ├── dashboard-client.tsx        # Dashboard client component (interactive state)
 │   ├── calendar.tsx                # Monthly calendar view
 │   ├── activity-log.tsx            # Daily reading log panel
-│   ├── entry-card.tsx              # Reading entry display
-│   ├── entry-form.tsx              # Log reading modal form
+│   ├── entry-card.tsx              # Reading entry card with edit/delete
+│   ├── entry-form.tsx              # Log/edit reading modal form
 │   └── stats.tsx                   # Stats cards
 ├── lib/
 │   ├── auth.ts                     # NextAuth configuration
 │   ├── db.ts                       # Prisma client singleton
 │   ├── ulid.ts                     # ULID ID generation
 │   ├── types.ts                    # TypeScript interfaces
-│   ├── mock-data.ts                # Sample data
+│   ├── mock-data.ts                # Sample data (unused, kept for reference)
 │   ├── constants.ts                # Bible books list
 │   ├── constants/
 │   │   └── countries.ts            # Country list
@@ -123,6 +125,14 @@ src/
 │   └── next-auth.d.ts              # NextAuth type augmentation
 ├── env.ts                          # Environment variable validation
 └── middleware.ts                   # Route protection
+
+scripts/
+└── db-migrate-safe.sh              # Auto-recover failed migrations before deploying
+
+prisma/
+├── schema.prisma                   # Database schema (User, ReadingEntry models)
+├── seed.ts                         # Seed script (imports from legacy SQL dump)
+└── migrations/                     # Prisma migration history
 ```
 
 ## Available Scripts
@@ -131,9 +141,13 @@ src/
 |---------|-------------|
 | `bun dev` | Start development server |
 | `bun run build` | Create production build |
-| `bun start` | Start production server |
+| `bun start` | Run safe migration + start production server |
 | `bun run lint` | Run ESLint |
-| `bunx prisma migrate dev` | Run database migrations |
+| `bun run typecheck` | Run TypeScript type checking |
+| `bun run check` | Run lint + typecheck |
+| `bun run db:seed` | Seed database from legacy SQL dump |
+| `bun run db:migrate:safe` | Auto-recover failed migrations + deploy |
+| `bunx prisma migrate dev` | Run database migrations (development) |
 | `bunx prisma studio` | Open Prisma database GUI |
 | `bunx prisma generate` | Regenerate Prisma client |
 
@@ -141,21 +155,29 @@ src/
 
 - **Calendar View** - Visual monthly calendar showing reading activity
 - **Reading Log** - Log book, chapter, verses, and personal reflections
+- **Edit & Delete Entries** - Edit existing entries and delete with confirmation
 - **Streak Tracking** - Track consecutive days of reading
 - **Progress Stats** - Total entries and books started out of 66
+- **Server Actions** - CRUD operations via React Server Actions with optimistic UI
 - **Authentication** - Email/password signup and login
 - **Route Protection** - Dashboard requires authentication
-- **ULID IDs** - Time-sortable unique identifiers for users
+- **ULID IDs** - Time-sortable unique identifiers
 - **Form Validation** - Client and server-side validation with Zod
+- **Safe Migrations** - Auto-recover failed Prisma migrations on deploy
+- **Data Seeding** - Import reading history from legacy SQL dumps
+- **Deployed** - Production deployment on Coolify
 
 ## Roadmap
 
-### Phase 1 - Core Functionality (Next)
+### ~~Phase 1 - Core Functionality~~ (Done)
 
-- [ ] **Connect dashboard to database** - Replace mock data with real Prisma queries (CRUD for reading entries)
-- [ ] **Associate entries with users** - Add `userId` foreign key to a `ReadingEntry` model in Prisma
-- [ ] **Server actions / API routes** - Create endpoints for creating, reading, and deleting entries
-- [ ] **Persist streak and stats** - Calculate streaks and stats from actual database records
+- [x] **Connect dashboard to database** - Replace mock data with real Prisma queries (CRUD for reading entries)
+- [x] **Associate entries with users** - Added `ReadingEntry` model with `userId` foreign key
+- [x] **Server actions** - Create, read, update, and delete entries via server actions
+- [x] **Persist streak and stats** - Calculate streaks and stats from actual database records
+- [x] **Edit and delete entries** - Edit entries inline, delete with confirmation modal
+- [x] **Data migration** - Seed script to import legacy data from SQL dumps
+- [x] **Production deployment** - Deployed to Coolify with safe migration recovery
 
 ### Phase 2 - User Experience
 
@@ -190,4 +212,3 @@ src/
 - [ ] **Analytics dashboard** - Reading trends, weekly/monthly summaries
 - [ ] **Rate limiting** - Protect auth endpoints from brute force
 - [ ] **CI/CD pipeline** - Automated testing and deployment
-- [ ] **Deploy to production** - Vercel, Railway, or self-hosted with Docker
