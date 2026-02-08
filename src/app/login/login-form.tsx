@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -26,6 +26,7 @@ export function LoginForm() {
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,6 +42,9 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (submittingRef.current || isLoading) return;
+
     setServerError("");
     setErrors({});
 
@@ -50,6 +54,7 @@ export function LoginForm() {
       return;
     }
 
+    submittingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -68,6 +73,7 @@ export function LoginForm() {
     } catch {
       setServerError("Network error. Please try again.");
     } finally {
+      submittingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -134,6 +140,7 @@ export function LoginForm() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  disabled={isLoading}
                   placeholder="john@example.com"
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
                 />
@@ -158,6 +165,7 @@ export function LoginForm() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={isLoading}
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
                 />
