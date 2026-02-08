@@ -1,0 +1,507 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import {
+  BookOpen,
+  ArrowLeft,
+  User,
+  Phone,
+  Globe,
+  Calendar,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  Check,
+} from "lucide-react";
+import {
+  updateProfile,
+  changePassword,
+  type ProfileData,
+} from "@/app/profile/actions";
+import {
+  updateProfileSchema,
+  changePasswordSchema,
+} from "@/lib/validations/profile";
+import { COUNTRIES } from "@/lib/constants/countries";
+
+interface ProfileClientProps {
+  initialProfile: ProfileData;
+}
+
+export function ProfileClient({ initialProfile }: ProfileClientProps) {
+  const { update: updateSession } = useSession();
+  const [isPending, startTransition] = useTransition();
+
+  const [profile, setProfile] = useState({
+    firstName: initialProfile.firstName,
+    lastName: initialProfile.lastName,
+    username: initialProfile.username,
+    phoneNumber: initialProfile.phoneNumber,
+    country: initialProfile.country,
+    gender: initialProfile.gender,
+    birthday: initialProfile.birthday,
+  });
+  const [profileErrors, setProfileErrors] = useState<Record<string, string[]>>(
+    {}
+  );
+
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+  const [passwordErrors, setPasswordErrors] = useState<
+    Record<string, string[]>
+  >({});
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleProfileChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setProfile((prev) => ({ ...prev, [name]: value }));
+    if (profileErrors[name]) {
+      setProfileErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswords((prev) => ({ ...prev, [name]: value }));
+    if (passwordErrors[name]) {
+      setPasswordErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const handleSaveProfile = () => {
+    setProfileErrors({});
+
+    const parsed = updateProfileSchema.safeParse(profile);
+    if (!parsed.success) {
+      setProfileErrors(
+        parsed.error.flatten().fieldErrors as Record<string, string[]>
+      );
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updateProfile(parsed.data);
+      if (result.error) {
+        if (result.fieldErrors) {
+          setProfileErrors(result.fieldErrors as Record<string, string[]>);
+        } else {
+          toast.error(result.error);
+        }
+        return;
+      }
+      toast.success("Profile updated successfully");
+      await updateSession({
+        name: `${parsed.data.firstName} ${parsed.data.lastName}`,
+      });
+    });
+  };
+
+  const handleChangePassword = () => {
+    setPasswordErrors({});
+
+    const parsed = changePasswordSchema.safeParse(passwords);
+    if (!parsed.success) {
+      setPasswordErrors(
+        parsed.error.flatten().fieldErrors as Record<string, string[]>
+      );
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await changePassword(parsed.data);
+      if (result.error) {
+        if (result.fieldErrors) {
+          setPasswordErrors(result.fieldErrors as Record<string, string[]>);
+        } else {
+          toast.error(result.error);
+        }
+        return;
+      }
+      toast.success("Password changed successfully");
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+    });
+  };
+
+  const memberSince = new Date(initialProfile.createdAt).toLocaleDateString(
+    "en-US",
+    { month: "long", year: "numeric" }
+  );
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <div className="bg-stone-900 text-white p-2 rounded-xl">
+              <BookOpen size={20} />
+            </div>
+            <span className="text-xl font-serif font-bold tracking-tight text-stone-900">
+              Sola Scriptura
+            </span>
+          </Link>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-all duration-200"
+          >
+            <ArrowLeft size={18} />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+          </Link>
+        </div>
+      </nav>
+
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-1">
+            Profile Settings
+          </h1>
+          <p className="text-stone-500">
+            Member since {memberSince} &middot; {initialProfile.email}
+          </p>
+        </div>
+
+        {/* Profile Details Card */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+            Personal Information
+          </h2>
+
+          <div className="space-y-5">
+            {/* First + Last Name */}
+            <div className="grid grid-cols-2 gap-4">
+              <InputField
+                label="First name"
+                name="firstName"
+                icon={User}
+                value={profile.firstName}
+                onChange={handleProfileChange}
+                errors={profileErrors.firstName}
+              />
+              <InputField
+                label="Last name"
+                name="lastName"
+                icon={User}
+                value={profile.lastName}
+                onChange={handleProfileChange}
+                errors={profileErrors.lastName}
+              />
+            </div>
+
+            {/* Username */}
+            <InputField
+              label="Username"
+              name="username"
+              icon={User}
+              value={profile.username}
+              onChange={handleProfileChange}
+              errors={profileErrors.username}
+              placeholder="johndoe (optional)"
+            />
+
+            {/* Birthday */}
+            <InputField
+              label="Birthday"
+              name="birthday"
+              type="date"
+              icon={Calendar}
+              value={profile.birthday}
+              onChange={handleProfileChange}
+              errors={profileErrors.birthday}
+            />
+
+            {/* Gender */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={profile.gender}
+                onChange={handleProfileChange}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              >
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+              </select>
+              {profileErrors.gender && (
+                <p className="text-red-500 text-xs mt-1">
+                  {profileErrors.gender[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <InputField
+              label="Phone number"
+              name="phoneNumber"
+              type="tel"
+              icon={Phone}
+              value={profile.phoneNumber}
+              onChange={handleProfileChange}
+              errors={profileErrors.phoneNumber}
+              placeholder="+1 (555) 123-4567 (optional)"
+            />
+
+            {/* Country */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Country
+              </label>
+              <div className="relative">
+                <Globe
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
+                <select
+                  name="country"
+                  value={profile.country}
+                  onChange={handleProfileChange}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                >
+                  <option value="">Select country</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {profileErrors.country && (
+                <p className="text-red-500 text-xs mt-1">
+                  {profileErrors.country[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Save */}
+            <button
+              type="button"
+              onClick={handleSaveProfile}
+              disabled={isPending}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                <>
+                  <Check size={20} />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Change Password Card */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+            Change Password
+          </h2>
+
+          <div className="space-y-5">
+            {/* Current Password */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Current password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={passwords.currentPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter current password"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {passwordErrors.currentPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.currentPassword[0]}
+                </p>
+              )}
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                New password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={passwords.newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Min 8 characters"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                >
+                  {showNewPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {passwordErrors.newPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.newPassword[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm New Password */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Confirm new password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmNewPassword"
+                  value={passwords.confirmNewPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Re-enter new password"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              {passwordErrors.confirmNewPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.confirmNewPassword[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Change Password Button */}
+            <button
+              type="button"
+              onClick={handleChangePassword}
+              disabled={isPending}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                <>
+                  <Lock size={20} />
+                  Change Password
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// --- Reusable Input Field ---
+
+interface InputFieldProps {
+  label: string;
+  name: string;
+  type?: string;
+  icon: React.ComponentType<{ size: number; className?: string }>;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errors?: string[];
+  placeholder?: string;
+}
+
+function InputField({
+  label,
+  name,
+  type = "text",
+  icon: Icon,
+  value,
+  onChange,
+  errors,
+  placeholder,
+}: InputFieldProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-stone-700 mb-1.5">
+        {label}
+      </label>
+      <div className="relative">
+        <Icon
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+        />
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+        />
+      </div>
+      {errors && <p className="text-red-500 text-xs mt-1">{errors[0]}</p>}
+    </div>
+  );
+}

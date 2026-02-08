@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
+import { toast } from "sonner";
 import { Navbar } from "@/components/navbar";
 import { Calendar } from "@/components/calendar";
 import { Stats } from "@/components/stats";
@@ -131,6 +132,7 @@ export function DashboardClient({
         prev.map((e) => (e.id === editingEntryId ? { ...e, ...data } : e))
       );
       handleCloseModal();
+      toast.success("Entry updated");
 
       startTransition(async () => {
         try {
@@ -141,6 +143,7 @@ export function DashboardClient({
               prev.map((e) => (e.id === originalEntry.id ? originalEntry : e))
             );
           }
+          toast.error("Failed to update entry");
         }
       });
     } else {
@@ -154,12 +157,14 @@ export function DashboardClient({
       };
       setEntries((prev) => [...prev, tempEntry]);
       handleCloseModal();
+      toast.success("Entry logged successfully");
 
       startTransition(async () => {
         try {
           await createEntry(data, dateStr);
         } catch {
           setEntries((prev) => prev.filter((e) => e.id !== tempEntry.id));
+          toast.error("Failed to save entry");
         }
       });
     }
@@ -168,15 +173,16 @@ export function DashboardClient({
   const handleDeleteEntry = (id: string) => {
     const removedEntry = entries.find((e) => e.id === id);
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    toast.success("Entry deleted");
 
     startTransition(async () => {
       try {
         await deleteEntry(id);
       } catch {
-        // Revert on error
         if (removedEntry) {
           setEntries((prev) => [...prev, removedEntry]);
         }
+        toast.error("Failed to delete entry");
       }
     });
   };

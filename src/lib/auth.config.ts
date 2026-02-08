@@ -12,11 +12,14 @@ export const authConfig = {
     newUser: "/dashboard",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       console.log("[AUTH] JWT callback - user:", !!user, "token:", !!token);
       if (user) {
         console.log("[AUTH] JWT callback - adding user id to token:", user.id);
         token.id = user.id;
+      }
+      if (trigger === "update" && session?.name) {
+        token.name = session.name;
       }
       return token;
     },

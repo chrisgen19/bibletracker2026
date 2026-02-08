@@ -88,7 +88,12 @@ src/
 │   ├── globals.css                 # Global styles
 │   ├── dashboard/
 │   │   ├── page.tsx                # Dashboard (Server Component, fetches entries)
-│   │   └── actions.ts              # Server actions (CRUD for reading entries)
+│   │   ├── actions.ts              # Server actions (CRUD for reading entries)
+│   │   └── loading.tsx             # Dashboard loading skeleton
+│   ├── profile/
+│   │   ├── page.tsx                # Profile page (Server Component)
+│   │   ├── actions.ts              # Server actions (profile update, password change)
+│   │   └── loading.tsx             # Profile loading skeleton
 │   ├── signup/
 │   │   └── page.tsx                # Registration page
 │   ├── login/
@@ -103,13 +108,15 @@ src/
 │   │   └── modal.tsx               # Reusable modal
 │   ├── providers/
 │   │   └── session-provider.tsx    # NextAuth session wrapper
-│   ├── navbar.tsx                  # Navigation bar
+│   ├── navbar.tsx                  # Navigation bar (desktop + mobile menu)
 │   ├── dashboard-client.tsx        # Dashboard client component (interactive state)
+│   ├── profile-client.tsx          # Profile page client component
 │   ├── calendar.tsx                # Monthly calendar view
 │   ├── activity-log.tsx            # Daily reading log panel
 │   ├── entry-card.tsx              # Reading entry card with edit/delete
 │   ├── entry-form.tsx              # Log/edit reading modal form
-│   └── stats.tsx                   # Stats cards
+│   ├── stats.tsx                   # Stats cards
+│   └── skeletons.tsx               # Loading skeleton components
 ├── lib/
 │   ├── auth.ts                     # NextAuth configuration
 │   ├── db.ts                       # Prisma client singleton
@@ -120,14 +127,16 @@ src/
 │   ├── constants/
 │   │   └── countries.ts            # Country list
 │   └── validations/
-│       └── auth.ts                 # Zod schemas
+│       ├── auth.ts                 # Auth Zod schemas (signup, login)
+│       └── profile.ts              # Profile Zod schemas (update, password change)
 ├── types/
 │   └── next-auth.d.ts              # NextAuth type augmentation
 ├── env.ts                          # Environment variable validation
 └── middleware.ts                   # Route protection
 
 scripts/
-└── db-migrate-safe.sh              # Auto-recover failed migrations before deploying
+├── db-migrate-safe.sh              # Auto-recover failed migrations before deploying
+└── reset-password.ts               # Admin CLI to reset user passwords
 
 prisma/
 ├── schema.prisma                   # Database schema (User, ReadingEntry models)
@@ -146,6 +155,7 @@ prisma/
 | `bun run typecheck` | Run TypeScript type checking |
 | `bun run check` | Run lint + typecheck |
 | `bun run db:seed` | Seed database from legacy SQL dump |
+| `bun run db:reset-password` | Reset a user's password (admin CLI) |
 | `bun run db:migrate:safe` | Auto-recover failed migrations + deploy |
 | `bunx prisma migrate dev` | Run database migrations (development) |
 | `bunx prisma studio` | Open Prisma database GUI |
@@ -158,9 +168,14 @@ prisma/
 - **Edit & Delete Entries** - Edit existing entries and delete with confirmation
 - **Streak Tracking** - Track consecutive days of reading
 - **Progress Stats** - Total entries and books started out of 66
+- **Profile Management** - Edit personal info and change password
+- **Toast Notifications** - Success/error feedback on all actions (sonner)
+- **Loading Skeletons** - Smooth loading states for dashboard and profile
+- **Mobile Navigation** - Responsive hamburger menu with streak, profile, and sign out
+- **Admin Password Reset** - CLI tool to reset user passwords
 - **Server Actions** - CRUD operations via React Server Actions with optimistic UI
 - **Authentication** - Email/password signup and login
-- **Route Protection** - Dashboard requires authentication
+- **Route Protection** - Dashboard and profile require authentication
 - **ULID IDs** - Time-sortable unique identifiers
 - **Form Validation** - Client and server-side validation with Zod
 - **Safe Migrations** - Auto-recover failed Prisma migrations on deploy
@@ -179,14 +194,16 @@ prisma/
 - [x] **Data migration** - Seed script to import legacy data from SQL dumps
 - [x] **Production deployment** - Deployed to Coolify with safe migration recovery
 
-### Phase 2 - User Experience
+### ~~Phase 2 - User Experience~~ (Done)
 
-- [ ] **Profile page** - View and edit account details (name, avatar, country, etc.)
-- [ ] **Password reset flow** - Forgot password with email verification
-- [ ] **Email verification** - Verify email address on signup
-- [ ] **Loading skeletons** - Add loading states for calendar and activity log
-- [ ] **Toast notifications** - Success/error feedback for user actions
-- [ ] **Mobile responsive nav** - Expand the mobile hamburger menu with full navigation
+- [x] **Profile page** - View and edit account details (name, username, phone, country, gender, birthday)
+- [x] **Change password** - Change password from profile page (current + new password)
+- [x] **Admin password reset** - CLI script to reset passwords without email
+- [x] **Loading skeletons** - Loading states for dashboard and profile pages
+- [x] **Toast notifications** - Success/error feedback using sonner
+- [x] **Mobile responsive nav** - Hamburger menu with streak, profile link, and sign out
+- [ ] **Email verification** - Verify email address on signup (pending SMTP setup)
+- [ ] **Password reset flow** - Forgot password with email verification (pending SMTP setup)
 
 ### Phase 3 - Reading Features
 
