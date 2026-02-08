@@ -2,7 +2,7 @@
 set -eu
 
 # Mark this migration as rolled back only when it is in a failed state.
-bunx prisma db execute --stdin --schema prisma/schema.prisma <<'SQL'
+bunx prisma db execute --stdin <<'SQL'
 UPDATE "_prisma_migrations"
 SET rolled_back_at = NOW()
 WHERE migration_name = '20260208130627_add_reading_entries'
