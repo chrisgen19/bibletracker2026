@@ -1,4 +1,7 @@
-import { BookOpen, Flame, MoreHorizontal } from "lucide-react";
+"use client";
+
+import { BookOpen, Flame, LogOut, UserCircle, MoreHorizontal } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import type { Stats } from "@/lib/types";
 
 interface NavbarProps {
@@ -6,6 +9,8 @@ interface NavbarProps {
 }
 
 export function Navbar({ stats }: NavbarProps) {
+  const { data: session } = useSession();
+
   return (
     <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -17,7 +22,7 @@ export function Navbar({ stats }: NavbarProps) {
             Sola Scriptura
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100">
             <Flame
               size={16}
@@ -29,6 +34,23 @@ export function Navbar({ stats }: NavbarProps) {
             />
             <span>{stats.currentStreak} Day Streak</span>
           </div>
+
+          {session?.user && (
+            <>
+              <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100">
+                <UserCircle size={16} className="text-stone-500" />
+                <span>{session.user.name}</span>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                title="Sign out"
+              >
+                <LogOut size={18} />
+              </button>
+            </>
+          )}
+
           <button className="sm:hidden p-2 text-stone-600">
             <MoreHorizontal size={24} />
           </button>
