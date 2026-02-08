@@ -4,19 +4,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
-import { env } from "@/env";
+import { authConfig } from "@/lib/auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  trustHost: true,
-  secret: env.AUTH_SECRET,
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-    newUser: "/dashboard",
-  },
   providers: [
     Credentials({
       name: "credentials",
@@ -69,21 +61,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      console.log("[AUTH] JWT callback - user:", !!user, "token:", !!token);
-      if (user) {
-        console.log("[AUTH] JWT callback - adding user id to token:", user.id);
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      console.log("[AUTH] Session callback - token id:", token.id);
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
-  },
 });
