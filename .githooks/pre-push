@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+echo "Running lint..."
+bun run lint
+
+echo "Running typecheck..."
+bun run typecheck

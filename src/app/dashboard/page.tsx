@@ -43,7 +43,7 @@ export default function Home() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let lastEntryDate =
+    const lastEntryDate =
       sortedEntries.length > 0 ? new Date(sortedEntries[0].date) : null;
     if (lastEntryDate) lastEntryDate.setHours(0, 0, 0, 0);
 
