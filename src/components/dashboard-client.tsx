@@ -9,7 +9,7 @@ import { ActivityLog } from "@/components/activity-log";
 import { EntryForm } from "@/components/entry-form";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
-import type { ReadingEntry, EntryFormData } from "@/lib/types";
+import type { ReadingEntry, EntryFormData, FriendsActivityEntry } from "@/lib/types";
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
   return entries.filter((e) => {
@@ -24,10 +24,12 @@ function getEntriesForDate(entries: ReadingEntry[], date: Date) {
 
 interface DashboardClientProps {
   initialEntries: ReadingEntry[];
+  initialFriendsActivity: FriendsActivityEntry[];
 }
 
 export function DashboardClient({
   initialEntries,
+  initialFriendsActivity,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -171,6 +173,7 @@ export function DashboardClient({
             <ActivityLog
               selectedDate={selectedDate}
               entries={selectedDateEntries}
+              friendsEntries={initialFriendsActivity}
               onAddEntry={() => setIsModalOpen(true)}
               onEditEntry={handleEditEntry}
               onDeleteEntry={handleDeleteEntry}

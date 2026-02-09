@@ -90,10 +90,16 @@ src/
 │   │   ├── page.tsx                # Dashboard (Server Component, fetches entries)
 │   │   ├── actions.ts              # Server actions (CRUD for reading entries)
 │   │   └── loading.tsx             # Dashboard loading skeleton
+│   ├── friends/
+│   │   ├── page.tsx                # Friends page (Server Component)
+│   │   └── actions.ts              # Server actions (follow, unfollow, search)
 │   ├── profile/
 │   │   ├── page.tsx                # Profile page (Server Component)
 │   │   ├── actions.ts              # Server actions (profile update, password change)
 │   │   └── loading.tsx             # Profile loading skeleton
+│   ├── u/[username]/
+│   │   ├── page.tsx                # Public profile page (Server Component)
+│   │   └── not-found.tsx           # 404 for missing usernames
 │   ├── signup/
 │   │   └── page.tsx                # Registration page
 │   ├── login/
@@ -115,6 +121,10 @@ src/
 │   ├── activity-log.tsx            # Daily reading log panel
 │   ├── entry-card.tsx              # Reading entry card with edit/delete
 │   ├── entry-form.tsx              # Log/edit reading modal form
+│   ├── friends-client.tsx          # Friends page client component
+│   ├── friend-card.tsx             # Reusable user card with follow button
+│   ├── friend-entry-card.tsx       # Entry card for friends activity feed
+│   ├── public-profile-client.tsx   # Public profile client component
 │   ├── stats.tsx                   # Stats cards
 │   └── skeletons.tsx               # Loading skeleton components
 ├── lib/
@@ -122,6 +132,7 @@ src/
 │   ├── db.ts                       # Prisma client singleton
 │   ├── ulid.ts                     # ULID ID generation
 │   ├── types.ts                    # TypeScript interfaces
+│   ├── stats.ts                    # Shared stats computation
 │   ├── mock-data.ts                # Sample data (unused, kept for reference)
 │   ├── constants.ts                # Bible books list
 │   ├── constants/
@@ -139,7 +150,7 @@ scripts/
 └── reset-password.ts               # Admin CLI to reset user passwords
 
 prisma/
-├── schema.prisma                   # Database schema (User, ReadingEntry models)
+├── schema.prisma                   # Database schema (User, ReadingEntry, Follow models)
 ├── seed.ts                         # Seed script (imports from legacy SQL dump)
 └── migrations/                     # Prisma migration history
 ```
@@ -177,7 +188,9 @@ prisma/
 - **Authentication** - Email/password signup and login
 - **Public Profiles** - Share reading stats, calendar, and recent entries at `/u/[username]`
 - **Profile Privacy** - Opt-out toggle to make your profile private
-- **Route Protection** - Dashboard and profile require authentication
+- **Friends/Follow System** - One-way follow system to connect with other readers
+- **Friends Activity Feed** - See followed users' recent reading entries in the Activity Log
+- **Route Protection** - Dashboard, profile, and friends pages require authentication
 - **ULID IDs** - Time-sortable unique identifiers
 - **Form Validation** - Client and server-side validation with Zod
 - **Safe Migrations** - Auto-recover failed Prisma migrations on deploy
@@ -219,6 +232,7 @@ prisma/
 ### Phase 4 - Social & Community
 
 - [x] **Public profiles** - Share reading stats with others
+- [x] **Friends/follow system** - Follow other readers and see their activity
 - [ ] **Reading groups** - Join or create accountability groups
 - [ ] **Shared reading plans** - Follow plans together with friends
 - [ ] **Leaderboard** - Optional streak and progress leaderboards

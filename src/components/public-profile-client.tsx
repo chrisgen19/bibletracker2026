@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
-import { BookOpen, Lock, Calendar as CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
+import {
+  BookOpen,
+  Lock,
+  Calendar as CalendarIcon,
+  UserPlus,
+  UserMinus,
+} from "lucide-react";
 import { Calendar } from "@/components/calendar";
 import { computeStats } from "@/lib/stats";
+import { followUser, unfollowUser } from "@/app/friends/actions";
 import type { ReadingEntry } from "@/lib/types";
 
 type PublicProfileClientProps =
@@ -13,6 +21,10 @@ type PublicProfileClientProps =
       username: string;
       profile?: never;
       entries?: never;
+      targetUserId?: never;
+      isOwnProfile?: never;
+      isFollowing?: never;
+      isLoggedIn?: never;
     }
   | {
       isPrivate?: false;
@@ -24,10 +36,18 @@ type PublicProfileClientProps =
         memberSince: string;
       };
       entries: ReadingEntry[];
+      targetUserId: string;
+      isOwnProfile: boolean;
+      isFollowing: boolean;
+      isLoggedIn: boolean;
     };
 
 export function PublicProfileClient(props: PublicProfileClientProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [following, setFollowing] = useState(
+    props.isPrivate ? false : props.isFollowing
+  );
+  const [isPending, startTransition] = useTransition();
 
   const handlePrevMonth = () => {
     setCurrentDate(
@@ -39,6 +59,28 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
     setCurrentDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
+  };
+
+  const handleFollowToggle = () => {
+    if (props.isPrivate || !props.targetUserId) return;
+
+    const newValue = !following;
+    setFollowing(newValue);
+
+    startTransition(async () => {
+      try {
+        if (newValue) {
+          await followUser(props.targetUserId);
+          toast.success("Following!");
+        } else {
+          await unfollowUser(props.targetUserId);
+          toast.success("Unfollowed");
+        }
+      } catch {
+        setFollowing(!newValue);
+        toast.error("Something went wrong");
+      }
+    });
   };
 
   if (props.isPrivate) {
@@ -113,11 +155,41 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
               </h1>
               <p className="text-stone-500 text-lg">@{profile.username}</p>
             </div>
-            <div className="sm:text-right">
-              <p className="text-sm text-stone-500 mb-1">Member since</p>
-              <p className="text-lg font-medium text-stone-700">
-                {memberSince}
-              </p>
+            <div className="flex items-center gap-4">
+              {props.isLoggedIn && !props.isOwnProfile && (
+                <button
+                  type="button"
+                  onClick={handleFollowToggle}
+                  disabled={isPending}
+                  className={`
+                    flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-medium transition-all
+                    ${
+                      following
+                        ? "bg-stone-200 text-stone-700 hover:bg-red-50 hover:text-red-600"
+                        : "bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg"
+                    }
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  `}
+                >
+                  {following ? (
+                    <>
+                      <UserMinus size={16} />
+                      <span>Unfollow</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={16} />
+                      <span>Follow</span>
+                    </>
+                  )}
+                </button>
+              )}
+              <div className="sm:text-right">
+                <p className="text-sm text-stone-500 mb-1">Member since</p>
+                <p className="text-lg font-medium text-stone-700">
+                  {memberSince}
+                </p>
+              </div>
             </div>
           </div>
 

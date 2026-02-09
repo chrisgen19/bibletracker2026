@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BookOpen, Flame, LogOut, UserCircle, Menu, X } from "lucide-react";
+import { BookOpen, Flame, LogOut, UserCircle, Users, Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import type { Stats } from "@/lib/types";
 
@@ -42,6 +42,13 @@ export function Navbar({ stats }: NavbarProps) {
 
           {session?.user && (
             <>
+              <Link
+                href="/friends"
+                className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
+              >
+                <Users size={16} className="text-stone-500" />
+                <span>My Friends</span>
+              </Link>
               <Link
                 href="/profile"
                 className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
@@ -85,6 +92,14 @@ export function Navbar({ stats }: NavbarProps) {
           </div>
           {session?.user && (
             <>
+              <Link
+                href="/friends"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium text-stone-700 py-2"
+              >
+                <Users size={16} className="text-stone-500" />
+                <span>My Friends</span>
+              </Link>
               <Link
                 href="/profile"
                 onClick={() => setIsMenuOpen(false)}

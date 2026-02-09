@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PublicProfileClient } from "@/components/public-profile-client";
 import type { ReadingEntry } from "@/lib/types";
@@ -12,6 +13,7 @@ async function getPublicProfile(username: string) {
   const user = await prisma.user.findUnique({
     where: { username },
     select: {
+      id: true,
       firstName: true,
       lastName: true,
       username: true,
@@ -52,7 +54,10 @@ export async function generateMetadata({
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
-  const user = await getPublicProfile(username);
+  const [user, session] = await Promise.all([
+    getPublicProfile(username),
+    auth(),
+  ]);
 
   if (!user) {
     notFound();
@@ -60,6 +65,21 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   if (!user.isProfilePublic) {
     return <PublicProfileClient isPrivate username={username} />;
+  }
+
+  const isOwnProfile = session?.user?.id === user.id;
+
+  let isFollowing = false;
+  if (session?.user?.id && !isOwnProfile) {
+    const follow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: session.user.id,
+          followingId: user.id,
+        },
+      },
+    });
+    isFollowing = !!follow;
   }
 
   const entries: ReadingEntry[] = user.entries.map((e) => ({
@@ -81,6 +101,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
         memberSince: user.createdAt.toISOString(),
       }}
       entries={entries}
+      targetUserId={user.id}
+      isOwnProfile={isOwnProfile}
+      isFollowing={isFollowing}
+      isLoggedIn={!!session?.user?.id}
     />
   );
 }

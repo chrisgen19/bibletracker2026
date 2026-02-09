@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { DashboardClient } from "@/components/dashboard-client";
+import { getFriendsActivity } from "@/app/friends/actions";
 import type { ReadingEntry } from "@/lib/types";
 
 export default async function DashboardPage() {
@@ -10,10 +11,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const dbEntries = await prisma.readingEntry.findMany({
-    where: { userId: session.user.id },
-    orderBy: { date: "desc" },
-  });
+  const [dbEntries, friendsActivity] = await Promise.all([
+    prisma.readingEntry.findMany({
+      where: { userId: session.user.id },
+      orderBy: { date: "desc" },
+    }),
+    getFriendsActivity(),
+  ]);
 
   const entries: ReadingEntry[] = dbEntries.map((e) => ({
     id: e.id,
@@ -24,5 +28,10 @@ export default async function DashboardPage() {
     notes: e.notes,
   }));
 
-  return <DashboardClient initialEntries={entries} />;
+  return (
+    <DashboardClient
+      initialEntries={entries}
+      initialFriendsActivity={friendsActivity}
+    />
+  );
 }

@@ -33,9 +33,11 @@ model User {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  accounts Account[]
-  sessions Session[]
-  entries  ReadingEntry[]
+  accounts  Account[]
+  sessions  Session[]
+  entries   ReadingEntry[]
+  followers Follow[] @relation("UserFollowing")
+  following Follow[] @relation("UserFollowers")
 
   @@map("users")
 }
@@ -86,6 +88,21 @@ model ReadingEntry {
 
   @@index([userId, date])
   @@map("reading_entries")
+}
+
+model Follow {
+  id          String   @id
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
 }
 
 model VerificationToken {
