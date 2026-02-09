@@ -675,7 +675,7 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                               </span>
                             </div>
                             <p className="text-sm text-stone-600">
-                              Show abbreviated verse references (e.g., "Rev 2:1-10") with
+                              Show abbreviated verse references (e.g., &quot;Rev 2:1-10&quot;) with
                               indicator dots below
                             </p>
                           </div>
