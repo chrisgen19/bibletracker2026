@@ -28,10 +28,13 @@ export function FriendsClient({
   const [isPending, startTransition] = useTransition();
   const [following, setFollowing] = useState(initialFollowing);
   const [followers, setFollowers] = useState(initialFollowers);
+  const [followerCount] = useState(stats.followerCount);
   const [activeTab, setActiveTab] = useState<Tab>("following");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendUser[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  const followingCount = following.length;
 
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
@@ -143,7 +146,7 @@ export function FriendsClient({
                 activeTab === "following" ? "text-stone-900 font-semibold" : ""
               }`}
             >
-              {stats.followingCount} following
+              {followingCount} following
             </button>
             {" \u00B7 "}
             <button
@@ -153,8 +156,8 @@ export function FriendsClient({
                 activeTab === "followers" ? "text-stone-900 font-semibold" : ""
               }`}
             >
-              {stats.followerCount}{" "}
-              {stats.followerCount === 1 ? "follower" : "followers"}
+              {followerCount}{" "}
+              {followerCount === 1 ? "follower" : "followers"}
             </button>
           </p>
         </div>
@@ -229,7 +232,7 @@ export function FriendsClient({
                   : "bg-stone-100 text-stone-500"
               }`}
             >
-              {stats.followingCount}
+              {followingCount}
             </span>
           </button>
           <button
@@ -250,7 +253,7 @@ export function FriendsClient({
                   : "bg-stone-100 text-stone-500"
               }`}
             >
-              {stats.followerCount}
+              {followerCount}
             </span>
           </button>
         </div>
