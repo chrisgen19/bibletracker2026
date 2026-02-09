@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
+import { formatReferenceShort } from "@/lib/constants";
 
 interface CalendarProps {
   currentDate: Date;
@@ -110,6 +111,8 @@ export function Calendar({
           const hasEntry = dayEntries.length > 0;
           const selected = isSelected(day);
           const today = isToday(date);
+          const firstEntry = dayEntries[0];
+          const additionalCount = dayEntries.length > 1 ? dayEntries.length - 1 : 0;
 
           const DayTag = onDayClick ? "button" : "div";
 
@@ -118,7 +121,7 @@ export function Calendar({
               key={day}
               {...(onDayClick ? { onClick: () => onDayClick(day) } : {})}
               className={`
-                relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all duration-300
+                relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all duration-300 px-1
                 ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10" : onDayClick ? "hover:bg-stone-100 text-stone-700" : "text-stone-700"}
                 ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
                 ${!selected && hasEntry ? "bg-emerald-50/50" : ""}
@@ -127,6 +130,12 @@ export function Calendar({
               <span className={`text-sm ${selected ? "font-medium" : ""}`}>
                 {day}
               </span>
+              {firstEntry && (
+                <span className={`text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
+                  {formatReferenceShort(firstEntry.book, firstEntry.chapters, firstEntry.verses, 10)}
+                  {additionalCount > 0 && ` +${additionalCount}`}
+                </span>
+              )}
               <div className="flex gap-0.5 mt-1 h-1.5">
                 {dayEntries.slice(0, 3).map((_, i) => (
                   <div
