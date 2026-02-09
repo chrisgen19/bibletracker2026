@@ -223,6 +223,7 @@ prisma/
 
 ### Phase 5 - Polish & Deployment
 
+- [ ] **Go-live SEO switch** - Remove temporary `noindex, nofollow` from `src/app/layout.tsx` and update `src/app/robots.ts` to allow crawling when the app is publicly launched
 - [ ] **Dark mode** - Toggle between light and dark themes
 - [ ] **PWA support** - Install as a mobile app with offline access
 - [ ] **Push notifications** - Daily reading reminders
