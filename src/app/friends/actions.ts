@@ -37,8 +37,19 @@ export async function followUser(targetUserId: string) {
     },
   });
 
-  await prisma.notification.create({
-    data: {
+  await prisma.notification.upsert({
+    where: {
+      userId_actorId_type: {
+        userId: targetUserId,
+        actorId: session.user.id,
+        type: "FOLLOW",
+      },
+    },
+    update: {
+      read: false,
+      createdAt: new Date(),
+    },
+    create: {
       id: generateId(),
       userId: targetUserId,
       actorId: session.user.id,
@@ -58,6 +69,14 @@ export async function unfollowUser(targetUserId: string) {
     where: {
       followerId: session.user.id,
       followingId: targetUserId,
+    },
+  });
+
+  await prisma.notification.deleteMany({
+    where: {
+      userId: targetUserId,
+      actorId: session.user.id,
+      type: "FOLLOW",
     },
   });
 

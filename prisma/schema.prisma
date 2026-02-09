@@ -129,6 +129,7 @@ model Notification {
   user  User @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
   actor User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, actorId, type])
   @@index([userId, read])
   @@index([actorId])
   @@map("notifications")
