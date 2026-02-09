@@ -38,47 +38,30 @@ export function ActivityLog({
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-stone-100/50 to-transparent rounded-bl-[100%] pointer-events-none -z-10" />
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-4">
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("my")}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeTab === "my"
-                ? "bg-stone-900 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            My Activity
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("friends")}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeTab === "friends"
-                ? "bg-stone-900 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            Friends
-          </button>
-        </div>
-
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-1">
-              Activity Log
-            </h3>
-            {activeTab === "my" && (
-              <h2 className="text-3xl font-serif font-bold text-stone-900">
-                {formattedDate}
-              </h2>
-            )}
-            {activeTab === "friends" && (
-              <h2 className="text-3xl font-serif font-bold text-stone-900">
-                Friends
-              </h2>
-            )}
+        <div className="flex gap-2 mb-4 justify-between items-center">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("my")}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                activeTab === "my"
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              My Activity
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("friends")}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                activeTab === "friends"
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              Friends
+            </button>
           </div>
           {activeTab === "my" && (
             <Button
@@ -89,6 +72,22 @@ export function ActivityLog({
             >
               Log
             </Button>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <h3 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-1">
+            Activity Log
+          </h3>
+          {activeTab === "my" && (
+            <h2 className="text-3xl font-serif font-bold text-stone-900">
+              {formattedDate}
+            </h2>
+          )}
+          {activeTab === "friends" && (
+            <h2 className="text-3xl font-serif font-bold text-stone-900">
+              Friends
+            </h2>
           )}
         </div>
 
