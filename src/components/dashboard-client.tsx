@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { toast } from "sonner";
+import { BookOpen } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Calendar } from "@/components/calendar";
 import { Stats } from "@/components/stats";
@@ -184,6 +185,20 @@ export function DashboardClient({
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-stone-200 py-8 mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-stone-400 text-sm">
+            <BookOpen size={16} />
+            <span className="font-serif font-medium">Sola Scriptura</span>
+          </div>
+          <p className="text-stone-400 text-sm">
+            &copy; {new Date().getFullYear()} Sola Scriptura. All rights
+            reserved.
+          </p>
+        </div>
+      </footer>
 
       <EntryForm
         isOpen={isModalOpen}
