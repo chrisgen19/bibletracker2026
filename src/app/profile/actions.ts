@@ -26,6 +26,7 @@ export async function getProfile() {
       birthday: true,
       createdAt: true,
       isProfilePublic: true,
+      calendarDisplayMode: true,
     },
   });
 
@@ -38,6 +39,7 @@ export async function getProfile() {
     phoneNumber: user.phoneNumber ?? "",
     createdAt: user.createdAt.toISOString(),
     isProfilePublic: user.isProfilePublic,
+    calendarDisplayMode: user.calendarDisplayMode,
   };
 }
 
@@ -132,4 +134,18 @@ export async function toggleProfilePrivacy() {
 
   revalidatePath("/profile");
   return { success: true, isProfilePublic: newValue };
+}
+
+export async function updateCalendarDisplayMode(mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY") {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { calendarDisplayMode: mode },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+  return { success: true };
 }

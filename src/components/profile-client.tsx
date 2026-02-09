@@ -23,6 +23,7 @@ import {
   updateProfile,
   changePassword,
   toggleProfilePrivacy,
+  updateCalendarDisplayMode,
   type ProfileData,
 } from "@/app/profile/actions";
 import {
@@ -77,6 +78,9 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
   const [isProfilePublic, setIsProfilePublic] = useState(
     initialProfile.isProfilePublic
   );
+  const [calendarDisplayMode, setCalendarDisplayMode] = useState<
+    "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY"
+  >(initialProfile.calendarDisplayMode);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -178,6 +182,21 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
         toast.success(
           newValue ? "Profile is now public" : "Profile is now private"
         );
+      }
+    });
+  };
+
+  const handleCalendarDisplayModeChange = (
+    mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY"
+  ) => {
+    setCalendarDisplayMode(mode);
+
+    startTransition(async () => {
+      const result = await updateCalendarDisplayMode(mode);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Calendar display updated");
       }
     });
   };
@@ -620,14 +639,116 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                   Layout Settings
                 </h2>
 
-                <div className="text-center py-12">
-                  <div className="bg-stone-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <Settings size={32} className="text-stone-400" />
+                <div className="space-y-6">
+                  {/* Calendar Display Mode */}
+                  <div>
+                    <h3 className="font-medium text-stone-900 mb-3">
+                      Calendar Display
+                    </h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Choose how reading entries are displayed on your calendar.
+                    </p>
+                    <div className="space-y-3">
+                      {/* References with Dots (Default) */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCalendarDisplayModeChange("REFERENCES_WITH_DOTS")
+                        }
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            calendarDisplayMode === "REFERENCES_WITH_DOTS"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              References with Dots
+                              <span className="ml-2 text-xs text-emerald-600 font-semibold">
+                                (Default)
+                              </span>
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Show abbreviated verse references (e.g., "Rev 2:1-10") with
+                              indicator dots below
+                            </p>
+                          </div>
+                          {calendarDisplayMode === "REFERENCES_WITH_DOTS" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Dots Only */}
+                      <button
+                        type="button"
+                        onClick={() => handleCalendarDisplayModeChange("DOTS_ONLY")}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            calendarDisplayMode === "DOTS_ONLY"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Dots Only
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Show only indicator dots without verse references for a cleaner
+                              look
+                            </p>
+                          </div>
+                          {calendarDisplayMode === "DOTS_ONLY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* References Only */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCalendarDisplayModeChange("REFERENCES_ONLY")
+                        }
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            calendarDisplayMode === "REFERENCES_ONLY"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              References Only
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Show verse references without indicator dots for maximum detail
+                            </p>
+                          </div>
+                          {calendarDisplayMode === "REFERENCES_ONLY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-stone-500 font-medium mb-2">Coming soon</p>
-                  <p className="text-stone-400 text-sm">
-                    Theme preferences, display density, and other customization options will be available here.
-                  </p>
                 </div>
               </div>
             )}

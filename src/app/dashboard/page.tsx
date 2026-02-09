@@ -11,12 +11,16 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [dbEntries, friendsActivity] = await Promise.all([
+  const [dbEntries, friendsActivity, user] = await Promise.all([
     prisma.readingEntry.findMany({
       where: { userId: session.user.id },
       orderBy: { date: "desc" },
     }),
     getFriendsActivity(),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { calendarDisplayMode: true },
+    }),
   ]);
 
   const entries: ReadingEntry[] = dbEntries.map((e) => ({
@@ -32,6 +36,7 @@ export default async function DashboardPage() {
     <DashboardClient
       initialEntries={entries}
       initialFriendsActivity={friendsActivity}
+      calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}
     />
   );
 }

@@ -10,6 +10,7 @@ interface CalendarProps {
   onNextMonth: () => void;
   onToday?: () => void;
   onDayClick?: (day: number) => void;
+  displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
 }
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
@@ -42,6 +43,7 @@ export function Calendar({
   onNextMonth,
   onToday,
   onDayClick,
+  displayMode = "REFERENCES_WITH_DOTS",
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -130,20 +132,22 @@ export function Calendar({
               <span className={`text-sm ${selected ? "font-medium" : ""}`}>
                 {day}
               </span>
-              {firstEntry && (
+              {firstEntry && displayMode !== "DOTS_ONLY" && (
                 <span className={`text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
                   {formatReferenceShort(firstEntry.book, firstEntry.chapters, firstEntry.verses, 10)}
                   {additionalCount > 0 && ` +${additionalCount}`}
                 </span>
               )}
-              <div className="flex gap-0.5 mt-1 h-1.5">
-                {dayEntries.slice(0, 3).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-1 h-1 rounded-full ${selected ? "bg-stone-500" : "bg-emerald-500"}`}
-                  />
-                ))}
-              </div>
+              {displayMode !== "REFERENCES_ONLY" && (
+                <div className="flex gap-0.5 mt-1 h-1.5">
+                  {dayEntries.slice(0, 3).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-1 h-1 rounded-full ${selected ? "bg-stone-500" : "bg-emerald-500"}`}
+                    />
+                  ))}
+                </div>
+              )}
             </DayTag>
           );
         })}

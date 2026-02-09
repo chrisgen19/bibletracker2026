@@ -25,11 +25,13 @@ function getEntriesForDate(entries: ReadingEntry[], date: Date) {
 interface DashboardClientProps {
   initialEntries: ReadingEntry[];
   initialFriendsActivity: FriendsActivityEntry[];
+  calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
 }
 
 export function DashboardClient({
   initialEntries,
   initialFriendsActivity,
+  calendarDisplayMode,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -165,6 +167,7 @@ export function DashboardClient({
               onNextMonth={handleNextMonth}
               onToday={handleToday}
               onDayClick={handleDayClick}
+              displayMode={calendarDisplayMode}
             />
             <Stats stats={stats} />
           </div>
