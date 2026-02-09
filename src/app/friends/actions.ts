@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateId } from "@/lib/ulid";
-import type { FriendUser, FriendsActivityEntry } from "@/lib/types";
+import type {
+  FriendUser,
+  FriendsActivityEntry,
+  NotificationItem,
+} from "@/lib/types";
 
 export async function followUser(targetUserId: string) {
   const session = await auth();
@@ -30,6 +34,15 @@ export async function followUser(targetUserId: string) {
       id: generateId(),
       followerId: session.user.id,
       followingId: targetUserId,
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      id: generateId(),
+      userId: targetUserId,
+      actorId: session.user.id,
+      type: "FOLLOW",
     },
   });
 
@@ -122,6 +135,44 @@ export async function getFollowing(): Promise<FriendUser[]> {
   }));
 }
 
+export async function getFollowers(): Promise<FriendUser[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const follows = await prisma.follow.findMany({
+    where: { followingId: session.user.id },
+    include: {
+      follower: {
+        select: {
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const followerIds = follows.map((f) => f.followerId);
+  const followingBack = await prisma.follow.findMany({
+    where: {
+      followerId: session.user.id,
+      followingId: { in: followerIds },
+    },
+    select: { followingId: true },
+  });
+  const followingBackSet = new Set(followingBack.map((f) => f.followingId));
+
+  return follows.map((f) => ({
+    id: f.follower.id,
+    username: f.follower.username!,
+    firstName: f.follower.firstName,
+    lastName: f.follower.lastName,
+    isFollowing: followingBackSet.has(f.follower.id),
+  }));
+}
+
 export async function getFollowCounts() {
   const session = await auth();
   if (!session?.user?.id) return { followingCount: 0, followerCount: 0 };
@@ -181,4 +232,70 @@ export async function getFriendsActivity(): Promise<FriendsActivityEntry[]> {
       lastName: e.user.lastName,
     },
   }));
+}
+
+export async function getUnreadNotificationCount(): Promise<number> {
+  const session = await auth();
+  if (!session?.user?.id) return 0;
+
+  return prisma.notification.count({
+    where: { userId: session.user.id, read: false },
+  });
+}
+
+export async function getNotifications(): Promise<NotificationItem[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const notifications = await prisma.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    include: {
+      actor: {
+        select: {
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+
+  const actorIds = notifications.map((n) => n.actorId);
+  const followingActors = await prisma.follow.findMany({
+    where: {
+      followerId: session.user.id,
+      followingId: { in: actorIds },
+    },
+    select: { followingId: true },
+  });
+  const followingSet = new Set(followingActors.map((f) => f.followingId));
+
+  return notifications.map((n) => ({
+    id: n.id,
+    type: n.type,
+    read: n.read,
+    createdAt: n.createdAt.toISOString(),
+    actor: {
+      id: n.actor.id,
+      username: n.actor.username!,
+      firstName: n.actor.firstName,
+      lastName: n.actor.lastName,
+      isFollowing: followingSet.has(n.actor.id),
+    },
+  }));
+}
+
+export async function markNotificationsAsRead() {
+  const session = await auth();
+  if (!session?.user?.id) return;
+
+  await prisma.notification.updateMany({
+    where: { userId: session.user.id, read: false },
+    data: { read: true },
+  });
+
+  revalidatePath("/dashboard");
 }

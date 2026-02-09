@@ -14,6 +14,10 @@ enum Gender {
   PREFER_NOT_TO_SAY
 }
 
+enum NotificationType {
+  FOLLOW
+}
+
 enum CalendarDisplayMode {
   DOTS_ONLY
   REFERENCES_WITH_DOTS
@@ -43,8 +47,10 @@ model User {
   accounts  Account[]
   sessions  Session[]
   entries   ReadingEntry[]
-  followers Follow[] @relation("UserFollowing")
-  following Follow[] @relation("UserFollowers")
+  followers     Follow[]       @relation("UserFollowing")
+  following     Follow[]       @relation("UserFollowers")
+  notifications     Notification[] @relation("NotificationRecipient")
+  actedNotifications Notification[] @relation("NotificationActor")
 
   @@map("users")
 }
@@ -110,6 +116,22 @@ model Follow {
   @@index([followerId])
   @@index([followingId])
   @@map("follows")
+}
+
+model Notification {
+  id        String           @id
+  userId    String           @map("user_id")
+  actorId   String           @map("actor_id")
+  type      NotificationType
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user  User @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([actorId])
+  @@map("notifications")
 }
 
 model VerificationToken {

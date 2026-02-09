@@ -6,9 +6,10 @@ interface FriendCardProps {
   user: FriendUser;
   onFollowToggle: (userId: string, isFollowing: boolean) => void;
   isPending?: boolean;
+  followLabel?: string;
 }
 
-export function FriendCard({ user, onFollowToggle, isPending }: FriendCardProps) {
+export function FriendCard({ user, onFollowToggle, isPending, followLabel = "Follow" }: FriendCardProps) {
   return (
     <div className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-stone-100 bg-stone-50 hover:bg-stone-100/50 transition-colors">
       <div className="flex items-center gap-3 min-w-0">
@@ -50,7 +51,7 @@ export function FriendCard({ user, onFollowToggle, isPending }: FriendCardProps)
         ) : (
           <>
             <UserPlus size={14} />
-            <span>Follow</span>
+            <span>{followLabel}</span>
           </>
         )}
       </button>

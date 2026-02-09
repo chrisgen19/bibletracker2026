@@ -1,18 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { BookOpen, Flame, LogOut, UserCircle, Users, Menu, X } from "lucide-react";
+import { BookOpen, Flame, LogOut, UserCircle, Users, Menu, X, Bell } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { NotificationDropdown } from "@/components/notification-dropdown";
 import type { Stats } from "@/lib/types";
 
 interface NavbarProps {
   stats: Stats;
+  unreadCount: number;
 }
 
-export function Navbar({ stats }: NavbarProps) {
+export function Navbar({ stats, unreadCount }: NavbarProps) {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    if (isNotificationsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isNotificationsOpen]);
 
   return (
     <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
@@ -49,6 +68,28 @@ export function Navbar({ stats }: NavbarProps) {
                 <Users size={16} className="text-stone-500" />
                 <span>My Friends</span>
               </Link>
+              <div ref={notificationRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsNotificationsOpen((prev) => !prev)}
+                  className="relative p-2 text-stone-500 bg-white rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
+                  title="Notifications"
+                >
+                  <Bell size={16} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-96">
+                    <NotificationDropdown
+                      onClose={() => setIsNotificationsOpen(false)}
+                    />
+                  </div>
+                )}
+              </div>
               <Link
                 href="/profile"
                 className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
@@ -67,21 +108,55 @@ export function Navbar({ stats }: NavbarProps) {
           )}
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className={`sm:hidden p-2 rounded-xl transition-colors ${
-            isMenuOpen
-              ? "bg-stone-900 text-stone-50"
-              : "text-stone-600 hover:bg-stone-100"
-          }`}
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-nav-menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Mobile bell + hamburger */}
+        <div className="sm:hidden flex items-center gap-2">
+          {session?.user && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsNotificationsOpen((prev) => !prev);
+                setIsMenuOpen(false);
+              }}
+              className="relative p-2 text-stone-500 rounded-xl hover:bg-stone-100 transition-colors"
+              title="Notifications"
+            >
+              <Bell size={22} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </button>
+          )}
+          <button
+            className={`p-2 rounded-xl transition-colors ${
+              isMenuOpen
+                ? "bg-stone-900 text-stone-50"
+                : "text-stone-600 hover:bg-stone-100"
+            }`}
+            onClick={() => {
+              setIsMenuOpen((prev) => !prev);
+              setIsNotificationsOpen(false);
+            }}
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-nav-menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile notification dropdown */}
+      {isNotificationsOpen && !isMenuOpen && (
+        <div className="sm:hidden border-t border-stone-200 bg-gradient-to-b from-stone-50/95 to-white/95 backdrop-blur-md px-4 py-4">
+          <div className="rounded-2xl border border-stone-200 bg-white/90 shadow-lg shadow-stone-200/50 overflow-hidden">
+            <NotificationDropdown
+              onClose={() => setIsNotificationsOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Mobile dropdown */}
       {isMenuOpen && (

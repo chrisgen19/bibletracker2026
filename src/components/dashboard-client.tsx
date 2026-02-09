@@ -27,12 +27,14 @@ interface DashboardClientProps {
   initialEntries: ReadingEntry[];
   initialFriendsActivity: FriendsActivityEntry[];
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  unreadNotificationCount: number;
 }
 
 export function DashboardClient({
   initialEntries,
   initialFriendsActivity,
   calendarDisplayMode,
+  unreadNotificationCount,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -155,7 +157,7 @@ export function DashboardClient({
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
-      <Navbar stats={stats} />
+      <Navbar stats={stats} unreadCount={unreadNotificationCount} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

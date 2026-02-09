@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { BookOpen, ArrowLeft, Search, Users, UserX } from "lucide-react";
+import { BookOpen, ArrowLeft, Search, Users, UserX, UserCheck } from "lucide-react";
 import { FriendCard } from "@/components/friend-card";
 import {
   searchUsers,
@@ -12,14 +12,23 @@ import {
 } from "@/app/friends/actions";
 import type { FriendUser } from "@/lib/types";
 
+type Tab = "following" | "followers";
+
 interface FriendsClientProps {
   initialFollowing: FriendUser[];
+  initialFollowers: FriendUser[];
   stats: { followingCount: number; followerCount: number };
 }
 
-export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
+export function FriendsClient({
+  initialFollowing,
+  initialFollowers,
+  stats,
+}: FriendsClientProps) {
   const [isPending, startTransition] = useTransition();
   const [following, setFollowing] = useState(initialFollowing);
+  const [followers, setFollowers] = useState(initialFollowers);
+  const [activeTab, setActiveTab] = useState<Tab>("following");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendUser[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -49,6 +58,9 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
     if (isCurrentlyFollowing) {
       // Optimistic unfollow
       setFollowing((prev) => prev.filter((u) => u.id !== userId));
+      setFollowers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isFollowing: false } : u))
+      );
       setSearchResults((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, isFollowing: false } : u))
       );
@@ -59,6 +71,7 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
           await unfollowUser(userId);
         } catch {
           setFollowing(initialFollowing);
+          setFollowers(initialFollowers);
           toast.error("Failed to unfollow");
         }
       });
@@ -66,10 +79,14 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
       // Optimistic follow
       const user =
         searchResults.find((u) => u.id === userId) ||
+        followers.find((u) => u.id === userId) ||
         following.find((u) => u.id === userId);
       if (user) {
         setFollowing((prev) => [{ ...user, isFollowing: true }, ...prev]);
       }
+      setFollowers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isFollowing: true } : u))
+      );
       setSearchResults((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, isFollowing: true } : u))
       );
@@ -80,11 +97,14 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
           await followUser(userId);
         } catch {
           setFollowing(initialFollowing);
+          setFollowers(initialFollowers);
           toast.error("Failed to follow");
         }
       });
     }
   };
+
+  const displayList = activeTab === "following" ? following : followers;
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
@@ -116,8 +136,26 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
             My Friends
           </h1>
           <p className="text-stone-500">
-            {stats.followingCount} following &middot; {stats.followerCount}{" "}
-            {stats.followerCount === 1 ? "follower" : "followers"}
+            <button
+              type="button"
+              onClick={() => setActiveTab("following")}
+              className={`hover:text-stone-700 transition-colors ${
+                activeTab === "following" ? "text-stone-900 font-semibold" : ""
+              }`}
+            >
+              {stats.followingCount} following
+            </button>
+            {" \u00B7 "}
+            <button
+              type="button"
+              onClick={() => setActiveTab("followers")}
+              className={`hover:text-stone-700 transition-colors ${
+                activeTab === "followers" ? "text-stone-900 font-semibold" : ""
+              }`}
+            >
+              {stats.followerCount}{" "}
+              {stats.followerCount === 1 ? "follower" : "followers"}
+            </button>
           </p>
         </div>
 
@@ -171,32 +209,83 @@ export function FriendsClient({ initialFollowing, stats }: FriendsClientProps) {
             )}
         </div>
 
-        {/* Following List */}
+        {/* Tabs */}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("following")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "following"
+                ? "bg-stone-900 text-stone-50"
+                : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-50"
+            }`}
+          >
+            <Users size={16} />
+            <span>Following</span>
+            <span
+              className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeTab === "following"
+                  ? "bg-stone-700 text-stone-200"
+                  : "bg-stone-100 text-stone-500"
+              }`}
+            >
+              {stats.followingCount}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("followers")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "followers"
+                ? "bg-stone-900 text-stone-50"
+                : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-50"
+            }`}
+          >
+            <UserCheck size={16} />
+            <span>Followers</span>
+            <span
+              className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeTab === "followers"
+                  ? "bg-stone-700 text-stone-200"
+                  : "bg-stone-100 text-stone-500"
+              }`}
+            >
+              {stats.followerCount}
+            </span>
+          </button>
+        </div>
+
+        {/* List */}
         <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-6 sm:p-8 border border-stone-100">
           <h2 className="text-xl font-serif font-bold text-stone-900 mb-4">
-            People You Follow
+            {activeTab === "following" ? "People You Follow" : "Your Followers"}
           </h2>
 
-          {following.length === 0 ? (
+          {displayList.length === 0 ? (
             <div className="text-center py-12">
               <div className="bg-stone-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Users size={32} className="text-stone-400" />
               </div>
               <p className="text-stone-500 font-medium">
-                You&apos;re not following anyone yet
+                {activeTab === "following"
+                  ? "You\u2019re not following anyone yet"
+                  : "No one is following you yet"}
               </p>
               <p className="text-stone-400 text-sm mt-1">
-                Search for friends by username above
+                {activeTab === "following"
+                  ? "Search for friends by username above"
+                  : "Share your profile to get followers"}
               </p>
             </div>
           ) : (
             <div className="space-y-3">
-              {following.map((user) => (
+              {displayList.map((user) => (
                 <FriendCard
                   key={user.id}
                   user={user}
                   onFollowToggle={handleFollowToggle}
                   isPending={isPending}
+                  followLabel={activeTab === "followers" ? "Follow Back" : "Follow"}
                 />
               ))}
             </div>
