@@ -37,6 +37,33 @@ export function ActivityLog({
       <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-stone-100/50 to-transparent rounded-bl-[100%] pointer-events-none -z-10" />
 
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("my")}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "my"
+                ? "bg-stone-900 text-white"
+                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+            }`}
+          >
+            My Activity
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("friends")}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              activeTab === "friends"
+                ? "bg-stone-900 text-white"
+                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+            }`}
+          >
+            Friends
+          </button>
+        </div>
+
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-stone-400 uppercase tracking-wider mb-1">
@@ -63,32 +90,6 @@ export function ActivityLog({
               Log
             </Button>
           )}
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab("my")}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeTab === "my"
-                ? "bg-stone-900 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            My Activity
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("friends")}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeTab === "friends"
-                ? "bg-stone-900 text-white"
-                : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            Friends
-          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
