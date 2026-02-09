@@ -3,12 +3,12 @@ import type { ReadingEntry } from "@/lib/types";
 
 interface CalendarProps {
   currentDate: Date;
-  selectedDate: Date;
+  selectedDate?: Date;
   entries: ReadingEntry[];
   onPrevMonth: () => void;
   onNextMonth: () => void;
-  onToday: () => void;
-  onDayClick: (day: number) => void;
+  onToday?: () => void;
+  onDayClick?: (day: number) => void;
 }
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
@@ -51,9 +51,11 @@ export function Calendar({
   const dayNumbers = Array.from({ length: days }, (_, i) => i + 1);
 
   const isSelected = (day: number) =>
-    selectedDate.getDate() === day &&
-    selectedDate.getMonth() === month &&
-    selectedDate.getFullYear() === year;
+    selectedDate
+      ? selectedDate.getDate() === day &&
+        selectedDate.getMonth() === month &&
+        selectedDate.getFullYear() === year
+      : false;
 
   return (
     <div className="bg-white rounded-[2rem] shadow-xl shadow-stone-200/50 p-6 sm:p-8">
@@ -71,12 +73,14 @@ export function Calendar({
           >
             <ChevronLeft size={20} />
           </button>
-          <button
-            onClick={onToday}
-            className="px-3 text-xs font-bold text-stone-500 uppercase hover:text-stone-900"
-          >
-            Today
-          </button>
+          {onToday && (
+            <button
+              onClick={onToday}
+              className="px-3 text-xs font-bold text-stone-500 uppercase hover:text-stone-900"
+            >
+              Today
+            </button>
+          )}
           <button
             onClick={onNextMonth}
             className="p-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-stone-600"
@@ -107,13 +111,15 @@ export function Calendar({
           const selected = isSelected(day);
           const today = isToday(date);
 
+          const DayTag = onDayClick ? "button" : "div";
+
           return (
-            <button
+            <DayTag
               key={day}
-              onClick={() => onDayClick(day)}
+              {...(onDayClick ? { onClick: () => onDayClick(day) } : {})}
               className={`
                 relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all duration-300
-                ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10" : "hover:bg-stone-100 text-stone-700"}
+                ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10" : onDayClick ? "hover:bg-stone-100 text-stone-700" : "text-stone-700"}
                 ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
                 ${!selected && hasEntry ? "bg-emerald-50/50" : ""}
               `}
@@ -129,7 +135,7 @@ export function Calendar({
                   />
                 ))}
               </div>
-            </button>
+            </DayTag>
           );
         })}
       </div>
@@ -143,10 +149,12 @@ export function Calendar({
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
           <span>Read</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-stone-900" />
-          <span>Selected</span>
-        </div>
+        {onDayClick && (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-stone-900" />
+            <span>Selected</span>
+          </div>
+        )}
       </div>
     </div>
   );

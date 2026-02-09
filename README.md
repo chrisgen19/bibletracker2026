@@ -175,6 +175,8 @@ prisma/
 - **Admin Password Reset** - CLI tool to reset user passwords
 - **Server Actions** - CRUD operations via React Server Actions with optimistic UI
 - **Authentication** - Email/password signup and login
+- **Public Profiles** - Share reading stats, calendar, and recent entries at `/u/[username]`
+- **Profile Privacy** - Opt-out toggle to make your profile private
 - **Route Protection** - Dashboard and profile require authentication
 - **ULID IDs** - Time-sortable unique identifiers
 - **Form Validation** - Client and server-side validation with Zod
@@ -216,7 +218,7 @@ prisma/
 
 ### Phase 4 - Social & Community
 
-- [ ] **Public profiles** - Share reading stats with others
+- [x] **Public profiles** - Share reading stats with others
 - [ ] **Reading groups** - Join or create accountability groups
 - [ ] **Shared reading plans** - Follow plans together with friends
 - [ ] **Leaderboard** - Optional streak and progress leaderboards

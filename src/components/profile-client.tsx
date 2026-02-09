@@ -10,6 +10,7 @@ import {
   User,
   Phone,
   Globe,
+  Globe2,
   Calendar,
   Lock,
   Eye,
@@ -20,6 +21,7 @@ import {
 import {
   updateProfile,
   changePassword,
+  toggleProfilePrivacy,
   type ProfileData,
 } from "@/app/profile/actions";
 import {
@@ -57,6 +59,9 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
   const [passwordErrors, setPasswordErrors] = useState<
     Record<string, string[]>
   >({});
+  const [isProfilePublic, setIsProfilePublic] = useState(
+    initialProfile.isProfilePublic
+  );
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -142,6 +147,23 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
         newPassword: "",
         confirmNewPassword: "",
       });
+    });
+  };
+
+  const handleTogglePrivacy = () => {
+    const newValue = !isProfilePublic;
+    setIsProfilePublic(newValue);
+
+    startTransition(async () => {
+      const result = await toggleProfilePrivacy();
+      if (result.error) {
+        setIsProfilePublic(!newValue);
+        toast.error(result.error);
+      } else {
+        toast.success(
+          newValue ? "Profile is now public" : "Profile is now private"
+        );
+      }
     });
   };
 
@@ -315,6 +337,64 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                 </>
               )}
             </button>
+          </div>
+        </div>
+
+        {/* Profile Privacy Card */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+            Profile Privacy
+          </h2>
+
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Globe2 size={20} className="text-stone-600" />
+                  <h3 className="font-medium text-stone-900">Public Profile</h3>
+                </div>
+                <p className="text-sm text-stone-600">
+                  {isProfilePublic
+                    ? `Your profile is visible at /u/${profile.username || "your-username"}. Anyone can see your reading stats and recent entries.`
+                    : "Your profile is private. Only you can see your reading activity."}
+                </p>
+                {profile.username && isProfilePublic && (
+                  <Link
+                    href={`/u/${profile.username}`}
+                    target="_blank"
+                    className="text-sm text-emerald-600 hover:text-emerald-700 font-medium mt-2 inline-block"
+                  >
+                    View your public profile &rarr;
+                  </Link>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleTogglePrivacy}
+                disabled={isPending || !profile.username}
+                className={`
+                  relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors
+                  ${isProfilePublic ? "bg-emerald-500" : "bg-stone-300"}
+                  ${isPending || !profile.username ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                `}
+              >
+                <span
+                  className={`
+                    inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform
+                    ${isProfilePublic ? "translate-x-7" : "translate-x-1"}
+                  `}
+                />
+              </button>
+            </div>
+
+            {!profile.username && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-800">
+                  You need to set a username above before you can enable your
+                  public profile.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

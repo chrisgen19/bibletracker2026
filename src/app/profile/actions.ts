@@ -25,6 +25,7 @@ export async function getProfile() {
       gender: true,
       birthday: true,
       createdAt: true,
+      isProfilePublic: true,
     },
   });
 
@@ -36,6 +37,7 @@ export async function getProfile() {
     username: user.username ?? "",
     phoneNumber: user.phoneNumber ?? "",
     createdAt: user.createdAt.toISOString(),
+    isProfilePublic: user.isProfilePublic,
   };
 }
 
@@ -109,4 +111,25 @@ export async function changePassword(formData: unknown) {
   });
 
   return { success: true };
+}
+
+export async function toggleProfilePrivacy() {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { isProfilePublic: true },
+  });
+
+  if (!user) return { error: "User not found" };
+
+  const newValue = !user.isProfilePublic;
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { isProfilePublic: newValue },
+  });
+
+  revalidatePath("/profile");
+  return { success: true, isProfilePublic: newValue };
 }
