@@ -7,6 +7,8 @@ import {
   ChevronRight,
   Quote,
   Bookmark,
+  Users,
+  Smartphone,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -114,9 +116,9 @@ export default function LandingPage() {
             {[
               {
                 icon: Calendar,
-                title: "Calendar View",
+                title: "Smart Calendar",
                 description:
-                  "See your reading history at a glance. Each day you read lights up on your personal calendar.",
+                  "View your reading history with verse references displayed right on the calendar. Customize how entries appear with multiple display modes.",
               },
               {
                 icon: Flame,
@@ -137,16 +139,16 @@ export default function LandingPage() {
                   "Write notes and reflections for each reading. Capture what God is teaching you.",
               },
               {
-                icon: Bookmark,
-                title: "Reading Progress",
+                icon: Users,
+                title: "Share Your Journey",
                 description:
-                  "Track how many books you've started and how many entries you've logged over time.",
+                  "Create a public profile to share your reading stats and encourage friends. Follow others and see their reading activity.",
               },
               {
-                icon: ChevronRight,
-                title: "Simple & Focused",
+                icon: Smartphone,
+                title: "Mobile Optimized",
                 description:
-                  "No clutter, no ads, no social feeds. Just a clean space to grow in your faith.",
+                  "Seamless experience on any device with floating quick-add buttons and responsive design for reading on the go.",
               },
             ].map((feature) => (
               <div
