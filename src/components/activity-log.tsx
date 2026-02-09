@@ -68,9 +68,9 @@ export function ActivityLog({
               onClick={onAddEntry}
               variant="primary"
               icon={Plus}
-              className="rounded-2xl"
+              className="rounded-2xl hidden sm:flex"
             >
-              Log
+              Log Entry
             </Button>
           )}
         </div>
@@ -134,6 +134,18 @@ export function ActivityLog({
           )}
         </div>
       </div>
+
+      {/* Floating button for mobile - only shows on My Activity tab */}
+      {activeTab === "my" && (
+        <Button
+          onClick={onAddEntry}
+          variant="primary"
+          icon={Plus}
+          className="fixed bottom-6 right-6 rounded-2xl shadow-lg sm:hidden z-50"
+        >
+          Log Entry
+        </Button>
+      )}
     </div>
   );
 }
