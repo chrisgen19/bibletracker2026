@@ -78,7 +78,7 @@ export function Navbar({ stats }: NavbarProps) {
 
       {/* Mobile dropdown */}
       {isMenuOpen && (
-        <div className="sm:hidden border-t border-stone-200 bg-stone-50/95 backdrop-blur-md px-4 py-4 space-y-3">
+        <div className="sm:hidden border-t border-stone-200 bg-stone-50/95 backdrop-blur-md px-4 py-4 space-y-3 flex flex-col items-end">
           <div className="flex items-center gap-2 text-sm font-medium text-stone-600">
             <Flame
               size={16}
