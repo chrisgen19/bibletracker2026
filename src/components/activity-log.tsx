@@ -32,8 +32,34 @@ export function ActivityLog({
     day: "numeric",
   });
 
+  // Check if selected date is today
+  const today = new Date();
+  const isToday =
+    selectedDate.getDate() === today.getDate() &&
+    selectedDate.getMonth() === today.getMonth() &&
+    selectedDate.getFullYear() === today.getFullYear();
+
+  // Should pulse when viewing today with no entries
+  const shouldPulse = isToday && entries.length === 0 && activeTab === "my";
+
   return (
-    <div className="sticky top-24">
+    <>
+      {/* Custom subtle pulse animation */}
+      <style>{`
+        @keyframes pulse-subtle {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        .animate-pulse-subtle {
+          animation: pulse-subtle 2s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="sticky top-24">
       <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-stone-100/50 to-transparent rounded-bl-[100%] pointer-events-none -z-10" />
 
@@ -68,7 +94,7 @@ export function ActivityLog({
               onClick={onAddEntry}
               variant="primary"
               icon={Plus}
-              className="rounded-2xl hidden sm:flex"
+              className={`rounded-2xl hidden sm:flex ${shouldPulse ? "animate-pulse-subtle" : ""}`}
             >
               Log Entry
             </Button>
@@ -141,11 +167,12 @@ export function ActivityLog({
           onClick={onAddEntry}
           variant="primary"
           icon={Plus}
-          className="fixed bottom-6 right-6 rounded-2xl shadow-lg sm:hidden z-50"
+          className={`fixed bottom-6 right-6 rounded-2xl shadow-lg sm:hidden z-50 ${shouldPulse ? "animate-pulse-subtle" : ""}`}
         >
           Log Entry
         </Button>
       )}
     </div>
+    </>
   );
 }
