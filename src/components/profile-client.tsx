@@ -17,6 +17,7 @@ import {
   EyeOff,
   Loader2,
   Check,
+  Settings,
 } from "lucide-react";
 import {
   updateProfile,
@@ -30,6 +31,19 @@ import {
 } from "@/lib/validations/profile";
 import { COUNTRIES } from "@/lib/constants/countries";
 
+type Section = "personal" | "privacy" | "password" | "layout";
+
+const SIDEBAR_ITEMS: {
+  key: Section;
+  label: string;
+  icon: React.ComponentType<{ size: number; className?: string }>;
+}[] = [
+  { key: "personal", label: "Personal Information", icon: User },
+  { key: "privacy", label: "Profile Privacy", icon: Globe2 },
+  { key: "password", label: "Change Password", icon: Lock },
+  { key: "layout", label: "Layout Settings", icon: Settings },
+];
+
 interface ProfileClientProps {
   initialProfile: ProfileData;
 }
@@ -37,6 +51,7 @@ interface ProfileClientProps {
 export function ProfileClient({ initialProfile }: ProfileClientProps) {
   const { update: updateSession } = useSession();
   const [isPending, startTransition] = useTransition();
+  const [activeSection, setActiveSection] = useState<Section>("personal");
 
   const [profile, setProfile] = useState({
     firstName: initialProfile.firstName,
@@ -195,9 +210,9 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div>
+        <div className="mb-8">
           <h1 className="text-3xl font-serif font-bold text-stone-900 mb-1">
             Profile Settings
           </h1>
@@ -206,332 +221,416 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
           </p>
         </div>
 
-        {/* Profile Details Card */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
-          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
-            Personal Information
-          </h2>
-
-          <div className="space-y-5">
-            {/* First + Last Name */}
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="First name"
-                name="firstName"
-                icon={User}
-                value={profile.firstName}
-                onChange={handleProfileChange}
-                errors={profileErrors.firstName}
-              />
-              <InputField
-                label="Last name"
-                name="lastName"
-                icon={User}
-                value={profile.lastName}
-                onChange={handleProfileChange}
-                errors={profileErrors.lastName}
-              />
-            </div>
-
-            {/* Username */}
-            <InputField
-              label="Username"
-              name="username"
-              icon={User}
-              value={profile.username}
-              onChange={handleProfileChange}
-              errors={profileErrors.username}
-              placeholder="johndoe (optional)"
-            />
-
-            {/* Birthday */}
-            <InputField
-              label="Birthday"
-              name="birthday"
-              type="date"
-              icon={Calendar}
-              value={profile.birthday}
-              onChange={handleProfileChange}
-              errors={profileErrors.birthday}
-            />
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Gender
-              </label>
-              <select
-                name="gender"
-                value={profile.gender}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-              >
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-              </select>
-              {profileErrors.gender && (
-                <p className="text-red-500 text-xs mt-1">
-                  {profileErrors.gender[0]}
-                </p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <InputField
-              label="Phone number"
-              name="phoneNumber"
-              type="tel"
-              icon={Phone}
-              value={profile.phoneNumber}
-              onChange={handleProfileChange}
-              errors={profileErrors.phoneNumber}
-              placeholder="+1 (555) 123-4567 (optional)"
-            />
-
-            {/* Country */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Country
-              </label>
-              <div className="relative">
-                <Globe
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                />
-                <select
-                  name="country"
-                  value={profile.country}
-                  onChange={handleProfileChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+        {/* Mobile tabs */}
+        <div className="lg:hidden mb-6 overflow-x-auto -mx-4 px-4">
+          <div className="flex gap-2 min-w-max">
+            {SIDEBAR_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActiveSection(item.key)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all
+                    ${
+                      isActive
+                        ? "bg-stone-900 text-white shadow-lg"
+                        : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-100"
+                    }
+                  `}
                 >
-                  <option value="">Select country</option>
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {profileErrors.country && (
-                <p className="text-red-500 text-xs mt-1">
-                  {profileErrors.country[0]}
-                </p>
-              )}
-            </div>
-
-            {/* Save */}
-            <button
-              type="button"
-              onClick={handleSaveProfile}
-              disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPending ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <>
-                  <Check size={20} />
-                  Save Changes
-                </>
-              )}
-            </button>
+                  <Icon size={16} />
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Profile Privacy Card */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
-          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
-            Profile Privacy
-          </h2>
-
-          <div className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Globe2 size={20} className="text-stone-600" />
-                  <h3 className="font-medium text-stone-900">Public Profile</h3>
-                </div>
-                <p className="text-sm text-stone-600">
-                  {isProfilePublic
-                    ? `Your profile is visible at /u/${profile.username || "your-username"}. Anyone can see your reading stats and recent entries.`
-                    : "Your profile is private. Only you can see your reading activity."}
-                </p>
-                {profile.username && isProfilePublic && (
-                  <Link
-                    href={`/u/${profile.username}`}
-                    target="_blank"
-                    className="text-sm text-emerald-600 hover:text-emerald-700 font-medium mt-2 inline-block"
-                  >
-                    View your public profile &rarr;
-                  </Link>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={handleTogglePrivacy}
-                disabled={isPending || !profile.username}
-                className={`
-                  relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors
-                  ${isProfilePublic ? "bg-emerald-500" : "bg-stone-300"}
-                  ${isPending || !profile.username ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                `}
-              >
-                <span
-                  className={`
-                    inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform
-                    ${isProfilePublic ? "translate-x-7" : "translate-x-1"}
-                  `}
-                />
-              </button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Desktop sidebar */}
+          <div className="hidden lg:block lg:col-span-3">
+            <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-4 border border-stone-100 sticky top-24">
+              <nav className="space-y-1">
+                {SIDEBAR_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setActiveSection(item.key)}
+                      className={`
+                        w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-left
+                        ${
+                          isActive
+                            ? "bg-stone-900 text-white shadow-lg"
+                            : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                        }
+                      `}
+                    >
+                      <Icon size={18} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
+          </div>
 
-            {!profile.username && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-sm text-amber-800">
-                  You need to set a username above before you can enable your
-                  public profile.
-                </p>
+          {/* Content area */}
+          <div className="lg:col-span-9">
+            {activeSection === "personal" && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+                <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+                  Personal Information
+                </h2>
+
+                <div className="space-y-5">
+                  {/* First + Last Name */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField
+                      label="First name"
+                      name="firstName"
+                      icon={User}
+                      value={profile.firstName}
+                      onChange={handleProfileChange}
+                      errors={profileErrors.firstName}
+                    />
+                    <InputField
+                      label="Last name"
+                      name="lastName"
+                      icon={User}
+                      value={profile.lastName}
+                      onChange={handleProfileChange}
+                      errors={profileErrors.lastName}
+                    />
+                  </div>
+
+                  {/* Username */}
+                  <InputField
+                    label="Username"
+                    name="username"
+                    icon={User}
+                    value={profile.username}
+                    onChange={handleProfileChange}
+                    errors={profileErrors.username}
+                    placeholder="johndoe (optional)"
+                  />
+
+                  {/* Birthday */}
+                  <InputField
+                    label="Birthday"
+                    name="birthday"
+                    type="date"
+                    icon={Calendar}
+                    value={profile.birthday}
+                    onChange={handleProfileChange}
+                    errors={profileErrors.birthday}
+                  />
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={profile.gender}
+                      onChange={handleProfileChange}
+                      className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                      <option value="OTHER">Other</option>
+                      <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                    </select>
+                    {profileErrors.gender && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {profileErrors.gender[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone */}
+                  <InputField
+                    label="Phone number"
+                    name="phoneNumber"
+                    type="tel"
+                    icon={Phone}
+                    value={profile.phoneNumber}
+                    onChange={handleProfileChange}
+                    errors={profileErrors.phoneNumber}
+                    placeholder="+1 (555) 123-4567 (optional)"
+                  />
+
+                  {/* Country */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                      Country
+                    </label>
+                    <div className="relative">
+                      <Globe
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      />
+                      <select
+                        name="country"
+                        value={profile.country}
+                        onChange={handleProfileChange}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                      >
+                        <option value="">Select country</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {profileErrors.country && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {profileErrors.country[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Save */}
+                  <button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={isPending}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPending ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Check size={20} />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Change Password Card */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
-          <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
-            Change Password
-          </h2>
+            {activeSection === "privacy" && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+                <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+                  Profile Privacy
+                </h2>
 
-          <div className="space-y-5">
-            {/* Current Password */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Current password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                />
-                <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  name="currentPassword"
-                  value={passwords.currentPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="Enter current password"
-                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Globe2 size={20} className="text-stone-600" />
+                        <h3 className="font-medium text-stone-900">Public Profile</h3>
+                      </div>
+                      <p className="text-sm text-stone-600">
+                        {isProfilePublic
+                          ? `Your profile is visible at /u/${profile.username || "your-username"}. Anyone can see your reading stats and recent entries.`
+                          : "Your profile is private. Only you can see your reading activity."}
+                      </p>
+                      {profile.username && isProfilePublic && (
+                        <Link
+                          href={`/u/${profile.username}`}
+                          target="_blank"
+                          className="text-sm text-emerald-600 hover:text-emerald-700 font-medium mt-2 inline-block"
+                        >
+                          View your public profile &rarr;
+                        </Link>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleTogglePrivacy}
+                      disabled={isPending || !profile.username}
+                      className={`
+                        relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors
+                        ${isProfilePublic ? "bg-emerald-500" : "bg-stone-300"}
+                        ${isPending || !profile.username ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                      `}
+                    >
+                      <span
+                        className={`
+                          inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform
+                          ${isProfilePublic ? "translate-x-7" : "translate-x-1"}
+                        `}
+                      />
+                    </button>
+                  </div>
+
+                  {!profile.username && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                      <p className="text-sm text-amber-800">
+                        You need to set a username above before you can enable your
+                        public profile.
+                      </p>
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
-              {passwordErrors.currentPassword && (
-                <p className="text-red-500 text-xs mt-1">
-                  {passwordErrors.currentPassword[0]}
-                </p>
-              )}
-            </div>
+            )}
 
-            {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                New password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                />
-                <input
-                  type={showNewPassword ? "text" : "password"}
-                  name="newPassword"
-                  value={passwords.newPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="Min 8 characters"
-                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-                >
-                  {showNewPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-              {passwordErrors.newPassword && (
-                <p className="text-red-500 text-xs mt-1">
-                  {passwordErrors.newPassword[0]}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm New Password */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Confirm new password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                />
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmNewPassword"
-                  value={passwords.confirmNewPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="Re-enter new password"
-                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-              {passwordErrors.confirmNewPassword && (
-                <p className="text-red-500 text-xs mt-1">
-                  {passwordErrors.confirmNewPassword[0]}
-                </p>
-              )}
-            </div>
-
-            {/* Change Password Button */}
-            <button
-              type="button"
-              onClick={handleChangePassword}
-              disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPending ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <>
-                  <Lock size={20} />
+            {activeSection === "password" && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+                <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
                   Change Password
-                </>
-              )}
-            </button>
+                </h2>
+
+                <div className="space-y-5">
+                  {/* Current Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                      Current password
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      />
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        name="currentPassword"
+                        value={passwords.currentPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Enter current password"
+                        className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                      >
+                        {showCurrentPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    {passwordErrors.currentPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {passwordErrors.currentPassword[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* New Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                      New password
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      />
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        name="newPassword"
+                        value={passwords.newPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Min 8 characters"
+                        className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                      >
+                        {showNewPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    {passwordErrors.newPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {passwordErrors.newPassword[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                      Confirm new password
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      />
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmNewPassword"
+                        value={passwords.confirmNewPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Re-enter new password"
+                        className="w-full pl-10 pr-12 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    {passwordErrors.confirmNewPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {passwordErrors.confirmNewPassword[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Change Password Button */}
+                  <button
+                    type="button"
+                    onClick={handleChangePassword}
+                    disabled={isPending}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPending ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Lock size={20} />
+                        Change Password
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "layout" && (
+              <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-8 border border-stone-100">
+                <h2 className="text-xl font-serif font-bold text-stone-900 mb-6">
+                  Layout Settings
+                </h2>
+
+                <div className="text-center py-12">
+                  <div className="bg-stone-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Settings size={32} className="text-stone-400" />
+                  </div>
+                  <p className="text-stone-500 font-medium mb-2">Coming soon</p>
+                  <p className="text-stone-400 text-sm">
+                    Theme preferences, display density, and other customization options will be available here.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
