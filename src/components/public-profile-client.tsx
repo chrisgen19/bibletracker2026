@@ -9,7 +9,6 @@ import {
   Calendar as CalendarIcon,
   UserPlus,
   UserMinus,
-  ArrowLeft,
 } from "lucide-react";
 import { Calendar } from "@/components/calendar";
 import { computeStats } from "@/lib/stats";
@@ -88,8 +87,8 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
     return (
       <div className="min-h-screen bg-stone-50 text-stone-800 font-sans">
         <nav className="bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+            <Link href={props.isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-3">
               <div className="bg-stone-900 text-white p-2 rounded-xl">
                 <BookOpen size={20} />
               </div>
@@ -97,15 +96,6 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
                 Sola Scriptura
               </span>
             </Link>
-            {props.isLoggedIn && (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
-              >
-                <ArrowLeft size={16} />
-                <span>Dashboard</span>
-              </Link>
-            )}
           </div>
         </nav>
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-16 text-center">
@@ -143,8 +133,8 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
       <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+          <Link href={props.isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-3">
             <div className="bg-stone-900 text-white p-2 rounded-xl">
               <BookOpen size={20} />
             </div>
@@ -152,15 +142,6 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
               Sola Scriptura
             </span>
           </Link>
-          {props.isLoggedIn && (
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
-            >
-              <ArrowLeft size={16} />
-              <span>Dashboard</span>
-            </Link>
-          )}
         </div>
       </nav>
 
