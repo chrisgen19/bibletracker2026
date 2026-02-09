@@ -133,10 +133,18 @@ export function Calendar({
                 {day}
               </span>
               {firstEntry && displayMode !== "DOTS_ONLY" && (
-                <span className={`text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
-                  {formatReferenceShort(firstEntry.book, firstEntry.chapters, firstEntry.verses, 10)}
-                  {additionalCount > 0 && ` +${additionalCount}`}
-                </span>
+                <>
+                  {/* Mobile: Book + Chapters only */}
+                  <span className={`sm:hidden text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
+                    {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 8)}
+                    {additionalCount > 0 && ` +${additionalCount}`}
+                  </span>
+                  {/* Desktop: Book + Chapters + Verses */}
+                  <span className={`hidden sm:inline text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
+                    {formatReferenceShort(firstEntry.book, firstEntry.chapters, firstEntry.verses, 10)}
+                    {additionalCount > 0 && ` +${additionalCount}`}
+                  </span>
+                </>
               )}
               {displayMode !== "REFERENCES_ONLY" && (
                 <div className="flex gap-0.5 mt-1 h-1.5">
