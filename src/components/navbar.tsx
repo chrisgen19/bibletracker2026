@@ -16,6 +16,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [badgeCount, setBadgeCount] = useState(unreadCount);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,14 +72,19 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
               <div ref={notificationRef} className="relative">
                 <button
                   type="button"
-                  onClick={() => setIsNotificationsOpen((prev) => !prev)}
+                  onClick={() => {
+                    setIsNotificationsOpen((prev) => {
+                      if (!prev) setBadgeCount(0);
+                      return !prev;
+                    });
+                  }}
                   className="relative p-2 text-stone-500 bg-white rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
                   title="Notifications"
                 >
                   <Bell size={16} />
-                  {unreadCount > 0 && (
+                  {badgeCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
-                      {unreadCount > 99 ? "99+" : unreadCount}
+                      {badgeCount > 99 ? "99+" : badgeCount}
                     </span>
                   )}
                 </button>
@@ -114,16 +120,19 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
             <button
               type="button"
               onClick={() => {
-                setIsNotificationsOpen((prev) => !prev);
+                setIsNotificationsOpen((prev) => {
+                  if (!prev) setBadgeCount(0);
+                  return !prev;
+                });
                 setIsMenuOpen(false);
               }}
               className="relative p-2 text-stone-500 rounded-xl hover:bg-stone-100 transition-colors"
               title="Notifications"
             >
               <Bell size={22} />
-              {unreadCount > 0 && (
+              {badgeCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {badgeCount > 99 ? "99+" : badgeCount}
                 </span>
               )}
             </button>
