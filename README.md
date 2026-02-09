@@ -235,15 +235,44 @@ prisma/
 - [ ] **Search entries** - Search through past reflections and notes
 - [ ] **Export data** - Download reading history as CSV or PDF
 
-### Phase 4 - Social & Community
+### Phase 4 - Prayer & Spiritual Life
+
+#### Core Prayer Features
+- [ ] **Prayer model** - Database schema for prayer entries (title, description, category, date, answered status)
+- [ ] **Create/edit/delete prayers** - Full CRUD operations for prayer management
+- [ ] **Prayer categories** - Organize prayers by type (Personal, Family, Friends, Church, Missions, Health, Work, etc.)
+- [ ] **Mark prayers as answered** - Track answered prayers with date and testimony notes
+- [ ] **Prayer journal** - Rich text notes and updates for ongoing prayers
+- [ ] **Calendar integration** - Display prayer indicators on calendar alongside reading entries
+- [ ] **Active prayers view** - Dedicated page showing all ongoing/unanswered prayers
+- [ ] **Answered prayers archive** - Celebrate and review God's faithfulness
+
+#### Social Prayer Features
+- [ ] **Prayer privacy settings** - Choose visibility per prayer (Public, Friends Only, Private)
+- [ ] **Friends prayer feed** - See friends' public prayers in the activity log
+- [ ] **Prayer support** - "Praying for this" button to let friends know you're praying
+- [ ] **Answered prayer celebrations** - Friends see when prayers are marked as answered
+- [ ] **Prayer requests** - Specific flag for prayers that need community support
+
+#### Advanced Prayer Features
+- [ ] **Prayer reminders** - Daily/weekly reminders for specific prayers
+- [ ] **Prayer streaks** - Track consistency in prayer life
+- [ ] **Search prayers** - Full-text search across prayer journal
+- [ ] **Export prayer journal** - Download prayer history as PDF or CSV
+- [ ] **Prayer statistics** - Track answered vs. pending prayers, categories breakdown
+- [ ] **Prayer plans** - Structured prayer guides (30-day prayer challenge, denominational prayer books, etc.)
+
+### Phase 5 - Social & Community
 
 - [x] **Public profiles** - Share reading stats with others
 - [x] **Friends/follow system** - Follow other readers and see their activity
 - [ ] **Reading groups** - Join or create accountability groups
 - [ ] **Shared reading plans** - Follow plans together with friends
+- [ ] **Prayer groups** - Shared prayer lists for accountability groups
+- [ ] **Group prayer requests** - Submit and track group prayers
 - [ ] **Leaderboard** - Optional streak and progress leaderboards
 
-### Phase 5 - Polish & Deployment
+### Phase 6 - Polish & Deployment
 
 - [ ] **Go-live SEO switch** - Remove temporary `noindex, nofollow` from `src/app/layout.tsx` and update `src/app/robots.ts` to allow crawling when the app is publicly launched
 - [ ] **Dark mode** - Toggle between light and dark themes
