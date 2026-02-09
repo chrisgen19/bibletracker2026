@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LandingNavbar } from "@/components/landing-navbar";
 import {
   BookOpen,
   Calendar,
@@ -12,32 +13,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
-      <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-stone-900 text-white p-2 rounded-xl">
-              <BookOpen size={20} />
-            </div>
-            <span className="text-lg sm:text-xl font-serif font-bold tracking-tight text-stone-900">
-              Sola Scriptura
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:gap-3">
-            <Link
-              href="/login"
-              className="px-3 sm:px-4 py-2.5 rounded-xl text-center text-sm sm:text-base font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-all duration-200"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="px-3 sm:px-4 py-2.5 rounded-xl text-center text-sm sm:text-base font-medium bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-lg shadow-stone-900/10 transition-all duration-200 active:scale-95"
-            >
-              Sign up
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <LandingNavbar />
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-16 sm:pt-32 sm:pb-24">
