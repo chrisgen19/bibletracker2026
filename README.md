@@ -134,7 +134,7 @@ src/
 │   ├── types.ts                    # TypeScript interfaces
 │   ├── stats.ts                    # Shared stats computation
 │   ├── mock-data.ts                # Sample data (unused, kept for reference)
-│   ├── constants.ts                # Bible books list
+│   ├── constants.ts                # Bible books list, abbreviations, and reference formatter
 │   ├── constants/
 │   │   └── countries.ts            # Country list
 │   └── validations/
@@ -150,7 +150,7 @@ scripts/
 └── reset-password.ts               # Admin CLI to reset user passwords
 
 prisma/
-├── schema.prisma                   # Database schema (User, ReadingEntry, Follow models)
+├── schema.prisma                   # Database schema (User, ReadingEntry, Follow, CalendarDisplayMode enum)
 ├── seed.ts                         # Seed script (imports from legacy SQL dump)
 └── migrations/                     # Prisma migration history
 ```
@@ -175,11 +175,15 @@ prisma/
 ## Features
 
 - **Calendar View** - Visual monthly calendar showing reading activity
-- **Reading Log** - Log book, chapter, verses, and personal reflections
+- **Calendar Verse References** - Display abbreviated verse references (e.g., "Rev 2:1-10") directly on calendar days with entry count indicators
+- **Calendar Display Modes** - Customize calendar appearance with three options: References with Dots (default), Dots Only, or References Only
+- **Reading Log** - Log book, chapter, verses, and personal reflections with responsive UI
+- **Mobile-Optimized Entry Logging** - Floating "+ Log Entry" button on mobile devices for quick access
 - **Edit & Delete Entries** - Edit existing entries and delete with confirmation
 - **Streak Tracking** - Track consecutive days of reading
 - **Progress Stats** - Total entries and books started out of 66
 - **Profile Management** - Edit personal info and change password
+- **Layout Settings** - Customize UI preferences including calendar display mode
 - **Toast Notifications** - Success/error feedback on all actions (sonner)
 - **Loading Skeletons** - Smooth loading states for dashboard and profile
 - **Mobile Navigation** - Responsive hamburger menu with streak, profile, and sign out
@@ -213,10 +217,12 @@ prisma/
 
 - [x] **Profile page** - View and edit account details (name, username, phone, country, gender, birthday)
 - [x] **Change password** - Change password from profile page (current + new password)
+- [x] **Layout settings** - Customize calendar display mode (dots only, references with dots, references only)
 - [x] **Admin password reset** - CLI script to reset passwords without email
 - [x] **Loading skeletons** - Loading states for dashboard and profile pages
 - [x] **Toast notifications** - Success/error feedback using sonner
 - [x] **Mobile responsive nav** - Hamburger menu with streak, profile link, and sign out
+- [x] **Mobile-optimized entry logging** - Floating "+ Log Entry" button for quick access on mobile
 - [ ] **Email verification** - Verify email address on signup (pending SMTP setup)
 - [ ] **Password reset flow** - Forgot password with email verification (pending SMTP setup)
 
