@@ -64,7 +64,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   }
 
   if (!user.isProfilePublic) {
-    return <PublicProfileClient isPrivate username={username} />;
+    return <PublicProfileClient isPrivate username={username} isLoggedIn={!!session?.user?.id} />;
   }
 
   const isOwnProfile = session?.user?.id === user.id;
