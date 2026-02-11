@@ -24,6 +24,7 @@ import {
   changePassword,
   toggleProfilePrivacy,
   updateCalendarDisplayMode,
+  updateShowMissedDays,
   type ProfileData,
 } from "@/app/profile/actions";
 import {
@@ -81,6 +82,9 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
   const [calendarDisplayMode, setCalendarDisplayMode] = useState<
     "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY"
   >(initialProfile.calendarDisplayMode);
+  const [showMissedDays, setShowMissedDays] = useState(
+    initialProfile.showMissedDays
+  );
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -182,6 +186,19 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
         toast.success(
           newValue ? "Profile is now public" : "Profile is now private"
         );
+      }
+    });
+  };
+
+  const handleShowMissedDaysChange = (show: boolean) => {
+    setShowMissedDays(show);
+
+    startTransition(async () => {
+      const result = await updateShowMissedDays(show);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Missed days display updated");
       }
     });
   };
@@ -743,6 +760,78 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                             </p>
                           </div>
                           {calendarDisplayMode === "REFERENCES_ONLY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Missed Days Highlight */}
+                  <div>
+                    <h3 className="font-medium text-stone-900 mb-3">
+                      Missed Days Highlight
+                    </h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Highlight past days with no reading entries on your calendar.
+                    </p>
+                    <div className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => handleShowMissedDaysChange(true)}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            showMissedDays
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Show Missed Days
+                              <span className="ml-2 text-xs text-emerald-600 font-semibold">
+                                (Default)
+                              </span>
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Highlight past days without entries in a subtle red background
+                            </p>
+                          </div>
+                          {showMissedDays && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleShowMissedDaysChange(false)}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            !showMissedDays
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Hide Missed Days
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Don&apos;t highlight missed days on the calendar
+                            </p>
+                          </div>
+                          {!showMissedDays && (
                             <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
                           )}
                         </div>

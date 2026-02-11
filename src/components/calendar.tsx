@@ -11,6 +11,7 @@ interface CalendarProps {
   onToday?: () => void;
   onDayClick?: (day: number) => void;
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  showMissedDays?: boolean;
 }
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
@@ -44,6 +45,7 @@ export function Calendar({
   onToday,
   onDayClick,
   displayMode = "REFERENCES_WITH_DOTS",
+  showMissedDays = true,
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -117,6 +119,8 @@ export function Calendar({
           const additionalCount = dayEntries.length > 1 ? dayEntries.length - 1 : 0;
 
           const DayTag = onDayClick ? "button" : "div";
+          const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+          const missed = showMissedDays && isPast && !hasEntry && !today;
 
           return (
             <DayTag
@@ -127,6 +131,7 @@ export function Calendar({
                 ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10" : onDayClick ? "hover:bg-stone-100 text-stone-700" : "text-stone-700"}
                 ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
                 ${!selected && hasEntry ? "bg-emerald-50/50" : ""}
+                ${!selected && missed ? "bg-red-50/50" : ""}
               `}
             >
               <span className={`text-sm ${selected ? "font-medium" : ""}`}>
@@ -162,10 +167,12 @@ export function Calendar({
       </div>
 
       <div className="mt-6 flex items-center justify-center gap-6 text-xs text-stone-500">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-stone-100 ring-1 ring-stone-300" />
-          <span>No reading</span>
-        </div>
+        {showMissedDays && (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+            <span>Missed</span>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
           <span>Read</span>

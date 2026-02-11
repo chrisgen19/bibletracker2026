@@ -27,6 +27,7 @@ export async function getProfile() {
       createdAt: true,
       isProfilePublic: true,
       calendarDisplayMode: true,
+      showMissedDays: true,
     },
   });
 
@@ -40,6 +41,7 @@ export async function getProfile() {
     createdAt: user.createdAt.toISOString(),
     isProfilePublic: user.isProfilePublic,
     calendarDisplayMode: user.calendarDisplayMode,
+    showMissedDays: user.showMissedDays,
   };
 }
 
@@ -143,6 +145,20 @@ export async function updateCalendarDisplayMode(mode: "DOTS_ONLY" | "REFERENCES_
   await prisma.user.update({
     where: { id: session.user.id },
     data: { calendarDisplayMode: mode },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateShowMissedDays(show: boolean) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { showMissedDays: show },
   });
 
   revalidatePath("/profile");

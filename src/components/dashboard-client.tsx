@@ -27,6 +27,7 @@ interface DashboardClientProps {
   initialEntries: ReadingEntry[];
   initialFriendsActivity: FriendsActivityEntry[];
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  showMissedDays: boolean;
   unreadNotificationCount: number;
 }
 
@@ -34,6 +35,7 @@ export function DashboardClient({
   initialEntries,
   initialFriendsActivity,
   calendarDisplayMode,
+  showMissedDays,
   unreadNotificationCount,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
@@ -174,6 +176,7 @@ export function DashboardClient({
               onToday={handleToday}
               onDayClick={handleDayClick}
               displayMode={calendarDisplayMode}
+              showMissedDays={showMissedDays}
             />
             <Stats stats={stats} />
           </div>
