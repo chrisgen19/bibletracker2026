@@ -48,6 +48,7 @@ export interface FriendsActivityEntry {
   book: string;
   chapters: string;
   verses: string;
+  notes: string;
   user: {
     username: string;
     firstName: string;

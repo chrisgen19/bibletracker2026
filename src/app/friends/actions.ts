@@ -229,6 +229,7 @@ export async function getFriendsActivity(): Promise<FriendsActivityEntry[]> {
       book: true,
       chapters: true,
       verses: true,
+      notes: true,
       user: {
         select: {
           username: true,
@@ -245,6 +246,7 @@ export async function getFriendsActivity(): Promise<FriendsActivityEntry[]> {
     book: e.book,
     chapters: e.chapters,
     verses: e.verses,
+    notes: e.notes,
     user: {
       username: e.user.username!,
       firstName: e.user.firstName,
