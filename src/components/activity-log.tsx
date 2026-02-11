@@ -25,6 +25,7 @@ export function ActivityLog({
   onDeleteEntry,
 }: ActivityLogProps) {
   const [activeTab, setActiveTab] = useState<"my" | "friends">("my");
+  const [visibleCount, setVisibleCount] = useState(6);
 
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
     weekday: "long",
@@ -68,7 +69,7 @@ export function ActivityLog({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setActiveTab("my")}
+              onClick={() => { setActiveTab("my"); setVisibleCount(6); }}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 activeTab === "my"
                   ? "bg-stone-900 text-white"
@@ -79,7 +80,7 @@ export function ActivityLog({
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("friends")}
+              onClick={() => { setActiveTab("friends"); setVisibleCount(6); }}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 activeTab === "friends"
                   ? "bg-stone-900 text-white"
@@ -154,9 +155,20 @@ export function ActivityLog({
               </p>
             </div>
           ) : (
-            friendsEntries.map((entry) => (
-              <FriendEntryCard key={entry.id} entry={entry} />
-            ))
+            <>
+              {friendsEntries.slice(0, visibleCount).map((entry) => (
+                <FriendEntryCard key={entry.id} entry={entry} />
+              ))}
+              {visibleCount < friendsEntries.length && (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + 6)}
+                  className="w-full py-3 text-sm font-medium text-stone-500 hover:text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"
+                >
+                  Load More
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
