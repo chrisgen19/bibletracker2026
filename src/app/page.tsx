@@ -10,6 +10,7 @@ import {
   Users,
   Smartphone,
 } from "lucide-react";
+import { APP_VERSION } from "@/lib/changelog";
 
 export default function LandingPage() {
   return (
@@ -217,10 +218,18 @@ export default function LandingPage() {
             <BookOpen size={16} />
             <span className="font-serif font-medium">Sola Scriptura</span>
           </div>
-          <p className="text-stone-400 text-sm">
-            &copy; {new Date().getFullYear()} Sola Scriptura. All rights
-            reserved.
-          </p>
+          <div className="flex items-center gap-3 text-stone-400 text-sm">
+            <p>
+              &copy; {new Date().getFullYear()} Sola Scriptura. All rights
+              reserved.
+            </p>
+            <Link
+              href="/changelog"
+              className="hover:text-stone-600 transition-colors"
+            >
+              v{APP_VERSION}
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

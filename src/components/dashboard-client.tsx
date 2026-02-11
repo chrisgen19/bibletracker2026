@@ -10,6 +10,7 @@ import { ActivityLog } from "@/components/activity-log";
 import { EntryForm } from "@/components/entry-form";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
+import { APP_VERSION } from "@/lib/changelog";
 import type { ReadingEntry, EntryFormData, FriendsActivityEntry } from "@/lib/types";
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
@@ -201,10 +202,18 @@ export function DashboardClient({
             <BookOpen size={16} />
             <span className="font-serif font-medium">Sola Scriptura</span>
           </div>
-          <p className="text-stone-400 text-sm">
-            &copy; {new Date().getFullYear()} Sola Scriptura. All rights
-            reserved.
-          </p>
+          <div className="flex items-center gap-3 text-stone-400 text-sm">
+            <p>
+              &copy; {new Date().getFullYear()} Sola Scriptura. All rights
+              reserved.
+            </p>
+            <a
+              href="/changelog"
+              className="hover:text-stone-600 transition-colors"
+            >
+              v{APP_VERSION}
+            </a>
+          </div>
         </div>
       </footer>
 
