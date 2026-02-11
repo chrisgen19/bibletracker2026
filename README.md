@@ -105,6 +105,8 @@ src/
 │   ├── login/
 │   │   ├── page.tsx                # Login page
 │   │   └── login-form.tsx          # Login form component
+│   ├── changelog/
+│   │   └── page.tsx                # Changelog / version history page
 │   └── api/auth/
 │       ├── [...nextauth]/route.ts  # NextAuth API handler
 │       └── signup/route.ts         # Signup API endpoint
@@ -133,6 +135,7 @@ src/
 │   ├── ulid.ts                     # ULID ID generation
 │   ├── types.ts                    # TypeScript interfaces
 │   ├── stats.ts                    # Shared stats computation
+│   ├── changelog.ts                # App version and changelog data
 │   ├── mock-data.ts                # Sample data (unused, kept for reference)
 │   ├── constants.ts                # Bible books list, abbreviations, and reference formatter
 │   ├── constants/
@@ -150,7 +153,7 @@ scripts/
 └── reset-password.ts               # Admin CLI to reset user passwords
 
 prisma/
-├── schema.prisma                   # Database schema (User, ReadingEntry, Follow, CalendarDisplayMode enum)
+├── schema.prisma                   # Database schema (User, ReadingEntry, Follow, Notification, CalendarDisplayMode enum)
 ├── seed.ts                         # Seed script (imports from legacy SQL dump)
 └── migrations/                     # Prisma migration history
 ```
@@ -179,11 +182,16 @@ prisma/
 - **Calendar Display Modes** - Customize calendar appearance with three options: References with Dots (default), Dots Only, or References Only
 - **Reading Log** - Log book, chapter, verses, and personal reflections with responsive UI
 - **Mobile-Optimized Entry Logging** - Floating "+ Log Entry" button on mobile devices for quick access
-- **Edit & Delete Entries** - Edit existing entries and delete with confirmation
+- **Edit & Delete Entries** - Edit existing entries and delete with confirmation; buttons always visible for touch screen accessibility
+- **Missed Days Highlight** - Past calendar days with no reading entries are highlighted in red, with a toggle setting to disable
+- **Friends Activity Notes** - View personal reflections from friends' reading entries in the activity feed
+- **Friends Activity Pagination** - Friends activity feed shows 6 cards at a time with a "Load More" button
+- **Version Footer & Changelog** - App version displayed in footer with a link to the changelog page at `/changelog`
+- **Follow Notifications** - Bell icon with badge for new follower notifications
 - **Streak Tracking** - Track consecutive days of reading
 - **Progress Stats** - Total entries and books started out of 66
 - **Profile Management** - Edit personal info and change password
-- **Layout Settings** - Customize UI preferences including calendar display mode
+- **Layout Settings** - Customize UI preferences including calendar display mode and missed days highlight
 - **Toast Notifications** - Success/error feedback on all actions (sonner)
 - **Loading Skeletons** - Smooth loading states for dashboard and profile
 - **Mobile Navigation** - Responsive hamburger menu with streak, profile, and sign out
@@ -217,12 +225,18 @@ prisma/
 
 - [x] **Profile page** - View and edit account details (name, username, phone, country, gender, birthday)
 - [x] **Change password** - Change password from profile page (current + new password)
-- [x] **Layout settings** - Customize calendar display mode (dots only, references with dots, references only)
+- [x] **Layout settings** - Customize calendar display mode and missed days highlight toggle
 - [x] **Admin password reset** - CLI script to reset passwords without email
 - [x] **Loading skeletons** - Loading states for dashboard and profile pages
 - [x] **Toast notifications** - Success/error feedback using sonner
 - [x] **Mobile responsive nav** - Hamburger menu with streak, profile link, and sign out
 - [x] **Mobile-optimized entry logging** - Floating "+ Log Entry" button for quick access on mobile
+- [x] **Missed days highlight** - Visual indicator on calendar for days with no reading (can be toggled off)
+- [x] **Touch-friendly buttons** - Edit/delete buttons always visible (no hover required)
+- [x] **Friends activity notes** - Display notes/reflections on friend activity cards
+- [x] **Friends activity pagination** - Load 6 cards at a time with "Load More" button
+- [x] **Version footer & changelog** - Version display in footer with changelog page
+- [x] **Follow notifications** - Bell icon with badge and followers tab on friends page
 - [ ] **Email verification** - Verify email address on signup (pending SMTP setup)
 - [ ] **Password reset flow** - Forgot password with email verification (pending SMTP setup)
 
