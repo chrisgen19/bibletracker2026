@@ -25,13 +25,13 @@ export async function getEntries(): Promise<ReadingEntry[]> {
   }));
 }
 
-export async function createEntry(formData: EntryFormData, date: string) {
+export async function createEntry(formData: EntryFormData, date: string): Promise<ReadingEntry> {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
 
-  await prisma.readingEntry.create({
+  const entry = await prisma.readingEntry.create({
     data: {
       id: generateId(),
       userId: session.user.id,
@@ -44,6 +44,15 @@ export async function createEntry(formData: EntryFormData, date: string) {
   });
 
   revalidatePath("/dashboard");
+
+  return {
+    id: entry.id,
+    date: entry.date.toISOString(),
+    book: entry.book,
+    chapters: entry.chapters,
+    verses: entry.verses,
+    notes: entry.notes,
+  };
 }
 
 export async function updateEntry(entryId: string, formData: EntryFormData) {

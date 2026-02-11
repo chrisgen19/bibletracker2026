@@ -127,7 +127,10 @@ export function DashboardClient({
 
       startTransition(async () => {
         try {
-          await createEntry(data, dateStr);
+          const savedEntry = await createEntry(data, dateStr);
+          setEntries((prev) =>
+            prev.map((e) => (e.id === tempEntry.id ? savedEntry : e))
+          );
         } catch {
           setEntries((prev) => prev.filter((e) => e.id !== tempEntry.id));
           toast.error("Failed to save entry");
