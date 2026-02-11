@@ -27,7 +27,7 @@ export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
               Ch {entry.chapters} {entry.verses && `: ${entry.verses}`}
             </span>
           </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => onEdit(entry)}
               className="p-1.5 text-stone-300 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
