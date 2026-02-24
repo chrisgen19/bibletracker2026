@@ -282,8 +282,8 @@ export function NotesEditorOverlay({
       )}
 
       {/* Editor */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 bg-stone-100">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg border border-stone-200 shadow-sm min-h-full px-8 py-8">
+      <div className="flex-1 overflow-y-auto px-0 sm:px-4 py-0 sm:py-6 bg-white sm:bg-stone-100">
+        <div className="max-w-4xl mx-auto bg-white sm:rounded-lg sm:border sm:border-stone-200 sm:shadow-sm min-h-full px-4 sm:px-8 py-4 sm:py-8">
           <BlockNoteView
             editor={editor}
             editable={!isViewMode}

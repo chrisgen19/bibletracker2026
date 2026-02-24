@@ -54,6 +54,52 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* --- Editor mobile padding fix --- */
+/* BlockNote adds ~54px internal padding via .bn-editor and .bn-block-group;
+   reduce it on small screens so text isn't squeezed into a narrow column. */
+@media (max-width: 639px) {
+  /* Remove internal padding so text fills the container */
+  .bn-container .bn-editor {
+    padding-inline: 0 !important;
+  }
+  .bn-container .bn-editor .bn-block-group {
+    padding-inline: 0 !important;
+  }
+  .bn-container .bn-editor .bn-block-outer {
+    padding-inline: 0 !important;
+  }
+
+  /* Scale down typography for mobile readability */
+  .bn-container .bn-editor .bn-block-content {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+  .bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
+    font-size: 1.35rem;
+    margin-top: 1rem;
+  }
+  .bn-container .bn-editor [data-content-type="heading"][data-level="2"] {
+    font-size: 1.15rem;
+    margin-top: 0.875rem;
+  }
+  .bn-container .bn-editor [data-content-type="heading"][data-level="3"] {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+  }
+  .bn-container .bn-editor [data-content-type="bulletListItem"],
+  .bn-container .bn-editor [data-content-type="numberedListItem"],
+  .bn-container .bn-editor [data-content-type="checkListItem"] {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .bn-container .bn-editor [data-content-type="quote"] {
+    font-size: 0.9rem;
+  }
+  .bn-container .bn-editor [data-content-type="codeBlock"] {
+    font-size: 0.8125rem;
+  }
+}
+
 /* --- Editor typography (Notion-inspired) --- */
 
 /* Body text — comfortable reading size and generous line height */
