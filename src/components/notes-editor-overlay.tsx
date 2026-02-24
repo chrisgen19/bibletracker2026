@@ -5,10 +5,18 @@ import {
   Bold,
   Italic,
   Underline,
+  Strikethrough,
   List,
   ListOrdered,
+  ListChecks,
   Quote,
+  Heading1,
   Heading2,
+  Heading3,
+  Code2,
+  Table,
+  Minus,
+  ChevronRight,
 } from "lucide-react";
 import {
   BlockNoteSchema,
@@ -48,19 +56,48 @@ function Toolbar({ editor }: { editor: EditorType }) {
   const btn =
     "p-2 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-100 active:bg-stone-200 transition-colors";
 
-  const toggleStyle = (style: "bold" | "italic" | "underline") => {
+  const toggleStyle = (style: "bold" | "italic" | "underline" | "strike") => {
     editor.toggleStyles({ [style]: true });
     editor.focus();
   };
 
-  const toggleBlock = (type: "bulletListItem" | "numberedListItem" | "heading" | "quote") => {
+  const toggleBlock = (
+    type: "bulletListItem" | "numberedListItem" | "checkListItem" | "toggleListItem" | "heading" | "quote" | "codeBlock",
+    headingLevel?: 1 | 2 | 3
+  ) => {
     const current = editor.getTextCursorPosition().block;
-    if (current.type === type) {
+    if (type === "heading") {
+      // Toggle off if already the same heading level
+      const isCurrentHeading =
+        current.type === "heading" &&
+        (current.props as { level?: number }).level === headingLevel;
+      if (isCurrentHeading) {
+        editor.updateBlock(current, { type: "paragraph" });
+      } else {
+        editor.updateBlock(current, { type: "heading", props: { level: headingLevel } } as Parameters<typeof editor.updateBlock>[1]);
+      }
+    } else if (current.type === type) {
       editor.updateBlock(current, { type: "paragraph" });
-    } else if (type === "heading") {
-      editor.updateBlock(current, { type: "heading", props: { level: 2 } } as Parameters<typeof editor.updateBlock>[1]);
     } else {
       editor.updateBlock(current, { type } as Parameters<typeof editor.updateBlock>[1]);
+    }
+    editor.focus();
+  };
+
+  const insertBlock = (type: "table" | "divider") => {
+    const current = editor.getTextCursorPosition().block;
+    if (type === "table") {
+      editor.insertBlocks(
+        [{ type: "table" } as Parameters<typeof editor.insertBlocks>[0][number]],
+        current,
+        "after"
+      );
+    } else {
+      editor.insertBlocks(
+        [{ type: "divider" } as Parameters<typeof editor.insertBlocks>[0][number]],
+        current,
+        "after"
+      );
     }
     editor.focus();
   };
@@ -76,11 +113,20 @@ function Toolbar({ editor }: { editor: EditorType }) {
       <button type="button" className={btn} onClick={() => toggleStyle("underline")} title="Underline">
         <Underline size={18} />
       </button>
+      <button type="button" className={btn} onClick={() => toggleStyle("strike")} title="Strikethrough">
+        <Strikethrough size={18} />
+      </button>
 
       <div className="w-px h-5 bg-stone-200 mx-1" />
 
-      <button type="button" className={btn} onClick={() => toggleBlock("heading")} title="Heading">
+      <button type="button" className={btn} onClick={() => toggleBlock("heading", 1)} title="Heading 1">
+        <Heading1 size={18} />
+      </button>
+      <button type="button" className={btn} onClick={() => toggleBlock("heading", 2)} title="Heading 2">
         <Heading2 size={18} />
+      </button>
+      <button type="button" className={btn} onClick={() => toggleBlock("heading", 3)} title="Heading 3">
+        <Heading3 size={18} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("bulletListItem")} title="Bullet list">
         <List size={18} />
@@ -88,8 +134,26 @@ function Toolbar({ editor }: { editor: EditorType }) {
       <button type="button" className={btn} onClick={() => toggleBlock("numberedListItem")} title="Numbered list">
         <ListOrdered size={18} />
       </button>
+      <button type="button" className={btn} onClick={() => toggleBlock("checkListItem")} title="Check list">
+        <ListChecks size={18} />
+      </button>
       <button type="button" className={btn} onClick={() => toggleBlock("quote")} title="Quote">
         <Quote size={18} />
+      </button>
+
+      <div className="w-px h-5 bg-stone-200 mx-1" />
+
+      <button type="button" className={btn} onClick={() => toggleBlock("toggleListItem")} title="Toggle">
+        <ChevronRight size={18} />
+      </button>
+      <button type="button" className={btn} onClick={() => toggleBlock("codeBlock")} title="Code block">
+        <Code2 size={18} />
+      </button>
+      <button type="button" className={btn} onClick={() => insertBlock("table")} title="Table">
+        <Table size={18} />
+      </button>
+      <button type="button" className={btn} onClick={() => insertBlock("divider")} title="Divider">
+        <Minus size={18} />
       </button>
     </div>
   );
