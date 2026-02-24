@@ -14,6 +14,7 @@ interface ActivityLogProps {
   onAddEntry: () => void;
   onEditEntry: (entry: ReadingEntry) => void;
   onDeleteEntry: (id: string) => void;
+  onUpdateNotes: (entryId: string, notes: string) => void;
 }
 
 export function ActivityLog({
@@ -23,6 +24,7 @@ export function ActivityLog({
   onAddEntry,
   onEditEntry,
   onDeleteEntry,
+  onUpdateNotes,
 }: ActivityLogProps) {
   const [activeTab, setActiveTab] = useState<"my" | "friends">("my");
   const [visibleCount, setVisibleCount] = useState(6);
@@ -139,6 +141,7 @@ export function ActivityLog({
                   entry={entry}
                   onEdit={onEditEntry}
                   onDelete={onDeleteEntry}
+                  onUpdateNotes={onUpdateNotes}
                 />
               ))
             )

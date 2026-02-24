@@ -12,9 +12,10 @@ interface EntryCardProps {
   entry: ReadingEntry;
   onEdit: (entry: ReadingEntry) => void;
   onDelete: (id: string) => void;
+  onUpdateNotes?: (entryId: string, notes: string) => void;
 }
 
-export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
+export function EntryCard({ entry, onEdit, onDelete, onUpdateNotes }: EntryCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
 
@@ -64,10 +65,7 @@ export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
         isOpen={showViewer}
         notes={entry.notes ?? ""}
         onClose={() => setShowViewer(false)}
-        onEdit={() => {
-          setShowViewer(false);
-          onEdit(entry);
-        }}
+        onSave={onUpdateNotes ? (notes) => onUpdateNotes(entry.id, notes) : undefined}
       />
 
       <Modal
