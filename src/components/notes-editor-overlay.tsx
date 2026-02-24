@@ -175,7 +175,6 @@ export function NotesEditorOverlay({
             editor={editor}
             theme="light"
             sideMenu={false}
-            slashMenu={false}
             emojiPicker={false}
             formattingToolbar={false}
           />
