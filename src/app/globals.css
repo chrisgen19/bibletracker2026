@@ -332,10 +332,10 @@ body {
   overflow-y: auto;
 }
 
-/* Color picker checkbox items */
+/* Color picker checkbox items — pl-8 reserves space for the absolute-positioned check icon */
 .bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] {
   border-radius: 0.375rem;
-  padding: 4px 8px;
+  padding: 4px 8px 4px 2rem;
   gap: 8px;
   font-size: 0.8125rem;
   transition: background-color 0.1s ease;
