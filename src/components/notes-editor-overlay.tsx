@@ -17,6 +17,8 @@ import {
   Table,
   Minus,
   ChevronRight,
+  ArrowLeft,
+  Pencil,
 } from "lucide-react";
 import {
   BlockNoteSchema,
@@ -164,6 +166,8 @@ interface NotesEditorOverlayProps {
   initialNotes: string;
   onSave: (notes: string) => void;
   onCancel: () => void;
+  mode?: "view" | "edit";
+  onEdit?: () => void;
 }
 
 export function NotesEditorOverlay({
@@ -171,6 +175,8 @@ export function NotesEditorOverlay({
   initialNotes,
   onSave,
   onCancel,
+  mode = "edit",
+  onEdit,
 }: NotesEditorOverlayProps) {
   // Lock body scroll when overlay is open to prevent double scrollbar
   useEffect(() => {
@@ -188,6 +194,8 @@ export function NotesEditorOverlay({
     // Legacy plain text → paragraph blocks
     return plainTextToBlocks(initialNotes);
   }, [initialNotes]);
+
+  const isViewMode = mode === "view";
 
   const editor = useCreateBlockNote(
     {
@@ -215,41 +223,74 @@ export function NotesEditorOverlay({
     <div className="fixed inset-0 z-60 flex flex-col bg-stone-50">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200 bg-white">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
-        >
-          Cancel
-        </button>
-        <h2 className="text-base font-serif font-bold text-stone-900">
-          Reflection
-        </h2>
-        <button
-          type="button"
-          onClick={handleSave}
-          className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
-        >
-          Done
-        </button>
+        {isViewMode ? (
+          <>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            <h2 className="text-base font-serif font-bold text-stone-900">
+              Reflection
+            </h2>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
+              >
+                <Pencil size={14} />
+                Edit
+              </button>
+            ) : (
+              <div className="px-3 py-1.5 w-[60px]" />
+            )}
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
+            >
+              Cancel
+            </button>
+            <h2 className="text-base font-serif font-bold text-stone-900">
+              Reflection
+            </h2>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
+            >
+              Done
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Static toolbar — centered to match canvas width */}
-      <div className="bg-white border-b border-stone-200">
-        <div className="max-w-4xl mx-auto">
-          <Toolbar editor={editor} />
+      {/* Static toolbar — centered to match canvas width (edit mode only) */}
+      {!isViewMode && (
+        <div className="bg-white border-b border-stone-200">
+          <div className="max-w-4xl mx-auto">
+            <Toolbar editor={editor} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Editor */}
       <div className="flex-1 overflow-y-auto px-4 py-6 bg-stone-100">
         <div className="max-w-4xl mx-auto bg-white rounded-lg border border-stone-200 shadow-sm min-h-full px-8 py-8">
           <BlockNoteView
             editor={editor}
+            editable={!isViewMode}
             theme="light"
-            sideMenu={true}
-            emojiPicker={true}
-            formattingToolbar={true}
+            sideMenu={!isViewMode}
+            emojiPicker={!isViewMode}
+            formattingToolbar={!isViewMode}
           />
         </div>
       </div>

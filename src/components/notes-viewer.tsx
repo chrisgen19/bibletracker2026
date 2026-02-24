@@ -18,33 +18,28 @@ const NotesEditorOverlay = dynamic(
   }
 );
 
-interface NotesEditorProps {
+interface NotesViewerProps {
   isOpen: boolean;
-  initialNotes: string;
-  onSave: (notes: string) => void;
-  onCancel: () => void;
-  mode?: "view" | "edit";
+  notes: string;
+  onClose: () => void;
   onEdit?: () => void;
 }
 
-export function NotesEditor({
+export function NotesViewer({
   isOpen,
-  initialNotes,
-  onSave,
-  onCancel,
-  mode = "edit",
+  notes,
+  onClose,
   onEdit,
-}: NotesEditorProps) {
-  // Only render the dynamic import when the overlay is open
+}: NotesViewerProps) {
   if (!isOpen) return null;
 
   return (
     <NotesEditorOverlay
       isOpen={isOpen}
-      initialNotes={initialNotes}
-      onSave={onSave}
-      onCancel={onCancel}
-      mode={mode}
+      initialNotes={notes}
+      onSave={() => {}}
+      onCancel={onClose}
+      mode="view"
       onEdit={onEdit}
     />
   );

@@ -12,6 +12,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Calendar } from "@/components/calendar";
+import { NotesViewer } from "@/components/notes-viewer";
 import { computeStats } from "@/lib/stats";
 import { extractPlainText } from "@/lib/notes";
 import { followUser, unfollowUser } from "@/app/friends/actions";
@@ -50,6 +51,7 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
     props.isPrivate ? false : props.isFollowing
   );
   const [isPending, startTransition] = useTransition();
+  const [viewingNotes, setViewingNotes] = useState<string | null>(null);
 
   const handlePrevMonth = () => {
     setCurrentDate(
@@ -288,12 +290,16 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
                       })}
                     </p>
                     {entry.notes && (
-                      <div className="relative pl-4 mt-2">
-                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-                        <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
+                      <button
+                        type="button"
+                        onClick={() => setViewingNotes(entry.notes!)}
+                        className="w-full text-left relative pl-4 mt-2 group/notes cursor-pointer"
+                      >
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
+                        <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
                           &ldquo;{extractPlainText(entry.notes)}&rdquo;
                         </p>
-                      </div>
+                      </button>
                     )}
                   </div>
                 ))}
@@ -312,6 +318,12 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
           </div>
         </div>
       </main>
+
+      <NotesViewer
+        isOpen={viewingNotes !== null}
+        notes={viewingNotes ?? ""}
+        onClose={() => setViewingNotes(null)}
+      />
     </div>
   );
 }
