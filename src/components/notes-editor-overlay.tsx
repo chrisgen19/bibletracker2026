@@ -234,7 +234,7 @@ export function NotesEditorOverlay({
           <BlockNoteView
             editor={editor}
             theme="light"
-            sideMenu={false}
+            sideMenu={true}
             emojiPicker={false}
             formattingToolbar={false}
           />
