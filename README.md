@@ -9,6 +9,7 @@ A web application to track your daily Bible reading journey. Log chapters and ve
 - **Styling:** Tailwind CSS 4
 - **Database:** PostgreSQL with Prisma 7
 - **Authentication:** NextAuth v5 (Auth.js) with Credentials provider
+- **Rich Text Editor:** BlockNote (shadcn theme)
 - **Validation:** Zod
 - **Icons:** Lucide React
 - **Package Manager:** Bun
@@ -121,12 +122,15 @@ src/
 │   ├── profile-client.tsx          # Profile page client component
 │   ├── calendar.tsx                # Monthly calendar view
 │   ├── activity-log.tsx            # Daily reading log panel
-│   ├── entry-card.tsx              # Reading entry card with edit/delete
+│   ├── entry-card.tsx              # Reading entry card with edit/delete and notes viewer
 │   ├── entry-form.tsx              # Log/edit reading modal form
+│   ├── notes-editor.tsx            # Dynamic import wrapper for rich text editor
+│   ├── notes-editor-overlay.tsx    # BlockNote rich text editor overlay (view/edit modes)
+│   ├── notes-viewer.tsx            # Read-only notes viewer (portaled to body)
 │   ├── friends-client.tsx          # Friends page client component
 │   ├── friend-card.tsx             # Reusable user card with follow button
-│   ├── friend-entry-card.tsx       # Entry card for friends activity feed
-│   ├── public-profile-client.tsx   # Public profile client component
+│   ├── friend-entry-card.tsx       # Entry card for friends activity feed with notes viewer
+│   ├── public-profile-client.tsx   # Public profile client component with notes viewer
 │   ├── stats.tsx                   # Stats cards
 │   └── skeletons.tsx               # Loading skeleton components
 ├── lib/
@@ -137,6 +141,7 @@ src/
 │   ├── stats.ts                    # Shared stats computation
 │   ├── changelog.ts                # App version and changelog data
 │   ├── mock-data.ts                # Sample data (unused, kept for reference)
+│   ├── notes.ts                    # Rich text notes utilities (parse, serialize, extract plain text)
 │   ├── constants.ts                # Bible books list, abbreviations, and reference formatter
 │   ├── constants/
 │   │   └── countries.ts            # Country list
@@ -180,6 +185,8 @@ prisma/
 - **Calendar View** - Visual monthly calendar showing reading activity
 - **Calendar Verse References** - Display abbreviated verse references (e.g., "Rev 2:1-10") directly on calendar days with entry count indicators
 - **Calendar Display Modes** - Customize calendar appearance with three options: References with Dots (default), Dots Only, or References Only
+- **Rich Text Reflections** - Write personal reflections using a BlockNote rich text editor with bold, italic, headings, lists, quotes, code blocks, tables, and more
+- **Notes Viewer** - Click any notes preview to read the full reflection in a full-screen read-only overlay; own entries have an inline "Edit" button to switch to edit mode directly
 - **Reading Log** - Log book, chapter, verses, and personal reflections with responsive UI
 - **Mobile-Optimized Entry Logging** - Floating "+ Log Entry" button on mobile devices for quick access
 - **Edit & Delete Entries** - Edit existing entries and delete with confirmation; buttons always visible for touch screen accessibility
@@ -237,6 +244,8 @@ prisma/
 - [x] **Friends activity pagination** - Load 6 cards at a time with "Load More" button
 - [x] **Version footer & changelog** - Version display in footer with changelog page
 - [x] **Follow notifications** - Bell icon with badge and followers tab on friends page
+- [x] **Rich text editor** - BlockNote-powered editor for reflections with formatting toolbar, side menu, and color picker
+- [x] **Notes viewer mode** - Full-screen read-only overlay for viewing reflections with inline edit capability for own entries
 - [ ] **Email verification** - Verify email address on signup (pending SMTP setup)
 - [ ] **Password reset flow** - Forgot password with email verification (pending SMTP setup)
 
