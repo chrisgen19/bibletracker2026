@@ -24,16 +24,12 @@ import "@blocknote/shadcn/style.css";
 
 import { parseNotesJson, plainTextToBlocks, serializeNotes } from "@/lib/notes";
 
-// Restricted schema: only paragraph, heading, bulletListItem, numberedListItem, quote, checkListItem
+// Restricted schema: exclude file-storage blocks (audio, video, image, file) since no S3 yet
 const {
   audio: _audio,
   video: _video,
   image: _image,
   file: _file,
-  table: _table,
-  codeBlock: _codeBlock,
-  divider: _divider,
-  toggleListItem: _toggleListItem,
   ...allowedBlockSpecs
 } = defaultBlockSpecs;
 
