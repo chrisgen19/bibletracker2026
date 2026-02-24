@@ -63,7 +63,7 @@ export function ActivityLog({
       `}</style>
 
       <div className="sticky top-24">
-      <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
+      <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 sm:min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-stone-100/50 to-transparent rounded-bl-[100%] pointer-events-none -z-10" />
 
         {/* Tabs */}

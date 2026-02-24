@@ -75,15 +75,15 @@ body {
     line-height: 1.65;
   }
   .bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
-    font-size: 1.35rem;
+    --level: 1.35rem;
     margin-top: 1rem;
   }
   .bn-container .bn-editor [data-content-type="heading"][data-level="2"] {
-    font-size: 1.15rem;
+    --level: 1.15rem;
     margin-top: 0.875rem;
   }
   .bn-container .bn-editor [data-content-type="heading"][data-level="3"] {
-    font-size: 1rem;
+    --level: 1rem;
     margin-top: 0.75rem;
   }
   .bn-container .bn-editor [data-content-type="bulletListItem"],
@@ -110,9 +110,11 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Headings — scaled down, tight line-height, strong weight */
+/* Headings — override BlockNote's --level CSS variable to control font-size.
+   BlockNote sets --level: 3em/2em/1.3em and applies font-size: var(--level),
+   so direct font-size overrides don't work. */
 .bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
-  font-size: 1.75rem;
+  --level: 1.75rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.025em;
@@ -121,7 +123,7 @@ body {
 }
 
 .bn-container .bn-editor [data-content-type="heading"][data-level="2"] {
-  font-size: 1.375rem;
+  --level: 1.375rem;
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -130,7 +132,7 @@ body {
 }
 
 .bn-container .bn-editor [data-content-type="heading"][data-level="3"] {
-  font-size: 1.125rem;
+  --level: 1.125rem;
   font-weight: 600;
   line-height: 1.4;
   letter-spacing: -0.015em;
