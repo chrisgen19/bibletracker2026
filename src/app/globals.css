@@ -74,7 +74,7 @@ body {
     font-size: 0.9375rem;
     line-height: 1.65;
   }
-  .bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
+  .bn-container .bn-editor [data-content-type="heading"]:not([data-level]) {
     --level: 1.35rem;
     margin-top: 1rem;
   }
@@ -112,8 +112,10 @@ body {
 
 /* Headings — override BlockNote's --level CSS variable to control font-size.
    BlockNote sets --level: 3em/2em/1.3em and applies font-size: var(--level),
-   so direct font-size overrides don't work. */
-.bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
+   so direct font-size overrides don't work.
+   Note: H1 has NO data-level attribute — BlockNote uses bare [data-content-type=heading]
+   as the default, so we target it without data-level. */
+.bn-container .bn-editor [data-content-type="heading"]:not([data-level]) {
   --level: 1.75rem;
   font-weight: 700;
   line-height: 1.25;
