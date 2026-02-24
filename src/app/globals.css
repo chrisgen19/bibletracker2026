@@ -50,8 +50,96 @@ body {
   --bn-colors-side-menu: #a8a29e;
   --bn-colors-highlights-gray-background: #f5f5f4;
   --bn-colors-highlights-gray-text: #44403c;
-  --bn-font-family: inherit;
-  font-family: inherit;
+  --bn-font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* --- Editor typography (Notion-inspired) --- */
+
+/* Body text — comfortable reading size and generous line height */
+.bn-container .bn-editor .bn-block-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #292524;
+  letter-spacing: -0.01em;
+}
+
+/* Headings — scaled down, tight line-height, strong weight */
+.bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: #1c1917;
+  margin-top: 1.5rem;
+}
+
+.bn-container .bn-editor [data-content-type="heading"][data-level="2"] {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: #1c1917;
+  margin-top: 1.25rem;
+}
+
+.bn-container .bn-editor [data-content-type="heading"][data-level="3"] {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: #292524;
+  margin-top: 1rem;
+}
+
+/* Lists — slightly tighter than body */
+.bn-container .bn-editor [data-content-type="bulletListItem"],
+.bn-container .bn-editor [data-content-type="numberedListItem"],
+.bn-container .bn-editor [data-content-type="checkListItem"] {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #292524;
+}
+
+/* Blockquote — slightly smaller, warm gray */
+.bn-container .bn-editor [data-content-type="quote"] {
+  font-size: 0.975rem;
+  line-height: 1.7;
+}
+
+/* Code block — monospace with tighter sizing */
+.bn-container .bn-editor [data-content-type="codeBlock"] {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Inline code */
+.bn-container .bn-editor code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  background-color: #f5f5f4;
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  color: #c7254e;
+}
+
+/* Bold — slightly heavier for emphasis clarity */
+.bn-container .bn-editor strong {
+  font-weight: 650;
+  color: #1c1917;
+}
+
+/* Links */
+.bn-container .bn-editor a {
+  color: #059669;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: #a7f3d0;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.bn-container .bn-editor a:hover {
+  text-decoration-color: #059669;
 }
 
 /*
@@ -277,12 +365,14 @@ body {
   font-style: italic;
 }
 
-/* --- Code block --- */
+/* --- Code block container --- */
 .bn-container .bn-editor [data-content-type="codeBlock"] {
   background-color: #f5f5f4;
   border: 1px solid #e7e5e4;
   border-radius: 0.5rem;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 /* --- Divider/horizontal rule --- */
