@@ -34,7 +34,7 @@ body {
 /* --- Core editor colors --- */
 .bn-container[data-theming-css-variables-demo] .bn-editor,
 .bn-container .bn-editor {
-  --bn-colors-editor-background: #fafaf9;
+  --bn-colors-editor-background: #ffffff;
   --bn-colors-editor-text: #1c1917;
   --bn-colors-menu-background: #ffffff;
   --bn-colors-menu-text: #44403c;

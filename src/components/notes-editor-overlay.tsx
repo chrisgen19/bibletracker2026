@@ -229,8 +229,8 @@ export function NotesEditorOverlay({
       <Toolbar editor={editor} />
 
       {/* Editor */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-6 bg-stone-100">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg border border-stone-200 shadow-sm min-h-full px-6 py-8">
           <BlockNoteView
             editor={editor}
             theme="light"
