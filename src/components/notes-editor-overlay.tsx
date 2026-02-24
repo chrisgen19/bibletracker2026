@@ -235,8 +235,8 @@ export function NotesEditorOverlay({
             editor={editor}
             theme="light"
             sideMenu={true}
-            emojiPicker={false}
-            formattingToolbar={false}
+            emojiPicker={true}
+            formattingToolbar={true}
           />
         </div>
       </div>
