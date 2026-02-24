@@ -49,6 +49,51 @@ body {
   font-family: inherit;
 }
 
+/*
+ * BlockNote's shadcn components use Tailwind classes like aria-selected:bg-accent,
+ * focus:bg-accent, data-[state=on]:bg-accent etc. Define the required CSS variables
+ * so menu highlights, toolbar active states, and dropdowns are visible.
+ */
+.bn-container {
+  --accent: #f5f5f4;
+  --accent-foreground: #1c1917;
+  --muted: #f5f5f4;
+  --muted-foreground: #78716c;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --border: #e7e5e4;
+  --ring: #059669;
+  --radius: 0.5rem;
+}
+
+/* Slash menu & suggestion menu — highlight selected item */
+.bn-container .bn-suggestion-menu [aria-selected] {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+.bn-container .bn-suggestion-menu [data-highlighted] {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+/* Grid suggestion menu (emoji picker) — highlight selected item */
+.bn-container .bn-grid-suggestion-menu [aria-selected],
+.bn-container .bn-grid-suggestion-menu [data-highlighted] {
+  background-color: #ecfdf5;
+}
+
+/* Dropdown menus — highlight focused/selected items */
+.bn-container [role="menu"] [role="menuitem"]:focus,
+.bn-container [role="menu"] [role="menuitem"]:hover,
+.bn-container [role="listbox"] [role="option"]:focus,
+.bn-container [role="listbox"] [role="option"][aria-selected="true"] {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
 /* Hide drag handles on mobile for cleaner UX */
 .bn-container .bn-side-menu {
   display: none;
@@ -59,6 +104,12 @@ body {
   background: #ffffff;
   border-color: #e7e5e4;
   border-radius: 0.75rem;
+}
+
+/* Toolbar active button state */
+.bn-container .bn-toolbar [data-state="on"] {
+  background-color: #ecfdf5;
+  color: #059669;
 }
 
 /* Blockquote styling */
