@@ -4,16 +4,20 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { NotesViewer } from "@/components/notes-viewer";
+import { extractPlainText } from "@/lib/notes";
 import type { ReadingEntry } from "@/lib/types";
 
 interface EntryCardProps {
   entry: ReadingEntry;
   onEdit: (entry: ReadingEntry) => void;
   onDelete: (id: string) => void;
+  onUpdateNotes?: (entryId: string, notes: string) => void;
 }
 
-export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
+export function EntryCard({ entry, onEdit, onDelete, onUpdateNotes }: EntryCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showViewer, setShowViewer] = useState(false);
 
   return (
     <>
@@ -44,14 +48,25 @@ export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
         </div>
 
         {entry.notes && (
-          <div className="relative pl-4 mt-3">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
-              &ldquo;{entry.notes}&rdquo;
+          <button
+            type="button"
+            onClick={() => setShowViewer(true)}
+            className="w-full text-left relative pl-4 mt-3 group/notes cursor-pointer"
+          >
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
+            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
+              &ldquo;{extractPlainText(entry.notes)}&rdquo;
             </p>
-          </div>
+          </button>
         )}
       </div>
+
+      <NotesViewer
+        isOpen={showViewer}
+        notes={entry.notes ?? ""}
+        onClose={() => setShowViewer(false)}
+        onSave={onUpdateNotes ? (notes) => onUpdateNotes(entry.id, notes) : undefined}
+      />
 
       <Modal
         isOpen={showConfirm}

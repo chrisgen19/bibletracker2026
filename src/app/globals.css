@@ -26,3 +26,456 @@ body {
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: #d6d3d1;
 }
+
+/* ============================================================
+   BlockNote Editor — Stone/Emerald Theme
+   ============================================================ */
+
+/* --- Core editor colors --- */
+.bn-container[data-theming-css-variables-demo] .bn-editor,
+.bn-container .bn-editor {
+  --bn-colors-editor-background: #ffffff;
+  --bn-colors-editor-text: #1c1917;
+  --bn-colors-menu-background: #ffffff;
+  --bn-colors-menu-text: #44403c;
+  --bn-colors-tooltip-background: #1c1917;
+  --bn-colors-tooltip-text: #fafaf9;
+  --bn-colors-hovered-background: #f5f5f4;
+  --bn-colors-selected-background: #ecfdf5;
+  --bn-colors-selected-text: #065f46;
+  --bn-colors-disabled-background: #e7e5e4;
+  --bn-colors-disabled-text: #a8a29e;
+  --bn-colors-shadow: rgba(12, 10, 9, 0.08);
+  --bn-colors-border: #d6d3d1;
+  --bn-colors-side-menu: #a8a29e;
+  --bn-colors-highlights-gray-background: #f5f5f4;
+  --bn-colors-highlights-gray-text: #44403c;
+  --bn-font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* --- Editor typography (Notion-inspired) --- */
+
+/* Body text — comfortable reading size and generous line height */
+.bn-container .bn-editor .bn-block-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #292524;
+  letter-spacing: -0.01em;
+}
+
+/* Headings — scaled down, tight line-height, strong weight */
+.bn-container .bn-editor [data-content-type="heading"][data-level="1"] {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: #1c1917;
+  margin-top: 1.5rem;
+}
+
+.bn-container .bn-editor [data-content-type="heading"][data-level="2"] {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: #1c1917;
+  margin-top: 1.25rem;
+}
+
+.bn-container .bn-editor [data-content-type="heading"][data-level="3"] {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: #292524;
+  margin-top: 1rem;
+}
+
+/* Lists — slightly tighter than body */
+.bn-container .bn-editor [data-content-type="bulletListItem"],
+.bn-container .bn-editor [data-content-type="numberedListItem"],
+.bn-container .bn-editor [data-content-type="checkListItem"] {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #292524;
+}
+
+/* Blockquote — slightly smaller, warm gray */
+.bn-container .bn-editor [data-content-type="quote"] {
+  font-size: 0.975rem;
+  line-height: 1.7;
+}
+
+/* Code block — monospace with tighter sizing */
+.bn-container .bn-editor [data-content-type="codeBlock"] {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Inline code */
+.bn-container .bn-editor code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  background-color: #f5f5f4;
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  color: #c7254e;
+}
+
+/* Bold — slightly heavier for emphasis clarity */
+.bn-container .bn-editor strong {
+  font-weight: 650;
+  color: #1c1917;
+}
+
+/* Links */
+.bn-container .bn-editor a {
+  color: #059669;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: #a7f3d0;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.bn-container .bn-editor a:hover {
+  text-decoration-color: #059669;
+}
+
+/*
+ * shadcn design tokens — BlockNote's shadcn components resolve these
+ * for aria-selected:bg-accent, focus:bg-accent, data-[state=on]:bg-accent etc.
+ */
+.bn-container {
+  --accent: #ecfdf5;
+  --accent-foreground: #065f46;
+  --muted: #f5f5f4;
+  --muted-foreground: #78716c;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #1c1917;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #059669;
+  --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+}
+
+/* --- Slash menu & suggestion menus --- */
+.bn-container [role="listbox"].bn-suggestion-menu {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  padding: 4px;
+  min-width: 240px;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.04),
+    0 12px 20px -4px rgba(12, 10, 9, 0.1);
+  background: #ffffff;
+}
+
+/* Individual menu items */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item {
+  border-radius: 0.375rem;
+  padding: 4px 8px !important;
+  gap: 8px !important;
+  margin: 0;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  background-color: transparent !important;
+  color: #44403c !important;
+}
+
+/* Icon container inside menu items */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item [data-position="left"] {
+  padding: 3px !important;
+  background-color: transparent;
+  border-radius: 0.25rem;
+  color: #78716c;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+/* Title text */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item .flex-1 > div:first-child {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: #1c1917;
+}
+
+/* Subtitle/subtext — hide for compact look */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item .flex-1 > div:last-child {
+  display: none;
+}
+
+/* Selected state (arrow key navigation) */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"] {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+}
+
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"] [data-position="left"] {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"] .flex-1 > div:first-child {
+  color: #065f46;
+}
+
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"] .flex-1 > div:last-child {
+  color: #047857;
+}
+
+/* Hover state */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item:hover {
+  background-color: #f5f5f4 !important;
+}
+
+/* Hover + selected combined */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"]:hover {
+  background-color: #ecfdf5 !important;
+}
+
+/* Group labels */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-label {
+  color: #a8a29e;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 8px 2px;
+}
+
+/* --- Grid suggestion menu (emoji picker) --- */
+.bn-container .bn-grid-suggestion-menu {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  padding: 6px;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.04),
+    0 12px 20px -4px rgba(12, 10, 9, 0.1);
+  background: #ffffff;
+}
+
+.bn-container .bn-grid-suggestion-menu [role="option"] {
+  border-radius: 0.375rem;
+  transition: background-color 0.1s ease;
+  background-color: transparent !important;
+}
+
+.bn-container .bn-grid-suggestion-menu [role="option"][aria-selected="true"] {
+  background-color: #ecfdf5 !important;
+}
+
+.bn-container .bn-grid-suggestion-menu [role="option"]:hover {
+  background-color: #f5f5f4 !important;
+}
+
+/* --- Dropdown menus (side menu, color picker, etc.) --- */
+.bn-container [role="menu"] {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  padding: 4px;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.04),
+    0 12px 20px -4px rgba(12, 10, 9, 0.1);
+  background: #ffffff;
+  overflow: visible;
+}
+
+.bn-container [role="menu"] [role="menuitem"],
+.bn-container [role="menu"] [data-slot="dropdown-menu-sub-trigger"] {
+  border-radius: 0.375rem;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.bn-container [role="menu"] [role="menuitem"]:focus,
+.bn-container [role="menu"] [role="menuitem"]:hover,
+.bn-container [role="menu"] [data-slot="dropdown-menu-sub-trigger"]:focus,
+.bn-container [role="menu"] [data-slot="dropdown-menu-sub-trigger"]:hover {
+  background-color: #f5f5f4 !important;
+  color: #1c1917 !important;
+}
+
+.bn-container [role="menu"] [data-slot="dropdown-menu-sub-trigger"][data-state="open"] {
+  background-color: #f5f5f4 !important;
+}
+
+.bn-container [role="menu"] [role="menuitem"][data-highlighted] {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+}
+
+/* Color picker submenu — chevron icon alignment */
+.bn-container [data-slot="dropdown-menu-sub-trigger"] {
+  display: flex;
+  align-items: center;
+}
+
+.bn-container [data-slot="dropdown-menu-sub-trigger"] > svg:last-child {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  align-self: center;
+}
+
+/* Color picker dropdown panel */
+.bn-container .bn-color-picker-dropdown {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  padding: 4px;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.04),
+    0 12px 20px -4px rgba(12, 10, 9, 0.1);
+  background: #ffffff;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* Color picker checkbox items */
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] {
+  border-radius: 0.375rem;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 2rem !important;
+  padding-right: 8px !important;
+  gap: 8px;
+  font-size: 0.8125rem;
+  transition: background-color 0.1s ease;
+}
+
+/* Check icon container — move left so it doesn't overlap the "A" color icon */
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] > span:first-child {
+  left: 4px !important;
+  width: 14px;
+  height: 14px;
+}
+
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] > span:first-child svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"]:focus,
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"]:hover {
+  background-color: #f5f5f4 !important;
+}
+
+.bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"][data-state="checked"] {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+/* Color picker section labels */
+.bn-container .bn-color-picker-dropdown [data-slot="dropdown-menu-label"] {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a8a29e;
+  padding: 6px 8px 2px;
+}
+
+/* Color icon styling */
+.bn-container .bn-color-icon {
+  border-color: #e7e5e4;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+/* --- Side menu (drag handle + add block) --- */
+.bn-container .bn-side-menu button {
+  color: #c8c3be;
+  transition: color 0.12s ease, background-color 0.12s ease;
+  border-radius: 0.375rem;
+}
+
+.bn-container .bn-side-menu button:hover {
+  color: #78716c;
+  background-color: #f5f5f4;
+}
+
+/* --- Floating formatting toolbar --- */
+.bn-container .bn-toolbar {
+  background: #ffffff;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.05),
+    0 10px 15px -3px rgba(12, 10, 9, 0.08);
+  padding: 2px;
+}
+
+.bn-container .bn-toolbar button {
+  transition: background-color 0.12s ease, color 0.12s ease;
+  border-radius: 0.375rem;
+}
+
+.bn-container .bn-toolbar button:hover {
+  background-color: #f5f5f4;
+  color: #1c1917;
+}
+
+/* Toolbar active/pressed button */
+.bn-container .bn-toolbar [data-state="on"],
+.bn-container .bn-toolbar [aria-pressed="true"] {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+}
+
+/* --- Blockquote --- */
+.bn-container .bn-editor blockquote,
+.bn-container .bn-editor [data-content-type="blockquote"] {
+  border-left: 3px solid #059669;
+  padding-left: 1rem;
+  color: #57534e;
+  font-style: italic;
+}
+
+/* --- Code block container --- */
+.bn-container .bn-editor [data-content-type="codeBlock"] {
+  background-color: #f5f5f4;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* --- Divider/horizontal rule --- */
+.bn-container .bn-editor [data-content-type="divider"] hr {
+  border-color: #d6d3d1;
+}
+
+/* --- Table --- */
+.bn-container .bn-editor table {
+  border-color: #e7e5e4;
+}
+
+.bn-container .bn-editor th {
+  background-color: #f5f5f4;
+  font-weight: 600;
+}
+
+/* --- Placeholder text --- */
+.bn-container .bn-editor .bn-block-content[data-is-empty-and-focused]::before,
+.bn-container .bn-editor .bn-inline-content:has(> .bn-cursor):empty::before {
+  color: #c8c3be;
+}
+
+/* --- Checklist checkboxes --- */
+.bn-container .bn-editor input[type="checkbox"]:checked {
+  accent-color: #059669;
+}
+
+/* --- Text selection color --- */
+.bn-container .bn-editor ::selection {
+  background-color: #d1fae5;
+  color: #065f46;
+}
