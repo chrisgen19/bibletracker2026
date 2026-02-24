@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { extractPlainText } from "@/lib/notes";
 import type { FriendsActivityEntry } from "@/lib/types";
 
 interface FriendEntryCardProps {
@@ -50,7 +51,7 @@ export function FriendEntryCard({ entry }: FriendEntryCardProps) {
         <div className="relative pl-4 mt-3">
           <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
           <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
-            &ldquo;{entry.notes}&rdquo;
+            &ldquo;{extractPlainText(entry.notes)}&rdquo;
           </p>
         </div>
       )}

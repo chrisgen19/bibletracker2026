@@ -1,7 +1,12 @@
-import { ChevronRight, Check } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { ChevronRight, Check, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { NotesEditor } from "@/components/notes-editor";
 import { BIBLE_BOOKS } from "@/lib/constants";
+import { extractPlainText } from "@/lib/notes";
 import type { EntryFormData } from "@/lib/types";
 
 interface EntryFormProps {
@@ -21,6 +26,12 @@ export function EntryForm({
   onSave,
   isEditing = false,
 }: EntryFormProps) {
+  const [notesEditorOpen, setNotesEditorOpen] = useState(false);
+
+  const notesPreview = formData.notes
+    ? extractPlainText(formData.notes)
+    : "";
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Entry" : "Log Reading"}>
       <div className="space-y-5">
@@ -86,14 +97,30 @@ export function EntryForm({
           <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
             Reflection
           </label>
-          <textarea
-            rows={4}
-            placeholder="What did you learn today?"
-            value={formData.notes}
-            onChange={(e) =>
-              onFormChange({ ...formData, notes: e.target.value })
-            }
-            className="w-full bg-stone-50 border border-stone-200 text-stone-900 rounded-xl p-3 focus:ring-2 focus:ring-stone-900 focus:border-stone-900 outline-none placeholder:text-stone-300 resize-none"
+          <button
+            type="button"
+            onClick={() => setNotesEditorOpen(true)}
+            className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-left min-h-[6rem] flex items-start gap-2 hover:bg-stone-100 transition-colors cursor-pointer"
+          >
+            {notesPreview ? (
+              <p className="text-stone-900 text-sm leading-relaxed line-clamp-4 flex-1">
+                {notesPreview}
+              </p>
+            ) : (
+              <span className="text-stone-300 text-sm flex items-center gap-2">
+                <PenLine size={14} />
+                Tap to add a reflection...
+              </span>
+            )}
+          </button>
+          <NotesEditor
+            isOpen={notesEditorOpen}
+            initialNotes={formData.notes}
+            onSave={(notes) => {
+              onFormChange({ ...formData, notes });
+              setNotesEditorOpen(false);
+            }}
+            onCancel={() => setNotesEditorOpen(false)}
           />
         </div>
 

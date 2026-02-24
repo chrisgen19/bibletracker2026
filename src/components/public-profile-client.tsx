@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/calendar";
 import { computeStats } from "@/lib/stats";
+import { extractPlainText } from "@/lib/notes";
 import { followUser, unfollowUser } from "@/app/friends/actions";
 import type { ReadingEntry } from "@/lib/types";
 
@@ -290,7 +291,7 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
                       <div className="relative pl-4 mt-2">
                         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
                         <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
-                          &ldquo;{entry.notes}&rdquo;
+                          &ldquo;{extractPlainText(entry.notes)}&rdquo;
                         </p>
                       </div>
                     )}
