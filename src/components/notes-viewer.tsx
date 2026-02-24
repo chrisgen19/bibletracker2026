@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
@@ -33,7 +34,9 @@ export function NotesViewer({
 }: NotesViewerProps) {
   if (!isOpen) return null;
 
-  return (
+  // Portal to document.body to escape containers with backdrop-filter/transform
+  // that create new containing blocks and trap fixed positioning
+  return createPortal(
     <NotesEditorOverlay
       isOpen={isOpen}
       initialNotes={notes}
@@ -41,6 +44,7 @@ export function NotesViewer({
       onCancel={onClose}
       mode="view"
       onEdit={onEdit}
-    />
+    />,
+    document.body
   );
 }
