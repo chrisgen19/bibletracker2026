@@ -344,16 +344,16 @@ body {
   transition: background-color 0.1s ease;
 }
 
-/* Check icon container — prevent the svg from overflowing its container */
+/* Check icon container — move left so it doesn't overlap the "A" color icon */
 .bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] > span:first-child {
-  overflow: hidden;
+  left: 4px !important;
   width: 14px;
   height: 14px;
 }
 
 .bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"] > span:first-child svg {
-  width: 12px !important;
-  height: 12px !important;
+  width: 14px !important;
+  height: 14px !important;
 }
 
 .bn-container .bn-color-picker-dropdown [role="menuitemcheckbox"]:focus,
