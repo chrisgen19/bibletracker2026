@@ -96,7 +96,7 @@ function Toolbar({ editor }: { editor: EditorType }) {
   };
 
   return (
-    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-stone-200 bg-white overflow-x-auto">
+    <div className="flex items-center justify-center gap-0.5 px-3 py-1.5 overflow-x-auto">
       {/* Text styles */}
       <button type="button" className={btn} onClick={() => toggleStyle("bold")} title="Bold">
         <Bold size={16} />
@@ -225,12 +225,16 @@ export function NotesEditorOverlay({
         </button>
       </div>
 
-      {/* Static toolbar */}
-      <Toolbar editor={editor} />
+      {/* Static toolbar — centered to match canvas width */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-4xl mx-auto">
+          <Toolbar editor={editor} />
+        </div>
+      </div>
 
       {/* Editor */}
       <div className="flex-1 overflow-y-auto px-4 py-6 bg-stone-100">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg border border-stone-200 shadow-sm min-h-full px-6 py-8">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg border border-stone-200 shadow-sm min-h-full px-8 py-8">
           <BlockNoteView
             editor={editor}
             theme="light"
