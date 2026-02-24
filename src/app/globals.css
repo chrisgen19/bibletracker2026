@@ -306,17 +306,6 @@ body {
 }
 
 /* --- Side menu (drag handle + add block) --- */
-.bn-container .bn-side-menu {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-/* Show on block hover */
-.bn-container .bn-block-outer:hover .bn-side-menu,
-.bn-container .bn-side-menu:hover {
-  opacity: 1;
-}
-
 .bn-container .bn-side-menu button {
   color: #c8c3be;
   transition: color 0.12s ease, background-color 0.12s ease;
