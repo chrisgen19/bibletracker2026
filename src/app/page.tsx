@@ -8,7 +8,8 @@ import {
   Quote,
   Bookmark,
   Users,
-  Smartphone,
+  PenLine,
+  Bell,
 } from "lucide-react";
 import { APP_VERSION } from "@/lib/changelog";
 
@@ -34,9 +35,9 @@ export default function LandingPage() {
               journey.
             </h1>
             <p className="text-lg text-stone-500 leading-relaxed max-w-md mb-10">
-              A simple, beautiful way to log your daily Scripture reading,
-              reflect on what you&apos;ve learned, and stay consistent in the
-              Word.
+              Log your daily Scripture reading, write rich reflections with
+              formatting, and stay consistent in the Word — together with
+              friends.
             </p>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <Link
@@ -55,45 +56,55 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Hero Visual */}
+          {/* Hero Visual — mimics the rich text editor */}
           <div className="hidden lg:block">
-            <div className="bg-white rounded-[2rem] shadow-2xl shadow-stone-200/50 p-8 relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-transparent rounded-bl-full -mr-0 -mt-0 rounded-tr-[2rem]" />
-              <div className="space-y-4">
-                {[
-                  {
-                    book: "Genesis 1-3",
-                    note: "In the beginning... truly striking how much order God brought out of chaos.",
-                  },
-                  {
-                    book: "Psalms 23:1-6",
-                    note: "He restores my soul — exactly what I needed today.",
-                  },
-                  {
-                    book: "Romans 8",
-                    note: "Nothing can separate us from the love of God. Powerful.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.book}
-                    className="bg-stone-50 rounded-2xl p-5 border border-stone-100"
-                  >
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="font-serif font-bold text-stone-900">
-                        {item.book}
-                      </span>
-                      <span className="text-emerald-600 text-xs font-medium bg-emerald-50 px-2 py-0.5 rounded-md">
-                        Read
-                      </span>
-                    </div>
-                    <div className="relative pl-4">
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-                      <p className="text-stone-500 text-sm italic leading-relaxed">
-                        &ldquo;{item.note}&rdquo;
-                      </p>
-                    </div>
-                  </div>
-                ))}
+            <div className="bg-white rounded-[2rem] shadow-2xl shadow-stone-200/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-transparent rounded-bl-full" />
+              {/* Mock editor header */}
+              <div className="flex items-center justify-between px-8 py-3 border-b border-stone-200">
+                <span className="text-sm font-medium text-stone-400">Cancel</span>
+                <span className="text-sm font-serif font-bold text-stone-900">Reflection</span>
+                <span className="text-sm font-bold text-emerald-600">Done</span>
+              </div>
+              {/* Mock toolbar */}
+              <div className="flex items-center gap-1 px-8 py-2 border-b border-stone-100">
+                <span className="p-1.5 rounded-md text-stone-400 text-xs font-bold">B</span>
+                <span className="p-1.5 rounded-md text-stone-400 text-xs italic">I</span>
+                <span className="p-1.5 rounded-md text-stone-400 text-xs underline">U</span>
+                <div className="w-px h-4 bg-stone-200 mx-1" />
+                <span className="p-1.5 rounded-md text-stone-400 text-xs">H1</span>
+                <span className="p-1.5 rounded-md text-stone-400 text-xs">H2</span>
+                <div className="w-px h-4 bg-stone-200 mx-1" />
+                <span className="p-1.5 rounded-md text-stone-400 text-xs">&bull;&mdash;</span>
+                <span className="p-1.5 rounded-md text-stone-400 text-xs">1.</span>
+                <span className="p-1.5 rounded-md text-stone-400 text-xs">&ldquo;&rdquo;</span>
+              </div>
+              {/* Mock rich text content */}
+              <div className="px-8 py-6 space-y-4">
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-stone-900 mb-1">Romans 8 — No Condemnation</h3>
+                  <p className="text-stone-600 text-sm leading-relaxed">
+                    Paul&apos;s argument builds beautifully here. The shift from chapter 7&apos;s
+                    struggle to chapter 8&apos;s <strong className="text-stone-800">triumph</strong> is
+                    one of the most powerful transitions in all of Scripture.
+                  </p>
+                </div>
+                <div className="border-l-2 border-emerald-300 pl-4 py-1">
+                  <p className="text-stone-500 text-sm italic leading-relaxed">
+                    &ldquo;For I am convinced that neither death nor life, neither angels nor
+                    demons... shall be able to separate us from the love of God.&rdquo;
+                  </p>
+                </div>
+                <div>
+                  <p className="text-stone-600 text-sm leading-relaxed">
+                    Three takeaways:
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-stone-600 text-sm">
+                    <li className="flex gap-2"><span className="text-emerald-500 mt-0.5">&bull;</span> The Spirit intercedes when I can&apos;t find words</li>
+                    <li className="flex gap-2"><span className="text-emerald-500 mt-0.5">&bull;</span> <strong className="text-stone-800">All things</strong> work together — not just the good</li>
+                    <li className="flex gap-2"><span className="text-emerald-500 mt-0.5">&bull;</span> Nothing in all creation can separate me from His love</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -134,22 +145,22 @@ export default function LandingPage() {
                   "Log chapters and verses across all 66 books. See how much of the Bible you've covered.",
               },
               {
-                icon: Quote,
-                title: "Personal Reflections",
+                icon: PenLine,
+                title: "Rich Text Reflections",
                 description:
-                  "Write notes and reflections for each reading. Capture what God is teaching you.",
+                  "Write beautiful reflections with a full rich text editor. Bold, headings, lists, quotes, tables, and more — then click any note to read it in full.",
               },
               {
                 icon: Users,
-                title: "Share Your Journey",
+                title: "Friends & Community",
                 description:
-                  "Create a public profile to share your reading stats and encourage friends. Follow others and see their reading activity.",
+                  "Follow other readers and see their activity. View their reflections in full, share public profiles, and encourage one another in the Word.",
               },
               {
-                icon: Smartphone,
-                title: "Mobile Optimized",
+                icon: Bell,
+                title: "Stay Connected",
                 description:
-                  "Seamless experience on any device with floating quick-add buttons and responsive design for reading on the go.",
+                  "Get notified when someone follows you. Keep up with friends' reading activity and reflections from your dashboard.",
               },
             ].map((feature) => (
               <div
