@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Bold,
   Italic,
@@ -172,6 +172,15 @@ export function NotesEditorOverlay({
   onSave,
   onCancel,
 }: NotesEditorOverlayProps) {
+  // Lock body scroll when overlay is open to prevent double scrollbar
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const initialContent = useMemo(() => {
     if (!initialNotes) return undefined;
     const parsed = parseNotesJson(initialNotes);
