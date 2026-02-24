@@ -313,10 +313,16 @@ body {
 }
 
 /* Color picker submenu — chevron icon alignment */
-.bn-container [data-slot="dropdown-menu-sub-trigger"] svg {
+.bn-container [data-slot="dropdown-menu-sub-trigger"] {
+  display: flex;
+  align-items: center;
+}
+
+.bn-container [data-slot="dropdown-menu-sub-trigger"] > svg:last-child {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
+  align-self: center;
 }
 
 /* Color picker dropdown panel */
