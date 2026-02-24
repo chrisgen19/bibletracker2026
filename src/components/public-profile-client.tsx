@@ -289,7 +289,7 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
                     {entry.notes && (
                       <div className="relative pl-4 mt-2">
                         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-                        <p className="text-stone-600 text-sm leading-relaxed italic">
+                        <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
                           &ldquo;{entry.notes}&rdquo;
                         </p>
                       </div>
