@@ -27,7 +27,11 @@ body {
   background-color: #d6d3d1;
 }
 
-/* BlockNote theme overrides — stone/emerald palette */
+/* ============================================================
+   BlockNote Editor — Stone/Emerald Theme
+   ============================================================ */
+
+/* --- Core editor colors --- */
 .bn-container[data-theming-css-variables-demo] .bn-editor,
 .bn-container .bn-editor {
   --bn-colors-editor-background: #fafaf9;
@@ -38,9 +42,10 @@ body {
   --bn-colors-tooltip-text: #fafaf9;
   --bn-colors-hovered-background: #f5f5f4;
   --bn-colors-selected-background: #ecfdf5;
+  --bn-colors-selected-text: #065f46;
   --bn-colors-disabled-background: #e7e5e4;
   --bn-colors-disabled-text: #a8a29e;
-  --bn-colors-shadow: rgba(12, 10, 9, 0.1);
+  --bn-colors-shadow: rgba(12, 10, 9, 0.08);
   --bn-colors-border: #d6d3d1;
   --bn-colors-side-menu: #a8a29e;
   --bn-colors-highlights-gray-background: #f5f5f4;
@@ -50,69 +55,165 @@ body {
 }
 
 /*
- * BlockNote's shadcn components use Tailwind classes like aria-selected:bg-accent,
- * focus:bg-accent, data-[state=on]:bg-accent etc. Define the required CSS variables
- * so menu highlights, toolbar active states, and dropdowns are visible.
+ * shadcn design tokens — BlockNote's shadcn components resolve these
+ * for aria-selected:bg-accent, focus:bg-accent, data-[state=on]:bg-accent etc.
  */
 .bn-container {
-  --accent: #f5f5f4;
-  --accent-foreground: #1c1917;
+  --accent: #ecfdf5;
+  --accent-foreground: #065f46;
   --muted: #f5f5f4;
   --muted-foreground: #78716c;
   --popover: #ffffff;
   --popover-foreground: #1c1917;
   --primary: #059669;
   --primary-foreground: #ffffff;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #1c1917;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   --border: #e7e5e4;
+  --input: #e7e5e4;
   --ring: #059669;
   --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
 }
 
-/* Slash menu & suggestion menu — highlight selected item */
-.bn-container .bn-suggestion-menu [aria-selected] {
-  background-color: #ecfdf5;
-  color: #065f46;
+/* --- Slash menu & suggestion menus --- */
+.bn-container .bn-suggestion-menu {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.05),
+    0 10px 15px -3px rgba(12, 10, 9, 0.08);
+  overflow: hidden;
+  background: #ffffff;
 }
 
-.bn-container .bn-suggestion-menu [data-highlighted] {
-  background-color: #ecfdf5;
-  color: #065f46;
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item {
+  transition: background-color 0.12s ease, color 0.12s ease;
+  border-radius: 0.375rem;
+  margin: 2px 4px;
 }
 
-/* Grid suggestion menu (emoji picker) — highlight selected item */
-.bn-container .bn-grid-suggestion-menu [aria-selected],
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[aria-selected="true"],
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item[data-highlighted] {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+}
+
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-item:hover {
+  background-color: #f5f5f4;
+}
+
+/* Suggestion menu group labels */
+.bn-container .bn-suggestion-menu .bn-suggestion-menu-label {
+  color: #a8a29e;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 8px 12px 4px;
+}
+
+/* --- Grid suggestion menu (emoji picker) --- */
+.bn-container .bn-grid-suggestion-menu {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.05),
+    0 10px 15px -3px rgba(12, 10, 9, 0.08);
+  background: #ffffff;
+}
+
+.bn-container .bn-grid-suggestion-menu [aria-selected="true"],
 .bn-container .bn-grid-suggestion-menu [data-highlighted] {
-  background-color: #ecfdf5;
+  background-color: #ecfdf5 !important;
+  border-radius: 0.375rem;
 }
 
-/* Dropdown menus — highlight focused/selected items */
+/* --- Dropdown menus (side menu, color picker, etc.) --- */
+.bn-container [role="menu"] {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.05),
+    0 10px 15px -3px rgba(12, 10, 9, 0.08);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.bn-container [role="menu"] [role="menuitem"] {
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
 .bn-container [role="menu"] [role="menuitem"]:focus,
 .bn-container [role="menu"] [role="menuitem"]:hover,
+.bn-container [role="menu"] [role="menuitem"][data-highlighted] {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+}
+
 .bn-container [role="listbox"] [role="option"]:focus,
 .bn-container [role="listbox"] [role="option"][aria-selected="true"] {
-  background-color: #ecfdf5;
-  color: #065f46;
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
 }
 
-/* Hide drag handles on mobile for cleaner UX */
+/* --- Side menu (drag handle + add block) --- */
 .bn-container .bn-side-menu {
-  display: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-/* Style the toolbar to match the app */
+/* Show on block hover */
+.bn-container .bn-block-outer:hover .bn-side-menu,
+.bn-container .bn-side-menu:hover {
+  opacity: 1;
+}
+
+.bn-container .bn-side-menu button {
+  color: #c8c3be;
+  transition: color 0.12s ease, background-color 0.12s ease;
+  border-radius: 0.375rem;
+}
+
+.bn-container .bn-side-menu button:hover {
+  color: #78716c;
+  background-color: #f5f5f4;
+}
+
+/* --- Floating formatting toolbar --- */
 .bn-container .bn-toolbar {
   background: #ffffff;
-  border-color: #e7e5e4;
+  border: 1px solid #e7e5e4;
   border-radius: 0.75rem;
+  box-shadow:
+    0 4px 6px -1px rgba(12, 10, 9, 0.05),
+    0 10px 15px -3px rgba(12, 10, 9, 0.08);
+  padding: 2px;
 }
 
-/* Toolbar active button state */
-.bn-container .bn-toolbar [data-state="on"] {
-  background-color: #ecfdf5;
-  color: #059669;
+.bn-container .bn-toolbar button {
+  transition: background-color 0.12s ease, color 0.12s ease;
+  border-radius: 0.375rem;
 }
 
-/* Blockquote styling */
+.bn-container .bn-toolbar button:hover {
+  background-color: #f5f5f4;
+  color: #1c1917;
+}
+
+/* Toolbar active/pressed button */
+.bn-container .bn-toolbar [data-state="on"],
+.bn-container .bn-toolbar [aria-pressed="true"] {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+}
+
+/* --- Blockquote --- */
 .bn-container .bn-editor blockquote,
 .bn-container .bn-editor [data-content-type="blockquote"] {
   border-left: 3px solid #059669;
@@ -121,8 +222,42 @@ body {
   font-style: italic;
 }
 
-/* Editor placeholder styling */
+/* --- Code block --- */
+.bn-container .bn-editor [data-content-type="codeBlock"] {
+  background-color: #f5f5f4;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* --- Divider/horizontal rule --- */
+.bn-container .bn-editor [data-content-type="divider"] hr {
+  border-color: #d6d3d1;
+}
+
+/* --- Table --- */
+.bn-container .bn-editor table {
+  border-color: #e7e5e4;
+}
+
+.bn-container .bn-editor th {
+  background-color: #f5f5f4;
+  font-weight: 600;
+}
+
+/* --- Placeholder text --- */
 .bn-container .bn-editor .bn-block-content[data-is-empty-and-focused]::before,
 .bn-container .bn-editor .bn-inline-content:has(> .bn-cursor):empty::before {
-  color: #d6d3d1;
+  color: #c8c3be;
+}
+
+/* --- Checklist checkboxes --- */
+.bn-container .bn-editor input[type="checkbox"]:checked {
+  accent-color: #059669;
+}
+
+/* --- Text selection color --- */
+.bn-container .bn-editor ::selection {
+  background-color: #d1fae5;
+  color: #065f46;
 }

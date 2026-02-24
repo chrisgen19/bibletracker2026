@@ -54,7 +54,9 @@ type EditorType = typeof schema extends BlockNoteSchema<infer B, infer I, infer 
 /** Static formatting toolbar — always visible above the editor */
 function Toolbar({ editor }: { editor: EditorType }) {
   const btn =
-    "p-2 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-100 active:bg-stone-200 transition-colors";
+    "p-1.5 rounded-md text-stone-400 hover:text-stone-800 hover:bg-stone-100 active:bg-emerald-50 active:text-emerald-700 transition-all duration-150 cursor-pointer";
+
+  const sep = <div className="w-px h-4 bg-stone-200 mx-1 shrink-0" />;
 
   const toggleStyle = (style: "bold" | "italic" | "underline" | "strike") => {
     editor.toggleStyles({ [style]: true });
@@ -67,7 +69,6 @@ function Toolbar({ editor }: { editor: EditorType }) {
   ) => {
     const current = editor.getTextCursorPosition().block;
     if (type === "heading") {
-      // Toggle off if already the same heading level
       const isCurrentHeading =
         current.type === "heading" &&
         (current.props as { level?: number }).level === headingLevel;
@@ -86,74 +87,73 @@ function Toolbar({ editor }: { editor: EditorType }) {
 
   const insertBlock = (type: "table" | "divider") => {
     const current = editor.getTextCursorPosition().block;
-    if (type === "table") {
-      editor.insertBlocks(
-        [{ type: "table" } as Parameters<typeof editor.insertBlocks>[0][number]],
-        current,
-        "after"
-      );
-    } else {
-      editor.insertBlocks(
-        [{ type: "divider" } as Parameters<typeof editor.insertBlocks>[0][number]],
-        current,
-        "after"
-      );
-    }
+    editor.insertBlocks(
+      [{ type } as Parameters<typeof editor.insertBlocks>[0][number]],
+      current,
+      "after"
+    );
     editor.focus();
   };
 
   return (
-    <div className="flex items-center gap-0.5 px-4 py-2 border-b border-stone-200 bg-white overflow-x-auto">
+    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-stone-200 bg-white overflow-x-auto">
+      {/* Text styles */}
       <button type="button" className={btn} onClick={() => toggleStyle("bold")} title="Bold">
-        <Bold size={18} />
+        <Bold size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleStyle("italic")} title="Italic">
-        <Italic size={18} />
+        <Italic size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleStyle("underline")} title="Underline">
-        <Underline size={18} />
+        <Underline size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleStyle("strike")} title="Strikethrough">
-        <Strikethrough size={18} />
+        <Strikethrough size={16} />
       </button>
 
-      <div className="w-px h-5 bg-stone-200 mx-1" />
+      {sep}
 
+      {/* Headings */}
       <button type="button" className={btn} onClick={() => toggleBlock("heading", 1)} title="Heading 1">
-        <Heading1 size={18} />
+        <Heading1 size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("heading", 2)} title="Heading 2">
-        <Heading2 size={18} />
+        <Heading2 size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("heading", 3)} title="Heading 3">
-        <Heading3 size={18} />
+        <Heading3 size={16} />
       </button>
+
+      {sep}
+
+      {/* Lists & quote */}
       <button type="button" className={btn} onClick={() => toggleBlock("bulletListItem")} title="Bullet list">
-        <List size={18} />
+        <List size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("numberedListItem")} title="Numbered list">
-        <ListOrdered size={18} />
+        <ListOrdered size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("checkListItem")} title="Check list">
-        <ListChecks size={18} />
+        <ListChecks size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("quote")} title="Quote">
-        <Quote size={18} />
+        <Quote size={16} />
       </button>
 
-      <div className="w-px h-5 bg-stone-200 mx-1" />
+      {sep}
 
+      {/* Blocks */}
       <button type="button" className={btn} onClick={() => toggleBlock("toggleListItem")} title="Toggle">
-        <ChevronRight size={18} />
+        <ChevronRight size={16} />
       </button>
       <button type="button" className={btn} onClick={() => toggleBlock("codeBlock")} title="Code block">
-        <Code2 size={18} />
+        <Code2 size={16} />
       </button>
       <button type="button" className={btn} onClick={() => insertBlock("table")} title="Table">
-        <Table size={18} />
+        <Table size={16} />
       </button>
       <button type="button" className={btn} onClick={() => insertBlock("divider")} title="Divider">
-        <Minus size={18} />
+        <Minus size={16} />
       </button>
     </div>
   );
