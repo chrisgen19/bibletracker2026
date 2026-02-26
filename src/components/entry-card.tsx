@@ -55,7 +55,7 @@ export function EntryCard({ entry, onEdit, onDelete, onUpdateNotes }: EntryCardP
           >
             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
             <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
-              &ldquo;{extractPlainText(entry.notes)}&rdquo;
+              &ldquo;{extractPlainText(entry.notes).slice(0, 150)}&rdquo;
             </p>
           </button>
         )}
