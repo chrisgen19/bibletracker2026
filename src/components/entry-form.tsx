@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Check, PenLine } from "lucide-react";
+import { Check, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BookSelector } from "@/components/ui/book-selector";
 import { Modal } from "@/components/ui/modal";
 import { NotesEditor } from "@/components/notes-editor";
 import { BIBLE_BOOKS } from "@/lib/constants";
@@ -39,24 +40,11 @@ export function EntryForm({
           <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
             Book
           </label>
-          <div className="relative">
-            <select
-              value={formData.book}
-              onChange={(e) =>
-                onFormChange({ ...formData, book: e.target.value })
-              }
-              className="w-full bg-stone-50 border border-stone-200 text-stone-900 text-lg font-serif font-medium rounded-xl p-3 focus:ring-2 focus:ring-stone-900 focus:border-stone-900 outline-none appearance-none cursor-pointer"
-            >
-              {BIBLE_BOOKS.map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-              <ChevronRight className="rotate-90" size={18} />
-            </div>
-          </div>
+          <BookSelector
+            value={formData.book}
+            onChange={(book) => onFormChange({ ...formData, book })}
+            books={BIBLE_BOOKS}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
