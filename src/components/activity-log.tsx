@@ -63,7 +63,7 @@ export function ActivityLog({
       `}</style>
 
       <div className="sticky top-24">
-      <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 sm:min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
+      <div className="bg-white/50 backdrop-blur-xl border border-white/50 rounded-[2rem] p-6 sm:p-8 lg:min-h-[600px] flex flex-col relative overflow-hidden shadow-2xl shadow-stone-200/40">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-stone-100/50 to-transparent rounded-bl-[100%] pointer-events-none -z-10" />
 
         {/* Tabs */}
@@ -120,7 +120,7 @@ export function ActivityLog({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+        <div className="lg:flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
           {activeTab === "my" ? (
             entries.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
