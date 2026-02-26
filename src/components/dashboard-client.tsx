@@ -45,8 +45,17 @@ export function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  // Default to the last book read so users can continue where they left off
+  const lastBookRead = useMemo(() => {
+    if (entries.length === 0) return "Genesis";
+    const sorted = [...entries].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    return sorted[0].book;
+  }, [entries]);
+
   const [formData, setFormData] = useState<EntryFormData>({
-    book: "Genesis",
+    book: lastBookRead,
     chapters: "",
     verses: "",
     notes: "",
@@ -88,7 +97,7 @@ export function DashboardClient({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingEntryId(null);
-    setFormData({ book: "Genesis", chapters: "", verses: "", notes: "" });
+    setFormData({ book: lastBookRead, chapters: "", verses: "", notes: "" });
   };
 
   const handleSaveEntry = () => {
