@@ -25,6 +25,7 @@ function getEntriesForDate(entries: ReadingEntry[], date: Date) {
 }
 
 interface DashboardClientProps {
+  username: string;
   initialEntries: ReadingEntry[];
   initialFriendsActivity: FriendsActivityEntry[];
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
@@ -33,6 +34,7 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({
+  username,
   initialEntries,
   initialFriendsActivity,
   calendarDisplayMode,
@@ -214,6 +216,7 @@ export function DashboardClient({
 
           <div className="lg:col-span-5">
             <ActivityLog
+              username={username}
               selectedDate={selectedDate}
               entries={selectedDateEntries}
               friendsEntries={initialFriendsActivity}

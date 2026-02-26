@@ -23,7 +23,7 @@ export default async function DashboardPage() {
       getFriendsActivity(),
       prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { calendarDisplayMode: true, showMissedDays: true },
+        select: { username: true, calendarDisplayMode: true, showMissedDays: true },
       }),
       getUnreadNotificationCount(),
     ]);
@@ -39,6 +39,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      username={user?.username ?? ""}
       initialEntries={entries}
       initialFriendsActivity={friendsActivity}
       calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}

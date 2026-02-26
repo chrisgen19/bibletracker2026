@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { NotesViewer } from "@/components/notes-viewer";
 import { extractPlainText } from "@/lib/notes";
 import type { FriendsActivityEntry } from "@/lib/types";
 
@@ -30,10 +28,7 @@ function timeAgo(dateStr: string): string {
 }
 
 export function FriendEntryCard({ entry }: FriendEntryCardProps) {
-  const [showViewer, setShowViewer] = useState(false);
-
   return (
-    <>
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
       <div className="flex items-center justify-between mb-2">
         <Link
@@ -55,24 +50,16 @@ export function FriendEntryCard({ entry }: FriendEntryCardProps) {
       </div>
 
       {entry.notes && (
-        <button
-          type="button"
-          onClick={() => setShowViewer(true)}
-          className="w-full text-left relative pl-4 mt-3 group/notes cursor-pointer"
+        <Link
+          href={`/u/${entry.user.username}/notes/${entry.id}`}
+          className="block w-full text-left relative pl-4 mt-3 group/notes"
         >
           <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
           <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
             &ldquo;{extractPlainText(entry.notes).slice(0, 150)}&rdquo;
           </p>
-        </button>
+        </Link>
       )}
     </div>
-
-    <NotesViewer
-      isOpen={showViewer}
-      notes={entry.notes ?? ""}
-      onClose={() => setShowViewer(false)}
-    />
-    </>
   );
 }

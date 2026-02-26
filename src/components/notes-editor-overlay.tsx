@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Bold,
   Italic,
@@ -19,6 +19,8 @@ import {
   ChevronRight,
   ArrowLeft,
   Pencil,
+  Link as LinkIcon,
+  Check,
 } from "lucide-react";
 import {
   BlockNoteSchema,
@@ -168,6 +170,8 @@ interface NotesEditorOverlayProps {
   onCancel: () => void;
   mode?: "view" | "edit";
   onEdit?: () => void;
+  /** When provided, shows a "Copy Link" button in view mode */
+  shareUrl?: string;
 }
 
 export function NotesEditorOverlay({
@@ -177,7 +181,18 @@ export function NotesEditorOverlay({
   onCancel,
   mode = "edit",
   onEdit,
+  shareUrl,
 }: NotesEditorOverlayProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = useCallback(() => {
+    if (!shareUrl) return;
+    const fullUrl = `${window.location.origin}${shareUrl}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [shareUrl]);
   // Lock body scroll when overlay is open to prevent double scrollbar
   useEffect(() => {
     if (!isOpen) return;
@@ -236,18 +251,31 @@ export function NotesEditorOverlay({
             <h2 className="text-base font-serif font-bold text-stone-900">
               Reflection
             </h2>
-            {onEdit ? (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
-              >
-                <Pencil size={14} />
-                Edit
-              </button>
-            ) : (
-              <div className="px-3 py-1.5 w-[60px]" />
-            )}
+            <div className="flex items-center gap-1">
+              {shareUrl && (
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="flex items-center gap-1 text-sm font-medium text-stone-400 hover:text-stone-600 transition-colors px-2 py-1.5"
+                  title="Copy shareable link"
+                >
+                  {copied ? <Check size={14} className="text-emerald-600" /> : <LinkIcon size={14} />}
+                  <span className={copied ? "text-emerald-600" : ""}>{copied ? "Copied" : "Share"}</span>
+                </button>
+              )}
+              {onEdit ? (
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-2 py-1.5"
+                >
+                  <Pencil size={14} />
+                  Edit
+                </button>
+              ) : (
+                !shareUrl && <div className="px-3 py-1.5 w-[60px]" />
+              )}
+            </div>
           </>
         ) : (
           <>

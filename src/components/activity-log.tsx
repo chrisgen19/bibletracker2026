@@ -8,6 +8,7 @@ import { FriendEntryCard } from "@/components/friend-entry-card";
 import type { ReadingEntry, FriendsActivityEntry } from "@/lib/types";
 
 interface ActivityLogProps {
+  username: string;
   selectedDate: Date;
   entries: ReadingEntry[];
   friendsEntries: FriendsActivityEntry[];
@@ -18,6 +19,7 @@ interface ActivityLogProps {
 }
 
 export function ActivityLog({
+  username,
   selectedDate,
   entries,
   friendsEntries,
@@ -139,6 +141,7 @@ export function ActivityLog({
                 <EntryCard
                   key={entry.id}
                   entry={entry}
+                  username={username}
                   onEdit={onEditEntry}
                   onDelete={onDeleteEntry}
                   onUpdateNotes={onUpdateNotes}

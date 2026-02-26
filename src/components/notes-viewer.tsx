@@ -26,6 +26,8 @@ interface NotesViewerProps {
   onClose: () => void;
   /** When provided, shows an "Edit" button and saves directly */
   onSave?: (notes: string) => void;
+  /** When provided, shows a "Copy Link" button in view mode */
+  shareUrl?: string;
 }
 
 export function NotesViewer({
@@ -33,6 +35,7 @@ export function NotesViewer({
   notes,
   onClose,
   onSave,
+  shareUrl,
 }: NotesViewerProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -59,6 +62,7 @@ export function NotesViewer({
       onCancel={handleClose}
       mode={mode}
       onEdit={onSave ? () => setMode("edit") : undefined}
+      shareUrl={shareUrl}
     />,
     document.body
   );

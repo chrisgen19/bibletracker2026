@@ -10,12 +10,13 @@ import type { ReadingEntry } from "@/lib/types";
 
 interface EntryCardProps {
   entry: ReadingEntry;
+  username: string;
   onEdit: (entry: ReadingEntry) => void;
   onDelete: (id: string) => void;
   onUpdateNotes?: (entryId: string, notes: string) => void;
 }
 
-export function EntryCard({ entry, onEdit, onDelete, onUpdateNotes }: EntryCardProps) {
+export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: EntryCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
 
@@ -66,6 +67,7 @@ export function EntryCard({ entry, onEdit, onDelete, onUpdateNotes }: EntryCardP
         notes={entry.notes ?? ""}
         onClose={() => setShowViewer(false)}
         onSave={onUpdateNotes ? (notes) => onUpdateNotes(entry.id, notes) : undefined}
+        shareUrl={username ? `/u/${username}/notes/${entry.id}` : undefined}
       />
 
       <Modal
