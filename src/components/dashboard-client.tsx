@@ -21,30 +21,18 @@ function MobileSheetHeader({
   selectedDate,
   activeTab,
   onTabChange,
-  onAddEntry,
   onExpand,
-  hasNoEntries,
 }: {
   selectedDate: Date;
   activeTab: ActivityTab;
   onTabChange: (tab: ActivityTab) => void;
-  onAddEntry: () => void;
   onExpand: () => void;
-  hasNoEntries: boolean;
 }) {
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
-
-  const today = new Date();
-  const isToday =
-    selectedDate.getDate() === today.getDate() &&
-    selectedDate.getMonth() === today.getMonth() &&
-    selectedDate.getFullYear() === today.getFullYear();
-
-  const shouldPulse = isToday && hasNoEntries && activeTab === "my";
 
   const tabClass = (active: boolean) =>
     `flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -70,16 +58,6 @@ function MobileSheetHeader({
         >
           Friends
         </button>
-        {activeTab === "my" && (
-          <Button
-            onClick={() => { onExpand(); onAddEntry(); }}
-            variant="primary"
-            icon={Plus}
-            className={`flex-1 rounded-xl justify-center ${shouldPulse ? "animate-pulse-subtle" : ""}`}
-          >
-            Log Entry
-          </Button>
-        )}
       </div>
 
       <div className="mb-3">
@@ -327,10 +305,18 @@ export function DashboardClient({
             selectedDate={selectedDate}
             activeTab={mobileTab}
             onTabChange={setMobileTab}
-            onAddEntry={() => setIsModalOpen(true)}
             onExpand={bottomSheet.expand}
-            hasNoEntries={selectedDateEntries.length === 0}
           />
+        }
+        fab={
+          <Button
+            onClick={() => { bottomSheet.expand(); setIsModalOpen(true); }}
+            variant="primary"
+            icon={Plus}
+            className="rounded-full shadow-lg ring-2 ring-white px-4"
+          >
+            Log Entry
+          </Button>
         }
       >
         <ActivityLog
