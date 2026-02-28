@@ -63,6 +63,10 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
     );
   };
 
+  const handleMonthSelect = (year: number, month: number) => {
+    setCurrentDate(new Date(year, month, 1));
+  };
+
   const handleFollowToggle = () => {
     if (props.isPrivate || !props.targetUserId) return;
 
@@ -256,6 +260,7 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
               entries={entries}
               onPrevMonth={handlePrevMonth}
               onNextMonth={handleNextMonth}
+              onMonthSelect={handleMonthSelect}
             />
           </div>
 
