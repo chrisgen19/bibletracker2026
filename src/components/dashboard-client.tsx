@@ -31,6 +31,7 @@ interface DashboardClientProps {
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays: boolean;
   weekStartDay: "SUNDAY" | "MONDAY";
+  showWeekNumbers: boolean;
   unreadNotificationCount: number;
 }
 
@@ -41,6 +42,7 @@ export function DashboardClient({
   calendarDisplayMode,
   showMissedDays,
   weekStartDay,
+  showWeekNumbers,
   unreadNotificationCount,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
@@ -218,6 +220,7 @@ export function DashboardClient({
               displayMode={calendarDisplayMode}
               showMissedDays={showMissedDays}
               weekStartDay={weekStartDay}
+              showWeekNumbers={showWeekNumbers}
             />
             <Stats stats={stats} />
           </div>

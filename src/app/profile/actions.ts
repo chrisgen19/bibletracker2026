@@ -29,6 +29,7 @@ export async function getProfile() {
       calendarDisplayMode: true,
       showMissedDays: true,
       weekStartDay: true,
+      showWeekNumbers: true,
     },
   });
 
@@ -44,6 +45,7 @@ export async function getProfile() {
     calendarDisplayMode: user.calendarDisplayMode,
     showMissedDays: user.showMissedDays,
     weekStartDay: user.weekStartDay,
+    showWeekNumbers: user.showWeekNumbers,
   };
 }
 
@@ -175,6 +177,20 @@ export async function updateShowMissedDays(show: boolean) {
   await prisma.user.update({
     where: { id: session.user.id },
     data: { showMissedDays: show },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateShowWeekNumbers(show: boolean) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { showWeekNumbers: show },
   });
 
   revalidatePath("/profile");
