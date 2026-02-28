@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2 } from "lucide-react";
-import { toPng } from "html-to-image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
 import { DayCell } from "@/components/calendar-day-cell";
 import { MonthPicker } from "@/components/calendar-month-picker";
@@ -41,15 +40,6 @@ const buildEntryMap = (
   return map;
 };
 
-/** Get the ISO 8601 week number for a given date */
-const getISOWeekNumber = (date: Date): number => {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-};
-
 interface CalendarProps {
   currentDate: Date;
   selectedDate?: Date;
@@ -61,8 +51,6 @@ interface CalendarProps {
   onMonthSelect?: (year: number, month: number) => void;
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays?: boolean;
-  weekStartDay?: "SUNDAY" | "MONDAY";
-  showWeekNumbers?: boolean;
   isLoading?: boolean;
 }
 
@@ -91,22 +79,12 @@ export function Calendar({
   onMonthSelect,
   displayMode = "REFERENCES_WITH_DOTS",
   showMissedDays = true,
-  weekStartDay = "SUNDAY",
-  showWeekNumbers = false,
   isLoading = false,
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const days = new Date(year, month + 1, 0).getDate();
-  const rawFirstDay = new Date(year, month, 1).getDay();
-  // Shift offset so Monday=0 when week starts on Monday
-  const firstDay = weekStartDay === "MONDAY"
-    ? (rawFirstDay + 6) % 7
-    : rawFirstDay;
-
-  const dayLabels = weekStartDay === "MONDAY"
-    ? [...DAY_LABELS.slice(1), DAY_LABELS[0]]
-    : DAY_LABELS;
+  const firstDay = new Date(year, month, 1).getDay();
 
   // Pre-compute entry lookup map — O(1) per cell instead of O(n) filtering
   const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
@@ -190,8 +168,6 @@ export function Calendar({
   // Keyboard navigation state
   const [focusedDay, setFocusedDay] = useState<number | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
 
   // Month picker state
   const [showMonthPicker, setShowMonthPicker] = useState(false);
@@ -290,36 +266,6 @@ export function Calendar({
     setIsSwiping(false);
   };
 
-  const handleExport = async () => {
-    if (!exportRef.current || isExporting) return;
-    setIsExporting(true);
-    try {
-      const dataUrl = await toPng(exportRef.current, {
-        backgroundColor: "#ffffff",
-        pixelRatio: 2,
-      });
-      const link = document.createElement("a");
-      const monthName = currentDate.toLocaleDateString("en-US", { month: "long" }).toLowerCase();
-      link.download = `sola-scriptura-${monthName}-${year}.png`;
-      link.href = dataUrl;
-      link.click();
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Chunk flat cells into rows of 7 for week number insertion
-  const allCells = [...blanks, ...dayNumbers];
-  const rows: (number | null)[][] = [];
-  for (let i = 0; i < allCells.length; i += 7) {
-    rows.push(allCells.slice(i, i + 7));
-  }
-  // Pad last row to 7 cells
-  const lastRow = rows[rows.length - 1];
-  while (lastRow.length < 7) {
-    lastRow.push(null);
-  }
-
   return (
     <div className="bg-white rounded-[2rem] shadow-xl shadow-stone-200/50 p-6 sm:p-8">
       <div className="flex items-center justify-between mb-8">
@@ -350,23 +296,7 @@ export function Calendar({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {onDayClick && (
-            <button
-              type="button"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isExporting ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <Download size={14} />
-              )}
-              <span className="hidden sm:inline">Share My Month</span>
-            </button>
-          )}
-          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
+        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
           <button
             onClick={onPrevMonth}
             className="p-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-stone-600"
@@ -389,162 +319,133 @@ export function Calendar({
           >
             <ChevronRight size={20} />
           </button>
-          </div>
         </div>
       </div>
 
-      {/* Exportable area: grid + legend + summary */}
-      <div ref={exportRef}>
-        {/* Calendar grid with swipe support */}
-        <div
-          ref={gridRef}
-          role="grid"
-          aria-label={currentDate.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-          })}
-          onKeyDown={handleGridKeyDown}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          className={`grid gap-1.5 sm:gap-2 mb-2 ${isSwiping ? "" : "transition-transform duration-200"} ${showWeekNumbers ? "grid-cols-[auto_repeat(7,1fr)]" : "grid-cols-7"}`}
-          style={{
-            transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined,
-          }}
-        >
-          {/* Header row */}
-          {showWeekNumbers && (
-            <div
-              role="columnheader"
-              className="text-center text-[0.6rem] sm:text-xs font-semibold text-stone-300 uppercase tracking-wider py-2"
-            >
-              Wk
-            </div>
-          )}
-          {dayLabels.map((d) => (
-            <div
-              key={d}
-              role="columnheader"
-              className="text-center text-xs font-semibold text-stone-400 uppercase tracking-wider py-2"
-            >
-              {d}
-            </div>
-          ))}
+      {/* Calendar grid with swipe support */}
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={currentDate.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        })}
+        onKeyDown={handleGridKeyDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`grid grid-cols-7 gap-1.5 sm:gap-2 mb-2 ${isSwiping ? "" : "transition-transform duration-200"}`}
+        style={{
+          transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined,
+        }}
+      >
+        {DAY_LABELS.map((d) => (
+          <div
+            key={d}
+            role="columnheader"
+            className="text-center text-xs font-semibold text-stone-400 uppercase tracking-wider py-2"
+          >
+            {d}
+          </div>
+        ))}
 
-          {/* Calendar rows */}
-          {rows.map((row, rowIndex) => {
-            // Find first real day in this row for week number
-            const firstDayInRow = row.find((cell): cell is number => cell !== null);
-            const weekNumber = firstDayInRow
-              ? getISOWeekNumber(new Date(year, month, firstDayInRow))
-              : null;
+        {blanks.map((_, i) => (
+          <div key={`blank-${i}`} role="gridcell" className="aspect-square" />
+        ))}
 
-            return (
-              <div key={rowIndex} className={`grid gap-1.5 sm:gap-2 col-span-full ${showWeekNumbers ? "grid-cols-[auto_repeat(7,1fr)]" : "grid-cols-7"}`}>
-                {showWeekNumbers && (
-                  <div className="flex items-center justify-center text-[0.6rem] sm:text-xs font-medium text-stone-300 w-6 sm:w-8">
-                    {weekNumber}
-                  </div>
-                )}
-                {row.map((cell, cellIndex) => {
-                  if (cell === null) {
-                    return (
-                      <div key={`empty-${rowIndex}-${cellIndex}`} role="gridcell" className="aspect-square" />
-                    );
-                  }
+        {isLoading
+          ? // Skeleton cells when loading
+            dayNumbers.map((day) => (
+              <div
+                key={day}
+                role="gridcell"
+                className="aspect-square rounded-2xl bg-stone-100 animate-pulse"
+              />
+            ))
+          : dayNumbers.map((day) => {
+              const date = new Date(year, month, day);
+              const dayEntries =
+                entryMap.get(`${year}-${month}-${day}`) ?? [];
+              const selected = isSelected(day);
+              const today = isTodayDate(date);
+              const hasEntry = dayEntries.length > 0;
+              const isPast =
+                date < new Date(new Date().setHours(0, 0, 0, 0));
+              const missed =
+                showMissedDays && isPast && !hasEntry && !today;
 
-                  if (isLoading) {
-                    return (
-                      <div
-                        key={cell}
-                        role="gridcell"
-                        className="aspect-square rounded-2xl bg-stone-100 animate-pulse"
-                      />
-                    );
-                  }
+              return (
+                <DayCell
+                  key={day}
+                  day={day}
+                  year={year}
+                  month={month}
+                  dayEntries={dayEntries}
+                  selected={selected}
+                  today={today}
+                  missed={missed}
+                  focused={focusedDay === day}
+                  interactive={!!onDayClick}
+                  displayMode={displayMode}
+                  isStreakDay={streakDays.has(`${year}-${month}-${day}`)}
+                  onDayClick={onDayClick}
+                  onFocus={setFocusedDay}
+                />
+              );
+            })}
+      </div>
 
-                  const date = new Date(year, month, cell);
-                  const dayEntries = entryMap.get(`${year}-${month}-${cell}`) ?? [];
-                  const selected = isSelected(cell);
-                  const today = isTodayDate(date);
-                  const hasEntry = dayEntries.length > 0;
-                  const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
-                  const missed = showMissedDays && isPast && !hasEntry && !today;
-
-                  return (
-                    <DayCell
-                      key={cell}
-                      day={cell}
-                      year={year}
-                      month={month}
-                      dayEntries={dayEntries}
-                      selected={selected}
-                      today={today}
-                      missed={missed}
-                      focused={focusedDay === cell}
-                      interactive={!!onDayClick}
-                      displayMode={displayMode}
-                      isStreakDay={streakDays.has(`${year}-${month}-${cell}`)}
-                      onDayClick={onDayClick}
-                      onFocus={setFocusedDay}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Legend + Month summary */}
-        <div className="mt-4 space-y-1">
-          <div className="flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
-            {displayMode === "HEATMAP" ? (
+      {/* Legend */}
+      <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
+        {displayMode === "HEATMAP" ? (
+          // Heatmap gradient legend
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span>Less</span>
+            <div className="w-2.5 h-2.5 rounded-sm bg-stone-100 border border-stone-200" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-100/70" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-300/60" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/50" />
+            <span>More</span>
+          </div>
+        ) : (
+          <>
+            {showMissedDays && (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span>Less</span>
-                <div className="w-2.5 h-2.5 rounded-sm bg-stone-100 border border-stone-200" />
-                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-100/70" />
-                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-300/60" />
-                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/50" />
-                <span>More</span>
-              </div>
-            ) : (
-              <>
-                {showMissedDays && (
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
-                    <span>Missed</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span>Read</span>
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
                 </div>
-                {streakDays.size > 1 && (
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
-                    <span>Streak</span>
-                  </div>
-                )}
-                {onDayClick && (
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <div className="w-2 h-2 rounded-full bg-stone-900" />
-                    <span>Selected</span>
-                  </div>
-                )}
-              </>
+                <span>Missed</span>
+              </div>
             )}
-          </div>
-
-          {monthSummary && (
-            <div className="text-center text-xs text-stone-400">
-              <span className="font-semibold text-stone-600">
-                {monthSummary.daysWithEntries}/{monthSummary.denominator}
-              </span>{" "}
-              days read
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Read</span>
             </div>
-          )}
-        </div>
+            {streakDays.size > 1 && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
+                <span>Streak</span>
+              </div>
+            )}
+            {onDayClick && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-stone-900" />
+                <span>Selected</span>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Month summary */}
+      {monthSummary && (
+        <div className="mt-2 text-center text-xs text-stone-400">
+          <span className="font-semibold text-stone-600">
+            {monthSummary.daysWithEntries}/{monthSummary.denominator}
+          </span>{" "}
+          days read
+        </div>
+      )}
     </div>
   );
 }

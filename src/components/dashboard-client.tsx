@@ -30,8 +30,6 @@ interface DashboardClientProps {
   initialFriendsActivity: FriendsActivityEntry[];
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays: boolean;
-  weekStartDay: "SUNDAY" | "MONDAY";
-  showWeekNumbers: boolean;
   unreadNotificationCount: number;
 }
 
@@ -41,8 +39,6 @@ export function DashboardClient({
   initialFriendsActivity,
   calendarDisplayMode,
   showMissedDays,
-  weekStartDay,
-  showWeekNumbers,
   unreadNotificationCount,
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
@@ -219,8 +215,6 @@ export function DashboardClient({
               onMonthSelect={handleMonthSelect}
               displayMode={calendarDisplayMode}
               showMissedDays={showMissedDays}
-              weekStartDay={weekStartDay}
-              showWeekNumbers={showWeekNumbers}
             />
             <Stats stats={stats} />
           </div>
