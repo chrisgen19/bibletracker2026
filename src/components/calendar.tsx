@@ -350,7 +350,23 @@ export function Calendar({
           )}
         </div>
 
-        <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
+        <div className="flex items-center gap-2">
+          {onDayClick && (
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )}
+              <span className="hidden sm:inline">Share My Month</span>
+            </button>
+          )}
+          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
           <button
             onClick={onPrevMonth}
             className="p-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-stone-600"
@@ -373,6 +389,7 @@ export function Calendar({
           >
             <ChevronRight size={20} />
           </button>
+          </div>
         </div>
       </div>
 
@@ -478,77 +495,56 @@ export function Calendar({
           })}
         </div>
 
-        {/* Legend */}
-        <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
-          {displayMode === "HEATMAP" ? (
-            // Heatmap gradient legend
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span>Less</span>
-              <div className="w-2.5 h-2.5 rounded-sm bg-stone-100 border border-stone-200" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-emerald-100/70" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-emerald-300/60" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/50" />
-              <span>More</span>
-            </div>
-          ) : (
-            <>
-              {showMissedDays && (
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex flex-col items-center gap-0.5">
-                    <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
-                  </div>
-                  <span>Missed</span>
-                </div>
-              )}
+        {/* Legend + Month summary */}
+        <div className="mt-4 space-y-1">
+          <div className="flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
+            {displayMode === "HEATMAP" ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Read</span>
+                <span>Less</span>
+                <div className="w-2.5 h-2.5 rounded-sm bg-stone-100 border border-stone-200" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-100/70" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-300/60" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/50" />
+                <span>More</span>
               </div>
-              {streakDays.size > 1 && (
+            ) : (
+              <>
+                {showMissedDays && (
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+                    <span>Missed</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
-                  <span>Streak</span>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>Read</span>
                 </div>
-              )}
-              {onDayClick && (
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-2 h-2 rounded-full bg-stone-900" />
-                  <span>Selected</span>
-                </div>
-              )}
-            </>
+                {streakDays.size > 1 && (
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
+                    <span>Streak</span>
+                  </div>
+                )}
+                {onDayClick && (
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="w-2 h-2 rounded-full bg-stone-900" />
+                    <span>Selected</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {monthSummary && (
+            <div className="text-center text-xs text-stone-400">
+              <span className="font-semibold text-stone-600">
+                {monthSummary.daysWithEntries}/{monthSummary.denominator}
+              </span>{" "}
+              days read
+            </div>
           )}
         </div>
-
-        {/* Month summary */}
-        {monthSummary && (
-          <div className="mt-2 text-center text-xs text-stone-400">
-            <span className="font-semibold text-stone-600">
-              {monthSummary.daysWithEntries}/{monthSummary.denominator}
-            </span>{" "}
-            days read
-          </div>
-        )}
       </div>
-
-      {/* Export button — only on dashboard (when onDayClick is provided) */}
-      {onDayClick && (
-        <div className="mt-4 flex justify-center">
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isExporting ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Download size={14} />
-            )}
-            Share My Month
-          </button>
-        </div>
-      )}
     </div>
   );
 }
