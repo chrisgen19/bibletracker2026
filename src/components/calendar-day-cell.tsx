@@ -135,9 +135,9 @@ export function DayCell({
         </>
       )}
 
-      {/* Streak indicator — warm accent bar at the bottom of consecutive reading days */}
+      {/* Streak indicator — subtle gradient rising from bottom of cell */}
       {!selected && isStreakDay && hasEntry && (
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-3/5 h-[3px] rounded-full bg-amber-400/80" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-teal-200/40 via-teal-100/15 to-transparent pointer-events-none" />
       )}
 
       {/* Desktop tooltip — shows full reference on hover for any day with entries */}

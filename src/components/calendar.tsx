@@ -423,8 +423,8 @@ export function Calendar({
             </div>
             {streakDays.size > 0 && (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="relative w-4 h-3 rounded bg-emerald-50/50">
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/5 h-[3px] rounded-full bg-amber-400/80" />
+                <div className="relative w-4 h-3 rounded bg-emerald-50/50 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-teal-200/40 via-teal-100/15 to-transparent" />
                 </div>
                 <span>Streak</span>
               </div>
