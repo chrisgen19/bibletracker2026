@@ -77,6 +77,10 @@ export function DashboardClient({
     );
   };
 
+  const handleMonthSelect = (year: number, month: number) => {
+    setCurrentDate(new Date(year, month, 1));
+  };
+
   const handleToday = () => setCurrentDate(new Date());
 
   const handleDayClick = (day: number) => {
@@ -208,6 +212,7 @@ export function DashboardClient({
               onNextMonth={handleNextMonth}
               onToday={handleToday}
               onDayClick={handleDayClick}
+              onMonthSelect={handleMonthSelect}
               displayMode={calendarDisplayMode}
               showMissedDays={showMissedDays}
             />

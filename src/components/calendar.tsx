@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+"use client";
+
+import { useMemo, useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
-import { formatReferenceShort } from "@/lib/constants";
+import { DayCell } from "@/components/calendar-day-cell";
+import { MonthPicker } from "@/components/calendar-month-picker";
 
 /** Parse a date/datetime string as local time to avoid UTC timezone shift */
 const parseLocalDate = (dateStr: string): Date => {
@@ -10,7 +13,9 @@ const parseLocalDate = (dateStr: string): Date => {
 };
 
 /** Build a lookup map keyed by "YYYY-MM-DD" for O(1) access per cell */
-const buildEntryMap = (entries: ReadingEntry[]): Map<string, ReadingEntry[]> => {
+const buildEntryMap = (
+  entries: ReadingEntry[],
+): Map<string, ReadingEntry[]> => {
   const map = new Map<string, ReadingEntry[]>();
   for (const entry of entries) {
     const date = parseLocalDate(entry.date);
@@ -33,20 +38,25 @@ interface CalendarProps {
   onNextMonth: () => void;
   onToday?: () => void;
   onDayClick?: (day: number) => void;
+  onMonthSelect?: (year: number, month: number) => void;
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
   showMissedDays?: boolean;
+  isLoading?: boolean;
 }
 
-function isToday(date: Date) {
+const isTodayDate = (date: Date) => {
   const today = new Date();
   return (
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear()
   );
-}
+};
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Minimum horizontal swipe distance in pixels
+const SWIPE_THRESHOLD = 50;
 
 export function Calendar({
   currentDate,
@@ -56,8 +66,10 @@ export function Calendar({
   onNextMonth,
   onToday,
   onDayClick,
+  onMonthSelect,
   displayMode = "REFERENCES_WITH_DOTS",
   showMissedDays = true,
+  isLoading = false,
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -77,26 +89,149 @@ export function Calendar({
         selectedDate.getFullYear() === year
       : false;
 
+  // Keyboard navigation state
+  const [focusedDay, setFocusedDay] = useState<number | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Month picker state
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+
+  // Swipe gesture state
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+
+  const handleMonthPickerSelect = useCallback(
+    (y: number, m: number) => {
+      onMonthSelect?.(y, m);
+    },
+    [onMonthSelect],
+  );
+
+  // Focus a specific day cell in the DOM
+  const focusDayCell = (day: number) => {
+    const cell = gridRef.current?.querySelector(
+      `[data-day="${day}"]`,
+    ) as HTMLElement | null;
+    cell?.focus();
+  };
+
+  const handleGridKeyDown = (e: React.KeyboardEvent) => {
+    if (!onDayClick) return;
+
+    const current = focusedDay ?? 1;
+    let next = current;
+
+    switch (e.key) {
+      case "ArrowRight":
+        next = Math.min(current + 1, days);
+        break;
+      case "ArrowLeft":
+        next = Math.max(current - 1, 1);
+        break;
+      case "ArrowDown":
+        next = Math.min(current + 7, days);
+        break;
+      case "ArrowUp":
+        next = Math.max(current - 7, 1);
+        break;
+      case "Home":
+        next = 1;
+        break;
+      case "End":
+        next = days;
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        onDayClick(current);
+        return;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    setFocusedDay(next);
+    // Wait for React to re-render with updated tabIndex, then focus
+    requestAnimationFrame(() => focusDayCell(next));
+  };
+
+  // Swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    setIsSwiping(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    // Only treat as horizontal swipe if horizontal movement exceeds vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      setIsSwiping(true);
+      // Dampened offset for visual feedback (50% of actual movement)
+      setSwipeOffset(deltaX * 0.5);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartRef.current && isSwiping) {
+      if (swipeOffset > SWIPE_THRESHOLD) {
+        onPrevMonth();
+      } else if (swipeOffset < -SWIPE_THRESHOLD) {
+        onNextMonth();
+      }
+    }
+    touchStartRef.current = null;
+    setSwipeOffset(0);
+    setIsSwiping(false);
+  };
+
   return (
     <div className="bg-white rounded-[2rem] shadow-xl shadow-stone-200/50 p-6 sm:p-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-serif font-bold text-stone-900">
-          {currentDate.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-          })}
-        </h2>
+        {/* Clickable month/year header — opens month picker */}
+        <div className="relative">
+          <button
+            onClick={() => setShowMonthPicker((v) => !v)}
+            className="text-2xl font-serif font-bold text-stone-900 hover:text-stone-600 transition-colors cursor-pointer flex items-center gap-1.5"
+            aria-expanded={showMonthPicker}
+            aria-haspopup="dialog"
+          >
+            {currentDate.toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+            })}
+            <ChevronRight
+              size={16}
+              className={`transition-transform duration-200 text-stone-400 ${showMonthPicker ? "rotate-90" : ""}`}
+            />
+          </button>
+          {showMonthPicker && (
+            <MonthPicker
+              currentYear={year}
+              currentMonth={month}
+              onSelect={handleMonthPickerSelect}
+              onClose={() => setShowMonthPicker(false)}
+            />
+          )}
+        </div>
+
         <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl">
           <button
             onClick={onPrevMonth}
             className="p-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-stone-600"
+            aria-label="Previous month"
           >
             <ChevronLeft size={20} />
           </button>
           {onToday && (
             <button
               onClick={onToday}
-              className="px-3 text-xs font-bold text-stone-500 uppercase hover:text-stone-900"
+              className="bg-white rounded-lg px-3 py-1 shadow-sm text-xs font-bold text-stone-500 uppercase hover:text-stone-900 transition-colors"
             >
               Today
             </button>
@@ -104,16 +239,34 @@ export function Calendar({
           <button
             onClick={onNextMonth}
             className="p-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-stone-600"
+            aria-label="Next month"
           >
             <ChevronRight size={20} />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+      {/* Calendar grid with swipe support */}
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={currentDate.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        })}
+        onKeyDown={handleGridKeyDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`grid grid-cols-7 gap-1.5 sm:gap-2 mb-2 ${isSwiping ? "" : "transition-transform duration-200"}`}
+        style={{
+          transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined,
+        }}
+      >
         {DAY_LABELS.map((d) => (
           <div
             key={d}
+            role="columnheader"
             className="text-center text-xs font-semibold text-stone-400 uppercase tracking-wider py-2"
           >
             {d}
@@ -121,79 +274,67 @@ export function Calendar({
         ))}
 
         {blanks.map((_, i) => (
-          <div key={`blank-${i}`} className="aspect-square" />
+          <div key={`blank-${i}`} role="gridcell" className="aspect-square" />
         ))}
 
-        {dayNumbers.map((day) => {
-          const date = new Date(year, month, day);
-          const dayEntries = entryMap.get(`${year}-${month}-${day}`) ?? [];
-          const hasEntry = dayEntries.length > 0;
-          const selected = isSelected(day);
-          const today = isToday(date);
-          const firstEntry = dayEntries[0];
-          const additionalCount = dayEntries.length > 1 ? dayEntries.length - 1 : 0;
+        {isLoading
+          ? // Skeleton cells when loading
+            dayNumbers.map((day) => (
+              <div
+                key={day}
+                role="gridcell"
+                className="aspect-square rounded-2xl bg-stone-100 animate-pulse"
+              />
+            ))
+          : dayNumbers.map((day) => {
+              const date = new Date(year, month, day);
+              const dayEntries =
+                entryMap.get(`${year}-${month}-${day}`) ?? [];
+              const selected = isSelected(day);
+              const today = isTodayDate(date);
+              const hasEntry = dayEntries.length > 0;
+              const isPast =
+                date < new Date(new Date().setHours(0, 0, 0, 0));
+              const missed =
+                showMissedDays && isPast && !hasEntry && !today;
 
-          const DayTag = onDayClick ? "button" : "div";
-          const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
-          const missed = showMissedDays && isPast && !hasEntry && !today;
-
-          return (
-            <DayTag
-              key={day}
-              {...(onDayClick ? { onClick: () => onDayClick(day) } : {})}
-              className={`
-                relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all duration-300 px-1
-                ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10" : onDayClick ? "hover:bg-stone-100 text-stone-700" : "text-stone-700"}
-                ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
-                ${!selected && hasEntry ? "bg-emerald-50/50" : ""}
-                ${!selected && missed ? "bg-red-50/50" : ""}
-              `}
-            >
-              <span className={`text-sm ${selected ? "font-medium" : ""}`}>
-                {day}
-              </span>
-              {firstEntry && displayMode !== "DOTS_ONLY" && (
-                <>
-                  {/* Mobile: Book + Chapters only */}
-                  <span className={`sm:hidden text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
-                    {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 8)}
-                    {additionalCount > 0 && ` +${additionalCount}`}
-                  </span>
-                  {/* Desktop: Book + Chapters + Verses */}
-                  <span className={`hidden sm:inline text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}>
-                    {formatReferenceShort(firstEntry.book, firstEntry.chapters, firstEntry.verses, 10)}
-                    {additionalCount > 0 && ` +${additionalCount}`}
-                  </span>
-                </>
-              )}
-              {displayMode !== "REFERENCES_ONLY" && (
-                <div className="flex gap-0.5 mt-1 h-1.5">
-                  {dayEntries.slice(0, 3).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 h-1 rounded-full ${selected ? "bg-stone-500" : "bg-emerald-500"}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </DayTag>
-          );
-        })}
+              return (
+                <DayCell
+                  key={day}
+                  day={day}
+                  year={year}
+                  month={month}
+                  dayEntries={dayEntries}
+                  selected={selected}
+                  today={today}
+                  missed={missed}
+                  focused={focusedDay === day}
+                  interactive={!!onDayClick}
+                  displayMode={displayMode}
+                  onDayClick={onDayClick}
+                  onFocus={setFocusedDay}
+                />
+              );
+            })}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-6 text-xs text-stone-500">
+      {/* Legend */}
+      <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
         {showMissedDays && (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+              <div className="w-2.5 h-0.5 rounded-full bg-red-300" />
+            </div>
             <span>Missed</span>
           </div>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
           <span>Read</span>
         </div>
         {onDayClick && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="w-2 h-2 rounded-full bg-stone-900" />
             <span>Selected</span>
           </div>
