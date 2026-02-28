@@ -138,7 +138,7 @@ export async function toggleProfilePrivacy() {
   return { success: true, isProfilePublic: newValue };
 }
 
-export async function updateCalendarDisplayMode(mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY") {
+export async function updateCalendarDisplayMode(mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP") {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 

@@ -80,7 +80,7 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
     initialProfile.isProfilePublic
   );
   const [calendarDisplayMode, setCalendarDisplayMode] = useState<
-    "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY"
+    "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP"
   >(initialProfile.calendarDisplayMode);
   const [showMissedDays, setShowMissedDays] = useState(
     initialProfile.showMissedDays
@@ -204,7 +204,7 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
   };
 
   const handleCalendarDisplayModeChange = (
-    mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY"
+    mode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP"
   ) => {
     setCalendarDisplayMode(mode);
 
@@ -760,6 +760,38 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                             </p>
                           </div>
                           {calendarDisplayMode === "REFERENCES_ONLY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Heatmap */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCalendarDisplayModeChange("HEATMAP")
+                        }
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            calendarDisplayMode === "HEATMAP"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Heatmap
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Color intensity shows how many entries each day has — darker means more reading
+                            </p>
+                          </div>
+                          {calendarDisplayMode === "HEATMAP" && (
                             <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
                           )}
                         </div>

@@ -49,7 +49,7 @@ interface CalendarProps {
   onToday?: () => void;
   onDayClick?: (day: number) => void;
   onMonthSelect?: (year: number, month: number) => void;
-  displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays?: boolean;
   isLoading?: boolean;
 }
@@ -88,6 +88,72 @@ export function Calendar({
 
   // Pre-compute entry lookup map — O(1) per cell instead of O(n) filtering
   const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
+
+  // Compute current reading streak as a Set of "YYYY-M-D" keys
+  const streakDays = useMemo(() => {
+    const set = new Set<string>();
+    if (entries.length === 0) return set;
+
+    // Collect unique date timestamps from all entries
+    const uniqueTimestamps = new Set<number>();
+    for (const entry of entries) {
+      const d = parseLocalDate(entry.date);
+      uniqueTimestamps.add(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime());
+    }
+
+    // Sort descending (most recent first)
+    const sorted = Array.from(uniqueTimestamps).sort((a, b) => b - a);
+
+    const today = new Date();
+    const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const yesterdayMs = todayMs - 86_400_000;
+
+    // Streak must start from today or yesterday
+    if (sorted[0] !== todayMs && sorted[0] !== yesterdayMs) return set;
+
+    // Walk backwards through consecutive days
+    let expected = sorted[0];
+    for (const ts of sorted) {
+      if (ts !== expected) break;
+      const d = new Date(ts);
+      set.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+      expected = ts - 86_400_000;
+    }
+
+    return set;
+  }, [entries]);
+
+  // Month summary: count of days with entries vs. total relevant days
+  const monthSummary = useMemo(() => {
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const displayYear = currentDate.getFullYear();
+    const displayMonth = currentDate.getMonth();
+    const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+
+    // Future month — hide summary
+    if (displayYear > todayYear || (displayYear === todayYear && displayMonth > todayMonth)) {
+      return null;
+    }
+
+    // Count unique days in displayed month that have entries
+    const daysWithReading = new Set<number>();
+    for (const entry of entries) {
+      const d = parseLocalDate(entry.date);
+      if (d.getFullYear() === displayYear && d.getMonth() === displayMonth) {
+        daysWithReading.add(d.getDate());
+      }
+    }
+
+    // Denominator: current month → today's date, past months → full month days
+    const denominator =
+      displayYear === todayYear && displayMonth === todayMonth
+        ? today.getDate()
+        : daysInMonth;
+
+    return { daysWithEntries: daysWithReading.size, denominator };
+  }, [entries, currentDate]);
 
   const blanks = Array(firstDay).fill(null);
   const dayNumbers = Array.from({ length: days }, (_, i) => i + 1);
@@ -321,6 +387,7 @@ export function Calendar({
                   focused={focusedDay === day}
                   interactive={!!onDayClick}
                   displayMode={displayMode}
+                  isStreakDay={streakDays.has(`${year}-${month}-${day}`)}
                   onDayClick={onDayClick}
                   onFocus={setFocusedDay}
                 />
@@ -330,25 +397,55 @@ export function Calendar({
 
       {/* Legend */}
       <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-[0.65rem] sm:text-xs text-stone-500">
-        {showMissedDays && (
+        {displayMode === "HEATMAP" ? (
+          // Heatmap gradient legend
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+            <span>Less</span>
+            <div className="w-2.5 h-2.5 rounded-sm bg-stone-100 border border-stone-200" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-100/70" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-300/60" />
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500/50" />
+            <span>More</span>
+          </div>
+        ) : (
+          <>
+            {showMissedDays && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
+                </div>
+                <span>Missed</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Read</span>
             </div>
-            <span>Missed</span>
-          </div>
-        )}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Read</span>
-        </div>
-        {onDayClick && (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-2 h-2 rounded-full bg-stone-900" />
-            <span>Selected</span>
-          </div>
+            {streakDays.size > 1 && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
+                <span>Streak</span>
+              </div>
+            )}
+            {onDayClick && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-2 h-2 rounded-full bg-stone-900" />
+                <span>Selected</span>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Month summary */}
+      {monthSummary && (
+        <div className="mt-2 text-center text-xs text-stone-400">
+          <span className="font-semibold text-stone-600">
+            {monthSummary.daysWithEntries}/{monthSummary.denominator}
+          </span>{" "}
+          days read
+        </div>
+      )}
     </div>
   );
 }

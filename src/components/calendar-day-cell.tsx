@@ -13,10 +13,19 @@ interface DayCellProps {
   missed: boolean;
   focused: boolean;
   interactive: boolean;
-  displayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  displayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
+  isStreakDay: boolean;
   onDayClick?: (day: number) => void;
   onFocus?: (day: number) => void;
 }
+
+/** Return a Tailwind bg class based on entry count for heatmap mode */
+const getHeatmapBg = (count: number): string => {
+  if (count === 0) return "";
+  if (count === 1) return "bg-emerald-100/70";
+  if (count === 2) return "bg-emerald-300/60";
+  return "bg-emerald-500/50";
+};
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -32,6 +41,7 @@ export function DayCell({
   focused,
   interactive,
   displayMode,
+  isStreakDay,
   onDayClick,
   onFocus,
   year,
@@ -70,9 +80,10 @@ export function DayCell({
         group relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all duration-300 px-1
         ${selected ? "bg-stone-900 text-white shadow-lg scale-105 z-10 ring-2 ring-stone-900/20" : interactive ? "hover:bg-stone-100 text-stone-700" : "text-stone-700"}
         ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
-        ${!selected && hasEntry ? "bg-emerald-50/50" : ""}
-        ${!selected && missed ? "bg-red-50/50" : ""}
-        ${focused && !selected ? "ring-2 ring-stone-400" : ""}
+        ${!selected && hasEntry ? (displayMode === "HEATMAP" ? getHeatmapBg(dayEntries.length) : "bg-emerald-50/50") : ""}
+        ${!selected && missed && displayMode !== "HEATMAP" ? "bg-red-50/50" : ""}
+        ${!selected && isStreakDay && hasEntry ? "ring-2 ring-emerald-400/60 shadow-[0_0_8px_rgba(16,185,129,0.2)]" : ""}
+        ${focused && !selected && !(isStreakDay && hasEntry) ? "ring-2 ring-stone-400" : ""}
         outline-none
       `}
     >
@@ -81,43 +92,48 @@ export function DayCell({
       </span>
 
       {/* Missed day indicator — small red dash below the number */}
-      {missed && !selected && (
+      {missed && !selected && displayMode !== "HEATMAP" && (
         <div className="w-3 h-0.5 rounded-full bg-red-300 mt-0.5" />
       )}
 
-      {firstEntry && displayMode !== "DOTS_ONLY" && (
+      {/* Hide reference text and dots in heatmap mode — color IS the indicator */}
+      {displayMode !== "HEATMAP" && (
         <>
-          {/* Mobile: Book + Chapters only */}
-          <span
-            className={`sm:hidden text-[0.65rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
-          >
-            {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 8)}
-            {additionalCount > 0 && ` +${additionalCount}`}
-          </span>
-          {/* Desktop: Book + Chapters + Verses */}
-          <span
-            className={`hidden sm:inline text-xs leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
-          >
-            {formatReferenceShort(
-              firstEntry.book,
-              firstEntry.chapters,
-              firstEntry.verses,
-              10,
-            )}
-            {additionalCount > 0 && ` +${additionalCount}`}
-          </span>
-        </>
-      )}
+          {firstEntry && displayMode !== "DOTS_ONLY" && (
+            <>
+              {/* Mobile: Book + Chapters only */}
+              <span
+                className={`sm:hidden text-[0.65rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
+              >
+                {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 8)}
+                {additionalCount > 0 && ` +${additionalCount}`}
+              </span>
+              {/* Desktop: Book + Chapters + Verses */}
+              <span
+                className={`hidden sm:inline text-xs leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
+              >
+                {formatReferenceShort(
+                  firstEntry.book,
+                  firstEntry.chapters,
+                  firstEntry.verses,
+                  10,
+                )}
+                {additionalCount > 0 && ` +${additionalCount}`}
+              </span>
+            </>
+          )}
 
-      {displayMode !== "REFERENCES_ONLY" && (
-        <div className="flex gap-0.5 mt-1 h-1.5">
-          {dayEntries.slice(0, 3).map((_, i) => (
-            <div
-              key={i}
-              className={`w-1 h-1 rounded-full ${selected ? "bg-stone-500" : "bg-emerald-500"}`}
-            />
-          ))}
-        </div>
+          {displayMode !== "REFERENCES_ONLY" && (
+            <div className="flex gap-0.5 mt-1 h-1.5">
+              {dayEntries.slice(0, 3).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1 h-1 rounded-full ${selected ? "bg-stone-500" : "bg-emerald-500"}`}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Desktop tooltip — shows full reference on hover for any day with entries */}

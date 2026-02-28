@@ -22,6 +22,7 @@ enum CalendarDisplayMode {
   DOTS_ONLY
   REFERENCES_WITH_DOTS
   REFERENCES_ONLY
+  HEATMAP
 }
 
 model User {
