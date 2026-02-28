@@ -13,21 +13,24 @@ export const authConfig = {
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      console.log("[AUTH] JWT callback - user:", !!user, "token:", !!token);
       if (user) {
-        console.log("[AUTH] JWT callback - adding user id to token:", user.id);
         token.id = user.id;
+        token.emailVerified = user.emailVerified ?? null;
       }
       if (trigger === "update" && session?.name) {
         token.name = session.name;
       }
+      // Allow refreshing emailVerified status from session update
+      if (trigger === "update" && session?.emailVerified !== undefined) {
+        token.emailVerified = session.emailVerified;
+      }
       return token;
     },
     async session({ session, token }) {
-      console.log("[AUTH] Session callback - token id:", token.id);
       if (session.user && token.id) {
         session.user.id = token.id as string;
       }
+      session.user.emailVerified = (token.emailVerified as Date) ?? null;
       return session;
     },
   },
