@@ -421,9 +421,11 @@ export function Calendar({
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>Read</span>
             </div>
-            {streakDays.size > 1 && (
+            {streakDays.size > 0 && (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-50 ring-2 ring-emerald-400/60" />
+                <div className="relative w-4 h-3 rounded bg-emerald-50/50">
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/5 h-[3px] rounded-full bg-amber-400/80" />
+                </div>
                 <span>Streak</span>
               </div>
             )}
