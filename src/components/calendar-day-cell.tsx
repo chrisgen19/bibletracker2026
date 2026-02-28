@@ -100,12 +100,11 @@ export function DayCell({
         <>
           {firstEntry && displayMode !== "DOTS_ONLY" && (
             <>
-              {/* Mobile: Book + Chapters only */}
+              {/* Mobile: Book + Chapter only, no +count — tap for full details */}
               <span
-                className={`sm:hidden text-[0.65rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
+                className={`sm:hidden text-[0.6rem] leading-tight mt-0.5 ${selected ? "text-stone-300" : "text-stone-500"}`}
               >
-                {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 8)}
-                {additionalCount > 0 && ` +${additionalCount}`}
+                {formatReferenceShort(firstEntry.book, firstEntry.chapters, "", 7)}
               </span>
               {/* Desktop: Book + Chapters + Verses */}
               <span
