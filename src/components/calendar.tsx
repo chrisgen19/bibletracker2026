@@ -3,9 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
 import { formatReferenceShort } from "@/lib/constants";
 
-/** Parse a date string as local time to avoid UTC timezone shift */
+/** Parse a date/datetime string as local time to avoid UTC timezone shift */
 const parseLocalDate = (dateStr: string): Date => {
-  const [y, m, d] = dateStr.split("-").map(Number);
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
   return new Date(y, m - 1, d);
 };
 
