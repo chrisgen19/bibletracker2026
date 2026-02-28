@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import {
   BookOpen,
   Eye,
@@ -90,19 +89,8 @@ export default function SignupPage() {
         return;
       }
 
-      // Auto sign in after successful registration
-      const signInResult = await signIn("credentials", {
-        email: parsed.data.email,
-        password: parsed.data.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        setServerError("Account created but failed to sign in. Please log in manually.");
-        return;
-      }
-
-      router.push("/dashboard");
+      // Redirect to verify-email page
+      router.push(`/verify-email?email=${encodeURIComponent(parsed.data.email)}`);
     } catch {
       setServerError("Network error. Please try again.");
     } finally {

@@ -20,6 +20,8 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const registered = searchParams.get("registered");
+  const verified = searchParams.get("verified");
+  const reset = searchParams.get("reset");
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -118,6 +120,18 @@ export function LoginForm() {
             </div>
           )}
 
+          {verified && (
+            <div className="bg-emerald-50 text-emerald-700 text-sm rounded-2xl px-4 py-3 mb-6 border border-emerald-100">
+              Email verified successfully! You can now sign in.
+            </div>
+          )}
+
+          {reset && (
+            <div className="bg-emerald-50 text-emerald-700 text-sm rounded-2xl px-4 py-3 mb-6 border border-emerald-100">
+              Password reset successfully! Sign in with your new password.
+            </div>
+          )}
+
           {serverError && (
             <div className="bg-red-50 text-red-700 text-sm rounded-2xl px-4 py-3 mb-6 border border-red-100">
               {serverError}
@@ -182,6 +196,14 @@ export function LoginForm() {
                   {errors.password[0]}
                 </p>
               )}
+              <div className="flex justify-end mt-1.5">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-emerald-600 font-medium hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {/* Submit */}
