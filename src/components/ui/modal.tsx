@@ -1,3 +1,6 @@
+"use client";
+
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
@@ -10,7 +13,8 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   if (!isOpen) return null;
 
-  return (
+  // Portal to document.body to escape transform stacking contexts (e.g. bottom sheet)
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-6 border-b border-stone-100">
@@ -26,6 +30,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         </div>
         <div className="p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
