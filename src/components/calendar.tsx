@@ -231,7 +231,7 @@ export function Calendar({
           {onToday && (
             <button
               onClick={onToday}
-              className="bg-white rounded-lg px-3 py-1 shadow-sm text-xs font-bold text-stone-500 uppercase hover:text-stone-900 transition-colors"
+              className="px-3 py-2 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow text-xs font-bold text-stone-500 uppercase hover:text-stone-900"
             >
               Today
             </button>
@@ -324,7 +324,6 @@ export function Calendar({
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="flex flex-col items-center gap-0.5">
               <div className="w-2 h-2 rounded-full bg-red-50 ring-1 ring-red-200" />
-              <div className="w-2.5 h-0.5 rounded-full bg-red-300" />
             </div>
             <span>Missed</span>
           </div>
