@@ -28,7 +28,7 @@ interface DashboardClientProps {
   username: string;
   initialEntries: ReadingEntry[];
   initialFriendsActivity: FriendsActivityEntry[];
-  calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
+  calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays: boolean;
   unreadNotificationCount: number;
 }
