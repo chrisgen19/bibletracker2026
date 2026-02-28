@@ -25,6 +25,11 @@ enum CalendarDisplayMode {
   HEATMAP
 }
 
+enum WeekStartDay {
+  SUNDAY
+  MONDAY
+}
+
 model User {
   id              String    @id
   email           String    @unique
@@ -41,6 +46,7 @@ model User {
   isProfilePublic     Boolean             @default(true) @map("is_profile_public")
   calendarDisplayMode CalendarDisplayMode @default(REFERENCES_WITH_DOTS) @map("calendar_display_mode")
   showMissedDays      Boolean             @default(true) @map("show_missed_days")
+  weekStartDay        WeekStartDay        @default(SUNDAY) @map("week_start_day")
   termsAccepted       Boolean             @default(false) @map("terms_accepted")
   termsAcceptedAt     DateTime?           @map("terms_accepted_at")
   createdAt           DateTime            @default(now()) @map("created_at")

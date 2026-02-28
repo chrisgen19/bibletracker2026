@@ -51,6 +51,7 @@ interface CalendarProps {
   onMonthSelect?: (year: number, month: number) => void;
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays?: boolean;
+  weekStartDay?: "SUNDAY" | "MONDAY";
   isLoading?: boolean;
 }
 
@@ -79,12 +80,21 @@ export function Calendar({
   onMonthSelect,
   displayMode = "REFERENCES_WITH_DOTS",
   showMissedDays = true,
+  weekStartDay = "SUNDAY",
   isLoading = false,
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const days = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
+  const rawFirstDay = new Date(year, month, 1).getDay();
+  // Shift offset so Monday=0 when week starts on Monday
+  const firstDay = weekStartDay === "MONDAY"
+    ? (rawFirstDay + 6) % 7
+    : rawFirstDay;
+
+  const dayLabels = weekStartDay === "MONDAY"
+    ? [...DAY_LABELS.slice(1), DAY_LABELS[0]]
+    : DAY_LABELS;
 
   // Pre-compute entry lookup map — O(1) per cell instead of O(n) filtering
   const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
@@ -339,7 +349,7 @@ export function Calendar({
           transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined,
         }}
       >
-        {DAY_LABELS.map((d) => (
+        {dayLabels.map((d) => (
           <div
             key={d}
             role="columnheader"

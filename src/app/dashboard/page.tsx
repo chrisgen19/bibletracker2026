@@ -23,7 +23,7 @@ export default async function DashboardPage() {
       getFriendsActivity(),
       prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { username: true, calendarDisplayMode: true, showMissedDays: true },
+        select: { username: true, calendarDisplayMode: true, showMissedDays: true, weekStartDay: true },
       }),
       getUnreadNotificationCount(),
     ]);
@@ -44,6 +44,7 @@ export default async function DashboardPage() {
       initialFriendsActivity={friendsActivity}
       calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}
       showMissedDays={user?.showMissedDays ?? true}
+      weekStartDay={user?.weekStartDay ?? "SUNDAY"}
       unreadNotificationCount={unreadNotificationCount}
     />
   );
