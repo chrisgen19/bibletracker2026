@@ -15,13 +15,8 @@ import "@blocknote/shadcn/style.css";
 import { parseNotesJson, plainTextToBlocks } from "@/lib/notes";
 
 // Same restricted schema as notes-editor-overlay.tsx
-const {
-  audio: _audio,
-  video: _video,
-  image: _image,
-  file: _file,
-  ...allowedBlockSpecs
-} = defaultBlockSpecs;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { audio, video, image, file, ...allowedBlockSpecs } = defaultBlockSpecs;
 
 const schema = BlockNoteSchema.create({
   blockSpecs: allowedBlockSpecs,
