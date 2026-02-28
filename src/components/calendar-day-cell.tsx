@@ -120,8 +120,8 @@ export function DayCell({
         </div>
       )}
 
-      {/* Desktop tooltip for days with 2+ entries */}
-      {dayEntries.length >= 2 && (
+      {/* Desktop tooltip — shows full reference on hover for any day with entries */}
+      {dayEntries.length >= 1 && (
         <div className="hidden sm:group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
           <div className="bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
             {dayEntries.map((entry, i) => (
