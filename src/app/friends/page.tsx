@@ -7,7 +7,6 @@ import {
   getFollowCounts,
   getUnreadNotificationCount,
 } from "./actions";
-import { computeStats } from "@/lib/stats";
 import { FriendsClient } from "@/components/friends-client";
 import type { ReadingEntry } from "@/lib/types";
 
@@ -36,14 +35,12 @@ export default async function FriendsPage() {
     notes: e.notes,
   }));
 
-  const navbarStats = computeStats(entries);
-
   return (
     <FriendsClient
       initialFollowing={following}
       initialFollowers={followers}
       stats={friendStats}
-      navbarStats={navbarStats}
+      entries={entries}
       unreadNotificationCount={unreadNotificationCount}
     />
   );

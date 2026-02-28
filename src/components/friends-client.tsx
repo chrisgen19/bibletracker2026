@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { Search, Users, UserX, UserCheck } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -10,7 +10,8 @@ import {
   followUser,
   unfollowUser,
 } from "@/app/friends/actions";
-import type { FriendUser, Stats } from "@/lib/types";
+import { computeStats } from "@/lib/stats";
+import type { FriendUser, ReadingEntry } from "@/lib/types";
 
 type Tab = "following" | "followers";
 
@@ -18,7 +19,7 @@ interface FriendsClientProps {
   initialFollowing: FriendUser[];
   initialFollowers: FriendUser[];
   stats: { followingCount: number; followerCount: number };
-  navbarStats: Stats;
+  entries: ReadingEntry[];
   unreadNotificationCount: number;
 }
 
@@ -26,9 +27,10 @@ export function FriendsClient({
   initialFollowing,
   initialFollowers,
   stats,
-  navbarStats,
+  entries,
   unreadNotificationCount,
 }: FriendsClientProps) {
+  const navbarStats = useMemo(() => computeStats(entries), [entries]);
   const [isPending, startTransition] = useTransition();
   const [following, setFollowing] = useState(initialFollowing);
   const [followers, setFollowers] = useState(initialFollowers);
