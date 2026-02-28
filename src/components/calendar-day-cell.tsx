@@ -82,8 +82,7 @@ export function DayCell({
         ${!selected && today ? "bg-stone-100 font-bold ring-1 ring-stone-300" : ""}
         ${!selected && hasEntry ? (displayMode === "HEATMAP" ? getHeatmapBg(dayEntries.length) : "bg-emerald-50/50") : ""}
         ${!selected && missed && displayMode !== "HEATMAP" ? "bg-red-50/50" : ""}
-        ${!selected && isStreakDay && hasEntry ? "ring-2 ring-emerald-400/60 shadow-[0_0_8px_rgba(16,185,129,0.2)]" : ""}
-        ${focused && !selected && !(isStreakDay && hasEntry) ? "ring-2 ring-stone-400" : ""}
+        ${focused && !selected ? "ring-2 ring-stone-400" : ""}
         outline-none
       `}
     >
@@ -134,6 +133,11 @@ export function DayCell({
             </div>
           )}
         </>
+      )}
+
+      {/* Streak indicator — warm accent bar at the bottom of consecutive reading days */}
+      {!selected && isStreakDay && hasEntry && (
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-3/5 h-[3px] rounded-full bg-amber-400/80" />
       )}
 
       {/* Desktop tooltip — shows full reference on hover for any day with entries */}
