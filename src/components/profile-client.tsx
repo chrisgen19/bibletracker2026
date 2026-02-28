@@ -25,6 +25,8 @@ import {
   toggleProfilePrivacy,
   updateCalendarDisplayMode,
   updateShowMissedDays,
+  updateWeekStartDay,
+  updateShowWeekNumbers,
   type ProfileData,
 } from "@/app/profile/actions";
 import {
@@ -84,6 +86,12 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
   >(initialProfile.calendarDisplayMode);
   const [showMissedDays, setShowMissedDays] = useState(
     initialProfile.showMissedDays
+  );
+  const [weekStartDay, setWeekStartDay] = useState<"SUNDAY" | "MONDAY">(
+    initialProfile.weekStartDay
+  );
+  const [showWeekNumbers, setShowWeekNumbers] = useState(
+    initialProfile.showWeekNumbers
   );
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -199,6 +207,32 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
         toast.error(result.error);
       } else {
         toast.success("Missed days display updated");
+      }
+    });
+  };
+
+  const handleWeekStartDayChange = (day: "SUNDAY" | "MONDAY") => {
+    setWeekStartDay(day);
+
+    startTransition(async () => {
+      const result = await updateWeekStartDay(day);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Week start day updated");
+      }
+    });
+  };
+
+  const handleShowWeekNumbersChange = (show: boolean) => {
+    setShowWeekNumbers(show);
+
+    startTransition(async () => {
+      const result = await updateShowWeekNumbers(show);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Week numbers display updated");
       }
     });
   };
@@ -864,6 +898,150 @@ export function ProfileClient({ initialProfile }: ProfileClientProps) {
                             </p>
                           </div>
                           {!showMissedDays && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Week Start Day */}
+                  <div>
+                    <h3 className="font-medium text-stone-900 mb-3">
+                      Week Start Day
+                    </h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Choose which day of the week your calendar starts on.
+                    </p>
+                    <div className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => handleWeekStartDayChange("SUNDAY")}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            weekStartDay === "SUNDAY"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Sunday
+                              <span className="ml-2 text-xs text-emerald-600 font-semibold">
+                                (Default)
+                              </span>
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Start the week on Sunday (US convention)
+                            </p>
+                          </div>
+                          {weekStartDay === "SUNDAY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleWeekStartDayChange("MONDAY")}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            weekStartDay === "MONDAY"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Monday
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Start the week on Monday (ISO standard)
+                            </p>
+                          </div>
+                          {weekStartDay === "MONDAY" && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Week Numbers */}
+                  <div>
+                    <h3 className="font-medium text-stone-900 mb-3">
+                      Week Numbers
+                    </h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Show ISO week numbers on the left edge of the calendar.
+                    </p>
+                    <div className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => handleShowWeekNumbersChange(true)}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            showWeekNumbers
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Show Week Numbers
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Display ISO week numbers in the first column of the calendar
+                            </p>
+                          </div>
+                          {showWeekNumbers && (
+                            <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleShowWeekNumbersChange(false)}
+                        disabled={isPending}
+                        className={`
+                          w-full text-left p-4 rounded-xl border-2 transition-all
+                          ${
+                            !showWeekNumbers
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-stone-200 hover:border-stone-300"
+                          }
+                          ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        `}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-stone-900 mb-1">
+                              Hide Week Numbers
+                              <span className="ml-2 text-xs text-emerald-600 font-semibold">
+                                (Default)
+                              </span>
+                            </div>
+                            <p className="text-sm text-stone-600">
+                              Don&apos;t show week numbers on the calendar
+                            </p>
+                          </div>
+                          {!showWeekNumbers && (
                             <Check size={20} className="text-emerald-600 ml-4 flex-shrink-0" />
                           )}
                         </div>
