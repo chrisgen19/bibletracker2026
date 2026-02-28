@@ -18,6 +18,8 @@ export interface Stats {
   totalEntries: number;
   booksRead: number;
   currentStreak: number;
+  longestStreak: number;
+  readingDays: number;
 }
 
 export interface FriendUser {

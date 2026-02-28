@@ -248,6 +248,11 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
                   days
                 </span>
               </div>
+              {stats.longestStreak > 0 && (
+                <p className="text-xs text-emerald-600/60 mt-1">
+                  Best: {stats.longestStreak} days
+                </p>
+              )}
             </div>
           </div>
         </div>
