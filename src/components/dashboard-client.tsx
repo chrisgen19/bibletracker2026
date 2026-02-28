@@ -263,7 +263,7 @@ export function DashboardClient({
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar stats={stats} unreadCount={unreadNotificationCount} />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-44 lg:pb-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-56 lg:pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-6">
             <Calendar
@@ -335,7 +335,7 @@ export function DashboardClient({
       </BottomSheet>
 
       {/* Footer */}
-      <footer className="border-t border-stone-200 py-8 mt-16">
+      <footer className="hidden lg:block border-t border-stone-200 py-8 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-stone-400 text-sm">
             <BookOpen size={16} />
