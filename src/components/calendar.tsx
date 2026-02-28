@@ -1,6 +1,29 @@
+import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
 import { formatReferenceShort } from "@/lib/constants";
+
+/** Parse a date/datetime string as local time to avoid UTC timezone shift */
+const parseLocalDate = (dateStr: string): Date => {
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+/** Build a lookup map keyed by "YYYY-MM-DD" for O(1) access per cell */
+const buildEntryMap = (entries: ReadingEntry[]): Map<string, ReadingEntry[]> => {
+  const map = new Map<string, ReadingEntry[]>();
+  for (const entry of entries) {
+    const date = parseLocalDate(entry.date);
+    const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.push(entry);
+    } else {
+      map.set(key, [entry]);
+    }
+  }
+  return map;
+};
 
 interface CalendarProps {
   currentDate: Date;
@@ -12,17 +35,6 @@ interface CalendarProps {
   onDayClick?: (day: number) => void;
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY";
   showMissedDays?: boolean;
-}
-
-function getEntriesForDate(entries: ReadingEntry[], date: Date) {
-  return entries.filter((e) => {
-    const entryDate = new Date(e.date);
-    return (
-      entryDate.getDate() === date.getDate() &&
-      entryDate.getMonth() === date.getMonth() &&
-      entryDate.getFullYear() === date.getFullYear()
-    );
-  });
 }
 
 function isToday(date: Date) {
@@ -51,6 +63,9 @@ export function Calendar({
   const month = currentDate.getMonth();
   const days = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
+
+  // Pre-compute entry lookup map — O(1) per cell instead of O(n) filtering
+  const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
 
   const blanks = Array(firstDay).fill(null);
   const dayNumbers = Array.from({ length: days }, (_, i) => i + 1);
@@ -111,7 +126,7 @@ export function Calendar({
 
         {dayNumbers.map((day) => {
           const date = new Date(year, month, day);
-          const dayEntries = getEntriesForDate(entries, date);
+          const dayEntries = entryMap.get(`${year}-${month}-${day}`) ?? [];
           const hasEntry = dayEntries.length > 0;
           const selected = isSelected(day);
           const today = isToday(date);

@@ -37,13 +37,8 @@ import "@blocknote/shadcn/style.css";
 import { parseNotesJson, plainTextToBlocks, serializeNotes } from "@/lib/notes";
 
 // Restricted schema: exclude file-storage blocks (audio, video, image, file) since no S3 yet
-const {
-  audio: _audio,
-  video: _video,
-  image: _image,
-  file: _file,
-  ...allowedBlockSpecs
-} = defaultBlockSpecs;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { audio, video, image, file, ...allowedBlockSpecs } = defaultBlockSpecs;
 
 const schema = BlockNoteSchema.create({
   blockSpecs: allowedBlockSpecs,
