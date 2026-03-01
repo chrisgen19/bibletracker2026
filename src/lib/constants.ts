@@ -79,6 +79,30 @@ export const BOOK_ABBREVIATIONS: Record<string, string> = {
   "Revelation": "Rev",
 };
 
+import type { PrayerCategory } from "@/lib/types";
+
+export const PRAYER_CATEGORY_COLORS: Record<PrayerCategory, string> = {
+  PERSONAL: "bg-blue-50 text-blue-700",
+  FAMILY: "bg-rose-50 text-rose-700",
+  FRIENDS: "bg-violet-50 text-violet-700",
+  CHURCH: "bg-amber-50 text-amber-700",
+  MISSIONS: "bg-emerald-50 text-emerald-700",
+  HEALTH: "bg-red-50 text-red-700",
+  WORK: "bg-cyan-50 text-cyan-700",
+  OTHER: "bg-stone-100 text-stone-700",
+};
+
+export const PRAYER_CATEGORY_LABELS: Record<PrayerCategory, string> = {
+  PERSONAL: "Personal",
+  FAMILY: "Family",
+  FRIENDS: "Friends",
+  CHURCH: "Church",
+  MISSIONS: "Missions",
+  HEALTH: "Health",
+  WORK: "Work",
+  OTHER: "Other",
+};
+
 export function formatReferenceShort(book: string, chapters: string, verses: string, maxLength = 12): string {
   const abbrev = BOOK_ABBREVIATIONS[book] || book;
   let reference = `${abbrev} ${chapters}${verses ? `:${verses}` : ""}`;

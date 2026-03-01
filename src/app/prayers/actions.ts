@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateId } from "@/lib/ulid";
-import type { Prayer, PrayerFormData, PrayerCategory, PrayerStatus } from "@/lib/types";
+import { createPrayerSchema, answerPrayerSchema } from "@/lib/validations/prayer";
+import type { Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
 
 const serializePrayer = (p: {
   id: string;
@@ -40,7 +41,7 @@ function revalidate() {
 }
 
 export async function createPrayer(
-  formData: PrayerFormData,
+  formData: unknown,
   date: string,
 ): Promise<Prayer> {
   const session = await auth();
@@ -48,16 +49,26 @@ export async function createPrayer(
     throw new Error("Unauthorized");
   }
 
+  const parsed = createPrayerSchema.safeParse(formData);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid prayer data");
+  }
+
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) {
+    throw new Error("Invalid date");
+  }
+
   const prayer = await prisma.prayer.create({
     data: {
       id: generateId(),
       userId: session.user.id,
-      date: new Date(date),
-      title: formData.title,
-      content: formData.content,
-      category: formData.category,
-      scriptureReference: formData.scriptureReference || null,
-      isPublic: formData.isPublic,
+      date: parsedDate,
+      title: parsed.data.title,
+      content: parsed.data.content,
+      category: parsed.data.category,
+      scriptureReference: parsed.data.scriptureReference || null,
+      isPublic: parsed.data.isPublic,
     },
   });
 
@@ -72,7 +83,9 @@ export async function getPrayers(filters?: {
   const session = await auth();
   if (!session?.user?.id) return [];
 
-  const where: Record<string, unknown> = { userId: session.user.id };
+  const where: { userId: string; status?: PrayerStatus; category?: PrayerCategory } = {
+    userId: session.user.id,
+  };
   if (filters?.status) where.status = filters.status;
   if (filters?.category) where.category = filters.category;
 
@@ -86,21 +99,26 @@ export async function getPrayers(filters?: {
 
 export async function updatePrayer(
   prayerId: string,
-  formData: PrayerFormData,
+  formData: unknown,
 ): Promise<Prayer> {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
 
+  const parsed = createPrayerSchema.safeParse(formData);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid prayer data");
+  }
+
   const prayer = await prisma.prayer.update({
     where: { id: prayerId, userId: session.user.id },
     data: {
-      title: formData.title,
-      content: formData.content,
-      category: formData.category,
-      scriptureReference: formData.scriptureReference || null,
-      isPublic: formData.isPublic,
+      title: parsed.data.title,
+      content: parsed.data.content,
+      category: parsed.data.category,
+      scriptureReference: parsed.data.scriptureReference || null,
+      isPublic: parsed.data.isPublic,
     },
   });
 
@@ -130,12 +148,17 @@ export async function markPrayerAnswered(
     throw new Error("Unauthorized");
   }
 
+  const parsed = answerPrayerSchema.safeParse({ answeredNote });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid note");
+  }
+
   const prayer = await prisma.prayer.update({
     where: { id: prayerId, userId: session.user.id },
     data: {
       status: "ANSWERED",
       answeredAt: new Date(),
-      answeredNote: answeredNote || null,
+      answeredNote: parsed.data.answeredNote || null,
     },
   });
 

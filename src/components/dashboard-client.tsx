@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -12,12 +12,13 @@ import { EntryForm } from "@/components/entry-form";
 import { PrayerForm } from "@/components/prayer-form";
 import { FabDropdown } from "@/components/fab-dropdown";
 import { useBottomSheet } from "@/hooks/use-bottom-sheet";
+import { usePrayers } from "@/hooks/use-prayers";
+import { parseLocalDate } from "@/lib/date-utils";
 import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
-import { createPrayer, updatePrayer, deletePrayer } from "@/app/prayers/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
-import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer, PrayerFormData } from "@/lib/types";
+import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer } from "@/lib/types";
 
 function MobileSheetHeader({
   selectedDate,
@@ -76,7 +77,7 @@ function MobileSheetHeader({
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
   return entries.filter((e) => {
-    const entryDate = new Date(e.date);
+    const entryDate = parseLocalDate(e.date);
     return (
       entryDate.getDate() === date.getDate() &&
       entryDate.getMonth() === date.getMonth() &&
@@ -95,14 +96,6 @@ interface DashboardClientProps {
   initialPrayers?: Prayer[];
 }
 
-const DEFAULT_PRAYER_FORM: PrayerFormData = {
-  title: "",
-  content: "",
-  category: "PERSONAL",
-  scriptureReference: "",
-  isPublic: false,
-};
-
 export function DashboardClient({
   username,
   initialEntries,
@@ -113,15 +106,29 @@ export function DashboardClient({
   initialPrayers = [],
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
-  const [prayers, setPrayers] = useState(initialPrayers);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
-  const [isPrayerModalOpen, setIsPrayerModalOpen] = useState(false);
-  const [editingPrayerId, setEditingPrayerId] = useState<string | null>(null);
-  const [prayerFormData, setPrayerFormData] = useState<PrayerFormData>(DEFAULT_PRAYER_FORM);
   const [, startTransition] = useTransition();
+
+  const getDateForCreate = useCallback(
+    () => selectedDate.toISOString(),
+    [selectedDate],
+  );
+
+  const {
+    prayers,
+    isModalOpen: isPrayerModalOpen,
+    editingPrayerId,
+    formData: prayerFormData,
+    setFormData: setPrayerFormData,
+    handleOpenModal: handleOpenPrayerModal,
+    handleCloseModal: handleClosePrayerModal,
+    handleEditPrayer,
+    handleSavePrayer,
+    handleDeletePrayer,
+  } = usePrayers({ initialPrayers, getDateForCreate });
 
   const prayerDates = useMemo(() => prayers.map((p) => p.date), [prayers]);
   // Default to the last book read so users can continue where they left off
@@ -275,113 +282,11 @@ export function DashboardClient({
     });
   };
 
-  const handleClosePrayerModal = () => {
-    setIsPrayerModalOpen(false);
-    setEditingPrayerId(null);
-    setPrayerFormData(DEFAULT_PRAYER_FORM);
-  };
-
-  const handleSavePrayer = () => {
-    const data = { ...prayerFormData };
-
-    if (editingPrayerId) {
-      // Optimistic update for edit
-      const originalPrayer = prayers.find((p) => p.id === editingPrayerId);
-      setPrayers((prev) =>
-        prev.map((p) => (p.id === editingPrayerId ? { ...p, ...data } : p))
-      );
-      handleClosePrayerModal();
-      toast.success("Prayer updated");
-
-      startTransition(async () => {
-        try {
-          const saved = await updatePrayer(editingPrayerId, data);
-          setPrayers((prev) =>
-            prev.map((p) => (p.id === saved.id ? saved : p))
-          );
-        } catch {
-          if (originalPrayer) {
-            setPrayers((prev) =>
-              prev.map((p) => (p.id === originalPrayer.id ? originalPrayer : p))
-            );
-          }
-          toast.error("Failed to update prayer");
-        }
-      });
-    } else {
-      const dateStr = selectedDate.toISOString();
-
-      // Optimistic: add prayer with temp ID
-      const tempPrayer: Prayer = {
-        id: `temp-${Date.now()}`,
-        date: dateStr,
-        title: data.title,
-        content: data.content,
-        category: data.category,
-        status: "ACTIVE",
-        answeredAt: null,
-        answeredNote: null,
-        scriptureReference: data.scriptureReference || null,
-        isPublic: data.isPublic,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setPrayers((prev) => [tempPrayer, ...prev]);
-      handleClosePrayerModal();
-      toast.success("Prayer logged");
-
-      startTransition(async () => {
-        try {
-          const saved = await createPrayer(data, dateStr);
-          setPrayers((prev) =>
-            prev.map((p) => (p.id === tempPrayer.id ? saved : p))
-          );
-        } catch {
-          setPrayers((prev) => prev.filter((p) => p.id !== tempPrayer.id));
-          toast.error("Failed to save prayer");
-        }
-      });
-    }
-  };
-
-  const handleOpenPrayerModal = () => {
-    setIsPrayerModalOpen(true);
-  };
-
-  const handleEditPrayer = (prayer: Prayer) => {
-    setEditingPrayerId(prayer.id);
-    setPrayerFormData({
-      title: prayer.title,
-      content: prayer.content,
-      category: prayer.category,
-      scriptureReference: prayer.scriptureReference ?? "",
-      isPublic: prayer.isPublic,
-    });
-    setIsPrayerModalOpen(true);
-  };
-
-  const handleDeletePrayer = (id: string) => {
-    const removedPrayer = prayers.find((p) => p.id === id);
-    setPrayers((prev) => prev.filter((p) => p.id !== id));
-    toast.success("Prayer deleted");
-
-    startTransition(async () => {
-      try {
-        await deletePrayer(id);
-      } catch {
-        if (removedPrayer) {
-          setPrayers((prev) => [...prev, removedPrayer]);
-        }
-        toast.error("Failed to delete prayer");
-      }
-    });
-  };
-
   const selectedDateEntries = getEntriesForDate(entries, selectedDate);
   const selectedDatePrayers = useMemo(
     () =>
       prayers.filter((p) => {
-        const d = new Date(p.date);
+        const d = parseLocalDate(p.date);
         return (
           d.getDate() === selectedDate.getDate() &&
           d.getMonth() === selectedDate.getMonth() &&
@@ -449,7 +354,7 @@ export function DashboardClient({
           mobileTab === "my" ? (
             <FabDropdown
               onLogReading={() => { bottomSheet.expand(); setIsModalOpen(true); }}
-              onLogPrayer={() => { bottomSheet.expand(); setIsPrayerModalOpen(true); }}
+              onLogPrayer={() => { bottomSheet.expand(); handleOpenPrayerModal(); }}
             />
           ) : undefined
         }

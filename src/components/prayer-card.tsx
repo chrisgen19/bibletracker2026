@@ -12,29 +12,8 @@ import {
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { extractPlainText } from "@/lib/notes";
-import type { Prayer, PrayerCategory } from "@/lib/types";
-
-const CATEGORY_COLORS: Record<PrayerCategory, string> = {
-  PERSONAL: "bg-blue-50 text-blue-700",
-  FAMILY: "bg-rose-50 text-rose-700",
-  FRIENDS: "bg-violet-50 text-violet-700",
-  CHURCH: "bg-amber-50 text-amber-700",
-  MISSIONS: "bg-emerald-50 text-emerald-700",
-  HEALTH: "bg-red-50 text-red-700",
-  WORK: "bg-cyan-50 text-cyan-700",
-  OTHER: "bg-stone-100 text-stone-700",
-};
-
-const CATEGORY_LABELS: Record<PrayerCategory, string> = {
-  PERSONAL: "Personal",
-  FAMILY: "Family",
-  FRIENDS: "Friends",
-  CHURCH: "Church",
-  MISSIONS: "Missions",
-  HEALTH: "Health",
-  WORK: "Work",
-  OTHER: "Other",
-};
+import { PRAYER_CATEGORY_COLORS, PRAYER_CATEGORY_LABELS } from "@/lib/constants";
+import type { Prayer } from "@/lib/types";
 
 interface PrayerCardProps {
   prayer: Prayer;
@@ -91,9 +70,9 @@ export function PrayerCard({
             </div>
             <div className="flex items-center gap-2">
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-md ${CATEGORY_COLORS[prayer.category]}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-md ${PRAYER_CATEGORY_COLORS[prayer.category]}`}
               >
-                {CATEGORY_LABELS[prayer.category]}
+                {PRAYER_CATEGORY_LABELS[prayer.category]}
               </span>
               <span className="text-xs text-stone-400">{formattedDate}</span>
             </div>

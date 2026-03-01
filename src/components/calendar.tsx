@@ -3,24 +3,9 @@
 import { useMemo, useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, HandHeart } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
+import { parseLocalDate } from "@/lib/date-utils";
 import { DayCell } from "@/components/calendar-day-cell";
 import { MonthPicker } from "@/components/calendar-month-picker";
-
-/** Parse a date/datetime string as local time to avoid UTC timezone shift */
-const parseLocalDate = (dateStr: string): Date => {
-  // UTC datetime strings (e.g. from toISOString()) need native parsing
-  // so the browser converts to the correct local date
-  if (
-    dateStr.includes("T") &&
-    (dateStr.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(dateStr))
-  ) {
-    const d = new Date(dateStr);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-  // Date-only or local datetime strings: extract parts directly
-  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
-  return new Date(y, m - 1, d);
-};
 
 /** Build a lookup map keyed by "YYYY-MM-DD" for O(1) access per cell */
 const buildEntryMap = (
