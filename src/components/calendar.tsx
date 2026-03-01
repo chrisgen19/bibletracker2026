@@ -267,7 +267,7 @@ export function Calendar({
   };
 
   return (
-    <div className="bg-white rounded-[2rem] shadow-xl shadow-stone-200/50 p-6 sm:p-8">
+    <div className="bg-white rounded-[2rem] shadow-xl shadow-stone-200/50 p-4 sm:p-8">
       <div className="flex items-center justify-between mb-8">
         {/* Clickable month/year header — opens month picker */}
         <div className="relative">

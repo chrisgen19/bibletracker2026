@@ -2,16 +2,75 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { toast } from "sonner";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Calendar } from "@/components/calendar";
 import { Stats } from "@/components/stats";
 import { ActivityLog } from "@/components/activity-log";
+import { BottomSheet } from "@/components/bottom-sheet";
+import { Button } from "@/components/ui/button";
 import { EntryForm } from "@/components/entry-form";
+import { useBottomSheet } from "@/hooks/use-bottom-sheet";
+import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
 import type { ReadingEntry, EntryFormData, FriendsActivityEntry } from "@/lib/types";
+
+function MobileSheetHeader({
+  selectedDate,
+  activeTab,
+  onTabChange,
+  onExpand,
+}: {
+  selectedDate: Date;
+  activeTab: ActivityTab;
+  onTabChange: (tab: ActivityTab) => void;
+  onExpand: () => void;
+}) {
+  const formattedDate = selectedDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  const tabClass = (active: boolean) =>
+    `flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+      active
+        ? "bg-stone-900 text-white"
+        : "bg-stone-100 text-stone-600 hover:bg-stone-200 shadow-sm"
+    }`;
+
+  return (
+    <>
+      <div className="flex gap-2 mb-3">
+        <button
+          type="button"
+          onClick={() => { onTabChange("my"); onExpand(); }}
+          className={tabClass(activeTab === "my")}
+        >
+          My Activity
+        </button>
+        <button
+          type="button"
+          onClick={() => { onTabChange("friends"); onExpand(); }}
+          className={tabClass(activeTab === "friends")}
+        >
+          Friends
+        </button>
+      </div>
+
+      <div className="mb-3">
+        <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-0.5">
+          Activity Log
+        </h3>
+        <h2 className="text-2xl font-serif font-bold text-stone-900">
+          {activeTab === "my" ? formattedDate : "Friends"}
+        </h2>
+      </div>
+    </>
+  );
+}
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
   return entries.filter((e) => {
@@ -64,6 +123,8 @@ export function DashboardClient({
   });
 
   const stats = useMemo(() => computeStats(entries), [entries]);
+  const bottomSheet = useBottomSheet();
+  const [mobileTab, setMobileTab] = useState<ActivityTab>("my");
 
   const handlePrevMonth = () => {
     setCurrentDate(
@@ -87,6 +148,7 @@ export function DashboardClient({
     setSelectedDate(
       new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
     );
+    bottomSheet.expand();
   };
 
   const handleEditEntry = (entry: ReadingEntry) => {
@@ -201,7 +263,7 @@ export function DashboardClient({
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar stats={stats} unreadCount={unreadNotificationCount} />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-56 lg:pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 space-y-6">
             <Calendar
@@ -219,7 +281,8 @@ export function DashboardClient({
             <Stats stats={stats} />
           </div>
 
-          <div className="lg:col-span-5">
+          {/* Desktop: standard sidebar layout */}
+          <div className="hidden lg:block lg:col-span-5">
             <ActivityLog
               username={username}
               selectedDate={selectedDate}
@@ -234,8 +297,47 @@ export function DashboardClient({
         </div>
       </main>
 
+      {/* Mobile: bottom sheet with activity log */}
+      <BottomSheet
+        sheet={bottomSheet}
+        header={
+          <MobileSheetHeader
+            selectedDate={selectedDate}
+            activeTab={mobileTab}
+            onTabChange={setMobileTab}
+            onExpand={bottomSheet.expand}
+          />
+        }
+        fab={
+          mobileTab === "my" ? (
+            <Button
+              onClick={() => { bottomSheet.expand(); setIsModalOpen(true); }}
+              variant="primary"
+              icon={Plus}
+              className="rounded-full shadow-lg ring-2 ring-white px-4"
+            >
+              Log Entry
+            </Button>
+          ) : undefined
+        }
+      >
+        <ActivityLog
+          username={username}
+          selectedDate={selectedDate}
+          entries={selectedDateEntries}
+          friendsEntries={initialFriendsActivity}
+          onAddEntry={() => setIsModalOpen(true)}
+          onEditEntry={handleEditEntry}
+          onDeleteEntry={handleDeleteEntry}
+          onUpdateNotes={handleUpdateNotes}
+          isInBottomSheet
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+        />
+      </BottomSheet>
+
       {/* Footer */}
-      <footer className="border-t border-stone-200 py-8 mt-16">
+      <footer className="hidden lg:block border-t border-stone-200 py-8 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-stone-400 text-sm">
             <BookOpen size={16} />
