@@ -394,6 +394,18 @@ export default function LandingPage() {
               reserved.
             </p>
             <Link
+              href="/terms"
+              className="hover:text-stone-600 transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="hover:text-stone-600 transition-colors"
+            >
+              Privacy
+            </Link>
+            <Link
               href="/changelog"
               className="hover:text-stone-600 transition-colors"
             >
