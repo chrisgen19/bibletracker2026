@@ -15,8 +15,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sola Scriptura - Bible Reading Tracker",
-  description: "Track your daily Bible reading journey",
+  metadataBase: new URL(process.env.AUTH_URL ?? "http://localhost:3000"),
+  title: {
+    default: "Sola Scriptura — Bible Reading Tracker",
+    template: "%s | Sola Scriptura",
+  },
+  description:
+    "Track your daily Bible reading, build streaks, and reflect on Scripture with a simple, beautiful journal.",
+  openGraph: {
+    type: "website",
+    siteName: "Sola Scriptura",
+    title: "Sola Scriptura — Bible Reading Tracker",
+    description:
+      "Track your daily Bible reading, build streaks, and reflect on Scripture with a simple, beautiful journal.",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sola Scriptura — Bible Reading Tracker",
+    description:
+      "Track your daily Bible reading, build streaks, and reflect on Scripture with a simple, beautiful journal.",
+  },
   robots: {
     index: false,
     follow: false,

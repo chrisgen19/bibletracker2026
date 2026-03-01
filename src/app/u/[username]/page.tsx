@@ -43,12 +43,16 @@ export async function generateMetadata({
   const user = await getPublicProfile(username);
 
   if (!user || !user.isProfilePublic) {
-    return { title: "Profile Not Found | Sola Scriptura" };
+    return { title: "Profile Not Found" };
   }
 
+  const title = `${user.firstName} ${user.lastName} (@${user.username})`;
+  const description = `View ${user.firstName}'s Bible reading journey on Sola Scriptura`;
+
   return {
-    title: `${user.firstName} ${user.lastName} (@${user.username}) | Sola Scriptura`,
-    description: `View ${user.firstName}'s Bible reading journey on Sola Scriptura`,
+    title,
+    description,
+    openGraph: { title, description },
   };
 }
 
