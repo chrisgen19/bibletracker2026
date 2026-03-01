@@ -29,11 +29,11 @@ export default auth((request) => {
 
   // Public routes: accessible to everyone
   if (isPublicRoute(pathname)) {
-    // Redirect logged-in verified users away from login/signup
+    // Redirect logged-in verified users away from guest-only pages
     if (
       isLoggedIn &&
       emailVerified &&
-      (pathname === "/login" || pathname === "/signup")
+      (pathname === "/" || pathname === "/login" || pathname === "/signup")
     ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
@@ -60,5 +60,12 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/friends/:path*"],
+  matcher: [
+    "/",
+    "/login",
+    "/signup",
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/friends/:path*",
+  ],
 };
