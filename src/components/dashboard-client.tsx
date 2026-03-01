@@ -38,7 +38,7 @@ function MobileSheetHeader({
     `flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
       active
         ? "bg-stone-900 text-white"
-        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+        : "bg-stone-100 text-stone-600 hover:bg-stone-200 shadow-sm"
     }`;
 
   return (
