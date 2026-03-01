@@ -137,10 +137,11 @@ export function DayCell({
         </>
       )}
 
-      {/* Prayer indicator — small icon in top-right corner */}
+      {/* Prayer indicator — icon in top-right corner, larger on desktop */}
       {hasPrayer && (
-        <div className="absolute top-0.5 right-0.5 pointer-events-none">
-          <HandHeart size={10} className={selected ? "text-amber-300" : "text-amber-500"} />
+        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 pointer-events-none">
+          <HandHeart size={10} className={`sm:hidden ${selected ? "text-amber-300" : "text-amber-500"}`} />
+          <HandHeart size={12} className={`hidden sm:block ${selected ? "text-amber-300" : "text-amber-500"}`} />
         </div>
       )}
 
