@@ -395,12 +395,14 @@ export default function LandingPage() {
             </p>
             <Link
               href="/terms"
+              target="_blank"
               className="hover:text-stone-600 transition-colors"
             >
               Terms
             </Link>
             <Link
               href="/privacy"
+              target="_blank"
               className="hover:text-stone-600 transition-colors"
             >
               Privacy
