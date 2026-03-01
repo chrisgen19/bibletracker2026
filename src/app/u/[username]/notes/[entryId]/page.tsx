@@ -49,16 +49,16 @@ export async function generateMetadata({
   const result = await getEntryWithUser(username, entryId);
 
   if (!result || !result.user.isProfilePublic) {
-    return { title: "Entry Not Found | Sola Scriptura" };
+    return { title: "Entry Not Found" };
   }
 
   const { user, entry } = result;
-  const title = `${entry.book} Ch ${entry.chapters}${entry.verses ? `: ${entry.verses}` : ""} — ${user.firstName} ${user.lastName} | Sola Scriptura`;
+  const title = `${entry.book} Ch ${entry.chapters}${entry.verses ? `: ${entry.verses}` : ""} — ${user.firstName} ${user.lastName}`;
   const description = entry.notes
     ? extractPlainText(entry.notes).slice(0, 160)
     : `${user.firstName}'s reading of ${entry.book} Chapter ${entry.chapters}`;
 
-  return { title, description };
+  return { title, description, openGraph: { title, description } };
 }
 
 export default async function NotesPage({ params }: PageProps) {
