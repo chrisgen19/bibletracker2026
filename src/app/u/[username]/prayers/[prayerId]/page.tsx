@@ -10,24 +10,53 @@ interface PageProps {
   params: Promise<{ username: string; prayerId: string }>;
 }
 
+interface PrayerWithCounts {
+  id: string;
+  date: Date;
+  title: string;
+  content: string;
+  category: string;
+  status: string;
+  answeredAt: Date | null;
+  answeredNote: string | null;
+  scriptureReference: string | null;
+  isPublic: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  _count: { supports: number };
+  supports: { id: string }[] | boolean;
+}
+
+const serializePublicPrayer = (
+  prayer: PrayerWithCounts,
+  user: { id: string; username: string; firstName: string; lastName: string },
+): PublicPrayer => ({
+  id: prayer.id,
+  date: prayer.date.toISOString(),
+  title: prayer.title,
+  content: prayer.content,
+  category: prayer.category as PrayerCategory,
+  status: prayer.status as PrayerStatus,
+  answeredAt: prayer.answeredAt?.toISOString() ?? null,
+  answeredNote: prayer.answeredNote,
+  scriptureReference: prayer.scriptureReference,
+  isPublic: prayer.isPublic,
+  createdAt: prayer.createdAt.toISOString(),
+  updatedAt: prayer.updatedAt.toISOString(),
+  user: { id: user.id, username: user.username, firstName: user.firstName, lastName: user.lastName },
+  supportCount: prayer._count.supports,
+  hasPrayed: Array.isArray(prayer.supports) ? prayer.supports.length > 0 : false,
+});
+
 async function getPrayerWithUser(
   username: string,
   prayerId: string,
   currentUserId: string | null,
-): Promise<{
-  prayer: PublicPrayer;
-  authorName: string;
-  isOwnPrayer: boolean;
-} | null> {
+) {
   const user = await prisma.user.findUnique({
     where: { username },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      username: true,
-      isProfilePublic: true,
-    },
+    select: { id: true, firstName: true, lastName: true, username: true, isProfilePublic: true },
   });
 
   if (!user || !user.isProfilePublic) return null;
@@ -36,40 +65,14 @@ async function getPrayerWithUser(
     where: { id: prayerId },
     include: {
       _count: { select: { supports: true } },
-      supports: currentUserId
-        ? { where: { userId: currentUserId }, take: 1 }
-        : false,
+      supports: currentUserId ? { where: { userId: currentUserId }, take: 1 } : false,
     },
   });
 
-  // Prayer must exist, belong to this user, and be public
   if (!prayer || prayer.userId !== user.id || !prayer.isPublic) return null;
 
   return {
-    prayer: {
-      id: prayer.id,
-      date: prayer.date.toISOString(),
-      title: prayer.title,
-      content: prayer.content,
-      category: prayer.category as PrayerCategory,
-      status: prayer.status as PrayerStatus,
-      answeredAt: prayer.answeredAt?.toISOString() ?? null,
-      answeredNote: prayer.answeredNote,
-      scriptureReference: prayer.scriptureReference,
-      isPublic: prayer.isPublic,
-      createdAt: prayer.createdAt.toISOString(),
-      updatedAt: prayer.updatedAt.toISOString(),
-      user: {
-        id: user.id,
-        username: user.username!,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-      supportCount: prayer._count.supports,
-      hasPrayed: Array.isArray(prayer.supports)
-        ? prayer.supports.length > 0
-        : false,
-    },
+    prayer: serializePublicPrayer(prayer, { ...user, username: user.username! }),
     authorName: `${user.firstName} ${user.lastName}`,
     isOwnPrayer: currentUserId === user.id,
   };

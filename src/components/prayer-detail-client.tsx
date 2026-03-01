@@ -33,6 +33,51 @@ const NotesBlockViewer = dynamic(
   }
 );
 
+function PrayerCardBody({ prayer }: { prayer: PublicPrayer }) {
+  return (
+    <>
+      {/* Content */}
+      {prayer.content ? (
+        <div className="prose-sm">
+          <NotesBlockViewer notes={prayer.content} />
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="bg-stone-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <FileText size={32} className="text-stone-400" />
+          </div>
+          <p className="text-stone-500 font-medium">
+            No details for this prayer
+          </p>
+        </div>
+      )}
+
+      {/* Scripture reference */}
+      {prayer.scriptureReference && (
+        <>
+          <div className="border-t border-stone-100 my-6" />
+          <div className="flex items-center gap-2 text-sm text-stone-600">
+            <BookOpenText size={16} className="text-emerald-600" />
+            <span className="font-medium">Scripture:</span>
+            <span>{prayer.scriptureReference}</span>
+          </div>
+        </>
+      )}
+
+      {/* Answered note */}
+      {prayer.status === "ANSWERED" && prayer.answeredNote && (
+        <>
+          <div className="border-t border-stone-100 my-6" />
+          <div className="bg-emerald-50/50 rounded-xl p-4 text-sm text-emerald-800">
+            <span className="font-medium">How God answered: </span>
+            {prayer.answeredNote}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 interface PrayerDetailClientProps {
   username: string;
   authorName: string;
@@ -60,7 +105,6 @@ export function PrayerDetailClient({
   });
 
   const handlePrayForUser = () => {
-    // Optimistic update
     setSupportCount((c) => c + 1);
     setHasPrayed(true);
 
@@ -68,7 +112,6 @@ export function PrayerDetailClient({
       try {
         await prayForPrayer(prayer.id, prayer.user.id);
       } catch {
-        // Revert on error
         setSupportCount((c) => c - 1);
         setHasPrayed(false);
         toast.error("Failed to record your support. Please try again.");
@@ -115,7 +158,6 @@ export function PrayerDetailClient({
       </nav>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Back link */}
         <Link
           href={`/u/${username}`}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mb-6"
@@ -124,7 +166,6 @@ export function PrayerDetailClient({
           {authorName}&apos;s profile
         </Link>
 
-        {/* Prayer card */}
         <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-6 sm:p-8 border border-stone-100">
           {/* Header */}
           <div className="mb-6">
@@ -143,47 +184,9 @@ export function PrayerDetailClient({
             <p className="text-sm text-stone-400 mt-1">by {authorName}</p>
           </div>
 
-          {/* Divider */}
           <div className="border-t border-stone-100 mb-6" />
 
-          {/* Content */}
-          {prayer.content ? (
-            <div className="prose-sm">
-              <NotesBlockViewer notes={prayer.content} />
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="bg-stone-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FileText size={32} className="text-stone-400" />
-              </div>
-              <p className="text-stone-500 font-medium">
-                No details for this prayer
-              </p>
-            </div>
-          )}
-
-          {/* Scripture reference */}
-          {prayer.scriptureReference && (
-            <>
-              <div className="border-t border-stone-100 my-6" />
-              <div className="flex items-center gap-2 text-sm text-stone-600">
-                <BookOpenText size={16} className="text-emerald-600" />
-                <span className="font-medium">Scripture:</span>
-                <span>{prayer.scriptureReference}</span>
-              </div>
-            </>
-          )}
-
-          {/* Answered note */}
-          {prayer.status === "ANSWERED" && prayer.answeredNote && (
-            <>
-              <div className="border-t border-stone-100 my-6" />
-              <div className="bg-emerald-50/50 rounded-xl p-4 text-sm text-emerald-800">
-                <span className="font-medium">How God answered: </span>
-                {prayer.answeredNote}
-              </div>
-            </>
-          )}
+          <PrayerCardBody prayer={prayer} />
 
           {/* Support section */}
           <div className="border-t border-stone-100 mt-6 pt-6">

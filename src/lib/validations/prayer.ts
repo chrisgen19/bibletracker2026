@@ -39,3 +39,8 @@ export const answerPrayerSchema = z.object({
 });
 
 export type AnswerPrayerFormData = z.infer<typeof answerPrayerSchema>;
+
+export const prayForPrayerSchema = z.object({
+  prayerId: z.string().min(1, "Prayer ID is required"),
+  prayerOwnerId: z.string().min(1, "Prayer owner ID is required"),
+});

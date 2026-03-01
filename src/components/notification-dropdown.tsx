@@ -13,7 +13,7 @@ import {
 } from "@/app/friends/actions";
 import type { NotificationItem } from "@/lib/types";
 
-function timeAgo(dateStr: string): string {
+const timeAgo = (dateStr: string): string => {
   const seconds = Math.floor(
     (Date.now() - new Date(dateStr).getTime()) / 1000
   );
@@ -24,7 +24,7 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
-}
+};
 
 function FollowNotification({
   notification,
