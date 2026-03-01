@@ -95,20 +95,20 @@ function PrayerSharedNotification({
   notification: NotificationItem;
   onClose: () => void;
 }) {
+  const href = notification.prayer
+    ? `/u/${notification.actor.username}/prayers/${notification.prayer.id}`
+    : `/u/${notification.actor.username}`;
+
   return (
-    <>
+    <Link href={href} onClick={onClose} className="flex items-center gap-3 w-full">
       <div className="bg-amber-100 p-1.5 rounded-full flex-shrink-0">
         <HandHeart size={20} className="text-amber-600" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-stone-800">
-          <Link
-            href={`/u/${notification.actor.username}`}
-            onClick={onClose}
-            className="font-semibold hover:text-emerald-700 transition-colors"
-          >
+          <span className="font-semibold">
             {notification.actor.firstName} {notification.actor.lastName}
-          </Link>{" "}
+          </span>{" "}
           shared a prayer request
         </p>
         {notification.prayer && (
@@ -120,16 +120,7 @@ function PrayerSharedNotification({
           {timeAgo(notification.createdAt)}
         </p>
       </div>
-      {notification.prayer && (
-        <Link
-          href={`/u/${notification.actor.username}/prayers/${notification.prayer.id}`}
-          onClick={onClose}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all flex-shrink-0"
-        >
-          Read
-        </Link>
-      )}
-    </>
+    </Link>
   );
 }
 
@@ -142,20 +133,20 @@ function PrayedForNotification({
   currentUsername: string | null;
   onClose: () => void;
 }) {
+  const href = notification.prayer && currentUsername
+    ? `/u/${currentUsername}/prayers/${notification.prayer.id}`
+    : `/u/${notification.actor.username}`;
+
   return (
-    <>
+    <Link href={href} onClick={onClose} className="flex items-center gap-3 w-full">
       <div className="bg-emerald-100 p-1.5 rounded-full flex-shrink-0">
         <Heart size={20} className="text-emerald-600" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-stone-800">
-          <Link
-            href={`/u/${notification.actor.username}`}
-            onClick={onClose}
-            className="font-semibold hover:text-emerald-700 transition-colors"
-          >
+          <span className="font-semibold">
             {notification.actor.firstName} {notification.actor.lastName}
-          </Link>{" "}
+          </span>{" "}
           prayed for your request
         </p>
         {notification.prayer && (
@@ -167,16 +158,7 @@ function PrayedForNotification({
           {timeAgo(notification.createdAt)}
         </p>
       </div>
-      {notification.prayer && currentUsername && (
-        <Link
-          href={`/u/${currentUsername}/prayers/${notification.prayer.id}`}
-          onClick={onClose}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all flex-shrink-0"
-        >
-          View
-        </Link>
-      )}
-    </>
+    </Link>
   );
 }
 
