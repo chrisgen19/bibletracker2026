@@ -37,25 +37,26 @@ export async function followUser(targetUserId: string) {
     },
   });
 
-  await prisma.notification.upsert({
-    where: {
-      userId_actorId_type: {
+  // Unique constraint now includes prayerId — use findFirst + create/update
+  const existingNotification = await prisma.notification.findFirst({
+    where: { userId: targetUserId, actorId: session.user.id, type: "FOLLOW" },
+  });
+
+  if (existingNotification) {
+    await prisma.notification.update({
+      where: { id: existingNotification.id },
+      data: { read: false, createdAt: new Date() },
+    });
+  } else {
+    await prisma.notification.create({
+      data: {
+        id: generateId(),
         userId: targetUserId,
         actorId: session.user.id,
         type: "FOLLOW",
       },
-    },
-    update: {
-      read: false,
-      createdAt: new Date(),
-    },
-    create: {
-      id: generateId(),
-      userId: targetUserId,
-      actorId: session.user.id,
-      type: "FOLLOW",
-    },
-  });
+    });
+  }
 
   revalidatePath("/friends");
   revalidatePath("/dashboard");
@@ -77,6 +78,7 @@ export async function unfollowUser(targetUserId: string) {
       userId: targetUserId,
       actorId: session.user.id,
       type: "FOLLOW",
+      prayerId: null,
     },
   });
 
@@ -281,6 +283,12 @@ export async function getNotifications(): Promise<NotificationItem[]> {
           lastName: true,
         },
       },
+      prayer: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
     },
   });
 
@@ -306,7 +314,20 @@ export async function getNotifications(): Promise<NotificationItem[]> {
       lastName: n.actor.lastName,
       isFollowing: followingSet.has(n.actor.id),
     },
+    ...(n.prayer && { prayer: { id: n.prayer.id, title: n.prayer.title } }),
   }));
+}
+
+export async function getCurrentUsername(): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { username: true },
+  });
+
+  return user?.username ?? null;
 }
 
 export async function markNotificationsAsRead() {

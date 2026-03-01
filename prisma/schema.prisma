@@ -16,6 +16,8 @@ enum Gender {
 
 enum NotificationType {
   FOLLOW
+  PRAYER_SHARED
+  PRAYED_FOR
 }
 
 enum CalendarDisplayMode {
@@ -67,6 +69,7 @@ model User {
   sessions  Session[]
   entries   ReadingEntry[]
   prayers   Prayer[]
+  prayerSupports PrayerSupport[]
   followers     Follow[]       @relation("UserFollowing")
   following     Follow[]       @relation("UserFollowers")
   notifications     Notification[] @relation("NotificationRecipient")
@@ -143,13 +146,15 @@ model Notification {
   userId    String           @map("user_id")
   actorId   String           @map("actor_id")
   type      NotificationType
+  prayerId  String?          @map("prayer_id")
   read      Boolean          @default(false)
   createdAt DateTime         @default(now()) @map("created_at")
 
-  user  User @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
-  actor User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  user   User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor  User    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  prayer Prayer? @relation(fields: [prayerId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, actorId, type])
+  @@unique([userId, actorId, type, prayerId])
   @@index([userId, read])
   @@index([actorId])
   @@map("notifications")
@@ -170,11 +175,27 @@ model Prayer {
   createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt          DateTime       @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+  supports      PrayerSupport[]
 
   @@index([userId, date])
   @@index([userId, status])
   @@map("prayers")
+}
+
+model PrayerSupport {
+  id        String   @id
+  prayerId  String   @map("prayer_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  prayer Prayer @relation(fields: [prayerId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([prayerId, userId])
+  @@index([prayerId])
+  @@map("prayer_supports")
 }
 
 model VerificationToken {

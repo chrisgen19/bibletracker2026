@@ -40,6 +40,29 @@ function revalidate() {
   revalidatePath("/dashboard");
 }
 
+/** Notify all followers when a prayer is made public */
+async function notifyFollowersOfPrayer(userId: string, prayerId: string) {
+  const followers = await prisma.follow.findMany({
+    where: { followingId: userId },
+    select: { followerId: true },
+  });
+
+  if (followers.length === 0) return;
+
+  await prisma.notification.createMany({
+    skipDuplicates: true,
+    data: followers.map((f) => ({
+      id: generateId(),
+      userId: f.followerId,
+      actorId: userId,
+      type: "PRAYER_SHARED" as const,
+      prayerId,
+    })),
+  });
+
+  revalidatePath("/dashboard");
+}
+
 export async function createPrayer(
   formData: unknown,
   date: string,
@@ -71,6 +94,10 @@ export async function createPrayer(
       isPublic: parsed.data.isPublic,
     },
   });
+
+  if (prayer.isPublic) {
+    await notifyFollowersOfPrayer(session.user.id, prayer.id);
+  }
 
   revalidate();
   return serializePrayer(prayer);
@@ -111,6 +138,13 @@ export async function updatePrayer(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid prayer data");
   }
 
+  // Fetch current state to detect public/private transitions
+  const current = await prisma.prayer.findUnique({
+    where: { id: prayerId, userId: session.user.id },
+    select: { isPublic: true },
+  });
+  if (!current) throw new Error("Prayer not found");
+
   const prayer = await prisma.prayer.update({
     where: { id: prayerId, userId: session.user.id },
     data: {
@@ -121,6 +155,15 @@ export async function updatePrayer(
       isPublic: parsed.data.isPublic,
     },
   });
+
+  // Handle public/private transitions
+  if (!current.isPublic && parsed.data.isPublic) {
+    await notifyFollowersOfPrayer(session.user.id, prayer.id);
+  } else if (current.isPublic && !parsed.data.isPublic) {
+    await prisma.notification.deleteMany({
+      where: { prayerId: prayer.id, type: "PRAYER_SHARED" },
+    });
+  }
 
   revalidate();
   return serializePrayer(prayer);
