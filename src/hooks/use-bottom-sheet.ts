@@ -56,6 +56,9 @@ export function useBottomSheet() {
 
   useEffect(() => {
     if (state === "expanded" || state === "dragging") {
+      // Only lock body scroll on mobile where the sheet is visible (< lg breakpoint)
+      if (window.innerWidth >= 1024) return;
+
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = "";
