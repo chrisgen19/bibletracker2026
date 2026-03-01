@@ -6,7 +6,7 @@ import {
   getFriendsActivity,
   getUnreadNotificationCount,
 } from "@/app/friends/actions";
-import type { ReadingEntry } from "@/lib/types";
+import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [dbEntries, friendsActivity, user, unreadNotificationCount, dbPrayerDates] =
+  const [dbEntries, friendsActivity, user, unreadNotificationCount, dbPrayers] =
     await Promise.all([
       prisma.readingEntry.findMany({
         where: { userId: session.user.id },
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
       getUnreadNotificationCount(),
       prisma.prayer.findMany({
         where: { userId: session.user.id },
-        select: { date: true },
+        orderBy: { date: "desc" },
       }),
     ]);
 
@@ -41,7 +41,20 @@ export default async function DashboardPage() {
     notes: e.notes,
   }));
 
-  const prayerDates = dbPrayerDates.map((p) => p.date.toISOString());
+  const prayers: Prayer[] = dbPrayers.map((p) => ({
+    id: p.id,
+    date: p.date.toISOString(),
+    title: p.title,
+    content: p.content,
+    category: p.category as PrayerCategory,
+    status: p.status as PrayerStatus,
+    answeredAt: p.answeredAt?.toISOString() ?? null,
+    answeredNote: p.answeredNote,
+    scriptureReference: p.scriptureReference,
+    isPublic: p.isPublic,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  }));
 
   return (
     <DashboardClient
@@ -51,7 +64,7 @@ export default async function DashboardPage() {
       calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}
       showMissedDays={user?.showMissedDays ?? true}
       unreadNotificationCount={unreadNotificationCount}
-      prayerDates={prayerDates}
+      initialPrayers={prayers}
     />
   );
 }
