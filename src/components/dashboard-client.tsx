@@ -309,14 +309,16 @@ export function DashboardClient({
           />
         }
         fab={
-          <Button
-            onClick={() => { bottomSheet.expand(); setIsModalOpen(true); }}
-            variant="primary"
-            icon={Plus}
-            className="rounded-full shadow-lg ring-2 ring-white px-4"
-          >
-            Log Entry
-          </Button>
+          mobileTab === "my" ? (
+            <Button
+              onClick={() => { bottomSheet.expand(); setIsModalOpen(true); }}
+              variant="primary"
+              icon={Plus}
+              className="rounded-full shadow-lg ring-2 ring-white px-4"
+            >
+              Log Entry
+            </Button>
+          ) : undefined
         }
       >
         <ActivityLog
