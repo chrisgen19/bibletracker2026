@@ -335,15 +335,17 @@ export default function SignupPage() {
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
+                  id="termsAccepted"
                   name="termsAccepted"
                   checked={formData.termsAccepted}
                   onChange={handleChange}
                   className="mt-1 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
                 />
-                <label className="text-sm text-stone-600">
+                <label htmlFor="termsAccepted" className="text-sm text-stone-600">
                   I agree to the{" "}
                   <Link
                     href="/terms"
+                    target="_blank"
                     className="text-emerald-600 hover:underline"
                   >
                     Terms of Service
@@ -351,6 +353,7 @@ export default function SignupPage() {
                   and{" "}
                   <Link
                     href="/privacy"
+                    target="_blank"
                     className="text-emerald-600 hover:underline"
                   >
                     Privacy Policy
