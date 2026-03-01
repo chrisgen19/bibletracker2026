@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ChevronDown } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { NotesViewer } from "@/components/notes-viewer";
@@ -58,6 +58,9 @@ export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: 
             <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
               &ldquo;{extractPlainText(entry.notes).slice(0, 150)}&rdquo;
             </p>
+            <span className="flex items-center gap-1 mt-1.5 text-xs text-stone-400 group-hover/notes:text-emerald-600 transition-colors">
+              Read more <ChevronDown size={12} />
+            </span>
           </button>
         )}
       </div>
