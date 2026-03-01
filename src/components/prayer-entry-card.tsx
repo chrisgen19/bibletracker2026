@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil, Trash2, BookOpen, HandHeart } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { NotesViewer } from "@/components/notes-viewer";
 import { extractPlainText } from "@/lib/notes";
 import type { Prayer, PrayerCategory } from "@/lib/types";
 
@@ -37,6 +38,7 @@ interface PrayerEntryCardProps {
 
 export function PrayerEntryCard({ prayer, onEdit, onDelete }: PrayerEntryCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showViewer, setShowViewer] = useState(false);
 
   const contentPreview = prayer.content
     ? extractPlainText(prayer.content).slice(0, 150)
@@ -78,12 +80,16 @@ export function PrayerEntryCard({ prayer, onEdit, onDelete }: PrayerEntryCardPro
         </div>
 
         {contentPreview && (
-          <div className="relative pl-4 mt-3">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
+          <button
+            type="button"
+            onClick={() => setShowViewer(true)}
+            className="w-full text-left relative pl-4 mt-3 group/notes cursor-pointer"
+          >
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
+            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
               &ldquo;{contentPreview}&rdquo;
             </p>
-          </div>
+          </button>
         )}
 
         {prayer.scriptureReference && (
@@ -93,6 +99,12 @@ export function PrayerEntryCard({ prayer, onEdit, onDelete }: PrayerEntryCardPro
           </div>
         )}
       </div>
+
+      <NotesViewer
+        isOpen={showViewer}
+        notes={prayer.content}
+        onClose={() => setShowViewer(false)}
+      />
 
       <Modal
         isOpen={showConfirm}
