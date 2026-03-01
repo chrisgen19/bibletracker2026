@@ -134,8 +134,17 @@ export function useBottomSheet() {
   const handleTouchEnd = useCallback(() => {
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
+
+    // Tap detection: if barely moved, toggle instead of snapping
+    const moved = Math.abs(translateY - startTranslateRef.current);
+    if (moved < 5) {
+      if (sheetState === "collapsed") expand();
+      else collapse();
+      return;
+    }
+
     snapFn(translateY, velocityRef.current);
-  }, [translateY, snapFn]);
+  }, [translateY, snapFn, sheetState, expand, collapse]);
 
   // --- Content area scroll-drag handoff ---
   const contentDragRef = useRef(false);
