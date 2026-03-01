@@ -246,8 +246,8 @@ prisma/
 - [x] **Follow notifications** - Bell icon with badge and followers tab on friends page
 - [x] **Rich text editor** - BlockNote-powered editor for reflections with formatting toolbar, side menu, and color picker
 - [x] **Notes viewer mode** - Full-screen read-only overlay for viewing reflections with inline edit capability for own entries
-- [ ] **Email verification** - Verify email address on signup (pending SMTP setup)
-- [ ] **Password reset flow** - Forgot password with email verification (pending SMTP setup)
+- [x] **Email verification** - Verify email address on signup via Resend
+- [x] **Password reset flow** - Forgot password and reset password with email verification
 
 ### Phase 3 - Reading Features
 

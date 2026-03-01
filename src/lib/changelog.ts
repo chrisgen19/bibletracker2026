@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.0";
+export const APP_VERSION = "0.4.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,51 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+    version: "0.4.0",
+    date: "2026-03-01",
+    changes: [
+      { type: "feat", description: "Mobile bottom sheet for activity log with swipe-up drag handle" },
+      { type: "feat", description: "Redesigned dashboard stats cards with longest streak" },
+      { type: "feat", description: "Streak indicator redesign with teal gradient background" },
+      { type: "feat", description: "3-column stats layout on mobile" },
+      { type: "fix", description: "Redirect authenticated users from guest-only pages to dashboard" },
+      { type: "fix", description: "Prevent body scroll lock on desktop when bottom sheet is open" },
+      { type: "fix", description: "Mobile notification bell toggle not collapsing on second tap" },
+    ],
+  },
+  {
+    version: "0.3.0",
+    date: "2026-02-28",
+    changes: [
+      { type: "feat", description: "Calendar swipe navigation and month picker" },
+      { type: "feat", description: "Streak visualization on calendar days" },
+      { type: "feat", description: "Calendar heatmap mode" },
+      { type: "feat", description: "Month summary stats panel" },
+      { type: "feat", description: "Week start day preference (Sunday or Monday)" },
+      { type: "feat", description: "Keyboard accessibility for calendar navigation" },
+      { type: "feat", description: "Email verification on signup with Resend" },
+      { type: "feat", description: "Forgot password and reset password flow" },
+      { type: "fix", description: "Calendar timezone parsing bug causing wrong day highlights" },
+      { type: "fix", description: "Friends streak calculation moved to client-side to fix timezone mismatch" },
+    ],
+  },
+  {
+    version: "0.2.0",
+    date: "2026-02-24",
+    changes: [
+      { type: "feat", description: "BlockNote rich text editor for reflections with formatting toolbar" },
+      { type: "feat", description: "Read-only notes viewer with full-screen overlay" },
+      { type: "feat", description: "Inline edit mode for notes (no redirect to entry form)" },
+      { type: "feat", description: "Shareable notes page with copy-link button" },
+      { type: "feat", description: "Searchable book combobox replacing native select" },
+      { type: "feat", description: "Default book field to last book read" },
+      { type: "feat", description: "SVG favicon matching the logo style" },
+      { type: "fix", description: "Notes preview truncation on mobile" },
+      { type: "fix", description: "Activity log card height on mobile" },
+      { type: "style", description: "Notion-inspired editor typography and paper canvas" },
+    ],
+  },
   {
     version: "0.1.0",
     date: "2026-02-11",
