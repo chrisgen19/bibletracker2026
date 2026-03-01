@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
@@ -28,6 +29,10 @@ interface NotesViewerProps {
   onSave?: (notes: string) => void;
   /** When provided, shows a "Copy Link" button in view mode */
   shareUrl?: string;
+  /** Header title — defaults to "Reflection" */
+  title?: string;
+  /** Extra content rendered below the header bar in view mode */
+  headerContent?: ReactNode;
 }
 
 export function NotesViewer({
@@ -36,6 +41,8 @@ export function NotesViewer({
   onClose,
   onSave,
   shareUrl,
+  title,
+  headerContent,
 }: NotesViewerProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -63,6 +70,8 @@ export function NotesViewer({
       mode={mode}
       onEdit={onSave ? () => setMode("edit") : undefined}
       shareUrl={shareUrl}
+      title={title}
+      headerContent={headerContent}
     />,
     document.body
   );

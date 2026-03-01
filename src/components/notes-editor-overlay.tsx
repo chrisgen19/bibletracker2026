@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Bold,
@@ -167,6 +168,10 @@ interface NotesEditorOverlayProps {
   onEdit?: () => void;
   /** When provided, shows a "Copy Link" button in view mode */
   shareUrl?: string;
+  /** Header title — defaults to "Reflection" */
+  title?: string;
+  /** Extra content rendered below the header bar in view mode (e.g. prayer metadata) */
+  headerContent?: ReactNode;
 }
 
 export function NotesEditorOverlay({
@@ -177,6 +182,8 @@ export function NotesEditorOverlay({
   mode = "edit",
   onEdit,
   shareUrl,
+  title = "Reflection",
+  headerContent,
 }: NotesEditorOverlayProps) {
   const [copied, setCopied] = useState(false);
 
@@ -244,7 +251,7 @@ export function NotesEditorOverlay({
               Back
             </button>
             <h2 className="text-base font-serif font-bold text-stone-900">
-              Reflection
+              {title}
             </h2>
             <div className="flex items-center gap-1">
               {shareUrl && (
@@ -282,7 +289,7 @@ export function NotesEditorOverlay({
               Cancel
             </button>
             <h2 className="text-base font-serif font-bold text-stone-900">
-              Reflection
+              {title}
             </h2>
             <button
               type="button"
@@ -307,6 +314,11 @@ export function NotesEditorOverlay({
       {/* Editor */}
       <div className="flex-1 overflow-y-auto px-0 sm:px-4 py-0 sm:py-6 bg-white sm:bg-stone-100">
         <div className="max-w-4xl mx-auto bg-white sm:rounded-lg sm:border sm:border-stone-200 sm:shadow-sm min-h-full px-4 sm:px-8 py-4 sm:py-8">
+          {isViewMode && headerContent && (
+            <div className="mb-4 pb-4 border-b border-stone-100">
+              {headerContent}
+            </div>
+          )}
           <BlockNoteView
             editor={editor}
             editable={!isViewMode}

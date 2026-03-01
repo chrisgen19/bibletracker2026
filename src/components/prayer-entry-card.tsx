@@ -104,6 +104,27 @@ export function PrayerEntryCard({ prayer, onEdit, onDelete }: PrayerEntryCardPro
         isOpen={showViewer}
         notes={prayer.content}
         onClose={() => setShowViewer(false)}
+        title="Prayer"
+        headerContent={
+          <div className="space-y-2">
+            <h3 className="font-serif font-bold text-lg text-stone-900">
+              {prayer.title}
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`inline-block text-xs font-medium px-2 py-0.5 rounded-md ${CATEGORY_COLORS[prayer.category]}`}
+              >
+                {CATEGORY_LABELS[prayer.category]}
+              </span>
+              {prayer.scriptureReference && (
+                <span className="flex items-center gap-1 text-xs text-stone-500">
+                  <BookOpen size={12} />
+                  {prayer.scriptureReference}
+                </span>
+              )}
+            </div>
+          </div>
+        }
       />
 
       <Modal
