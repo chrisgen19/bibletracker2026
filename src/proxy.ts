@@ -30,11 +30,15 @@ export default auth((request) => {
   // Public routes: accessible to everyone
   if (isPublicRoute(pathname)) {
     // Redirect logged-in verified users away from guest-only pages
-    if (
-      isLoggedIn &&
-      emailVerified &&
-      (pathname === "/" || pathname === "/login" || pathname === "/signup")
-    ) {
+    const guestOnlyPages = [
+      "/",
+      "/login",
+      "/signup",
+      "/forgot-password",
+      "/reset-password",
+      "/verify-email",
+    ];
+    if (isLoggedIn && emailVerified && guestOnlyPages.includes(pathname)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     return NextResponse.next();
@@ -64,6 +68,9 @@ export const config = {
     "/",
     "/login",
     "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
     "/dashboard/:path*",
     "/profile/:path*",
     "/friends/:path*",
