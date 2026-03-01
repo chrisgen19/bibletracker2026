@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { BookOpen, Flame, LogOut, UserCircle, Users, Menu, X, Bell } from "lucide-react";
+import { BookOpen, Flame, HandHeart, LogOut, UserCircle, Users, Menu, X, Bell } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { NotificationDropdown } from "@/components/notification-dropdown";
 import type { Stats } from "@/lib/types";
@@ -71,6 +71,13 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
               >
                 <Users size={16} className="text-stone-500" />
                 <span>My Friends</span>
+              </Link>
+              <Link
+                href="/prayers"
+                className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-stone-100 hover:bg-stone-50 transition-colors"
+              >
+                <HandHeart size={16} className="text-amber-500" />
+                <span>Prayers</span>
               </Link>
               <div ref={notificationRef} className="relative">
                 <button
@@ -205,6 +212,17 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
                   <span className="flex items-center gap-2">
                     <Users size={16} className="text-stone-500" />
                     <span>My Friends</span>
+                  </span>
+                  <span className="text-xs text-stone-400">Open</span>
+                </Link>
+                <Link
+                  href="/prayers"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <HandHeart size={16} className="text-amber-500" />
+                    <span>Prayers</span>
                   </span>
                   <span className="text-xs text-stone-400">Open</span>
                 </Link>

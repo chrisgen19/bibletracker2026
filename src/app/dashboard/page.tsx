@@ -6,7 +6,7 @@ import {
   getFriendsActivity,
   getUnreadNotificationCount,
 } from "@/app/friends/actions";
-import type { ReadingEntry } from "@/lib/types";
+import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [dbEntries, friendsActivity, user, unreadNotificationCount] =
+  const [dbEntries, friendsActivity, user, unreadNotificationCount, dbPrayers] =
     await Promise.all([
       prisma.readingEntry.findMany({
         where: { userId: session.user.id },
@@ -26,6 +26,10 @@ export default async function DashboardPage() {
         select: { username: true, calendarDisplayMode: true, showMissedDays: true },
       }),
       getUnreadNotificationCount(),
+      prisma.prayer.findMany({
+        where: { userId: session.user.id },
+        orderBy: { date: "desc" },
+      }),
     ]);
 
   const entries: ReadingEntry[] = dbEntries.map((e) => ({
@@ -37,6 +41,21 @@ export default async function DashboardPage() {
     notes: e.notes,
   }));
 
+  const prayers: Prayer[] = dbPrayers.map((p) => ({
+    id: p.id,
+    date: p.date.toISOString(),
+    title: p.title,
+    content: p.content,
+    category: p.category as PrayerCategory,
+    status: p.status as PrayerStatus,
+    answeredAt: p.answeredAt?.toISOString() ?? null,
+    answeredNote: p.answeredNote,
+    scriptureReference: p.scriptureReference,
+    isPublic: p.isPublic,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  }));
+
   return (
     <DashboardClient
       username={user?.username ?? ""}
@@ -45,6 +64,7 @@ export default async function DashboardPage() {
       calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}
       showMissedDays={user?.showMissedDays ?? true}
       unreadNotificationCount={unreadNotificationCount}
+      initialPrayers={prayers}
     />
   );
 }

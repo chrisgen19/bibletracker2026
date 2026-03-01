@@ -16,6 +16,8 @@ enum Gender {
 
 enum NotificationType {
   FOLLOW
+  PRAYER_SHARED
+  PRAYED_FOR
 }
 
 enum CalendarDisplayMode {
@@ -23,6 +25,23 @@ enum CalendarDisplayMode {
   REFERENCES_WITH_DOTS
   REFERENCES_ONLY
   HEATMAP
+}
+
+enum PrayerCategory {
+  PERSONAL
+  FAMILY
+  FRIENDS
+  CHURCH
+  MISSIONS
+  HEALTH
+  WORK
+  OTHER
+}
+
+enum PrayerStatus {
+  ACTIVE
+  ANSWERED
+  NO_LONGER_PRAYING
 }
 
 model User {
@@ -49,6 +68,8 @@ model User {
   accounts  Account[]
   sessions  Session[]
   entries   ReadingEntry[]
+  prayers   Prayer[]
+  prayerSupports PrayerSupport[]
   followers     Follow[]       @relation("UserFollowing")
   following     Follow[]       @relation("UserFollowers")
   notifications     Notification[] @relation("NotificationRecipient")
@@ -125,16 +146,56 @@ model Notification {
   userId    String           @map("user_id")
   actorId   String           @map("actor_id")
   type      NotificationType
+  prayerId  String?          @map("prayer_id")
   read      Boolean          @default(false)
   createdAt DateTime         @default(now()) @map("created_at")
 
-  user  User @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
-  actor User @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  user   User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor  User    @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  prayer Prayer? @relation(fields: [prayerId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, actorId, type])
+  @@unique([userId, actorId, type, prayerId])
   @@index([userId, read])
   @@index([actorId])
   @@map("notifications")
+}
+
+model Prayer {
+  id                 String         @id
+  userId             String         @map("user_id")
+  date               DateTime
+  title              String
+  content            String         @default("") @db.Text
+  category           PrayerCategory @default(PERSONAL)
+  status             PrayerStatus   @default(ACTIVE)
+  answeredAt         DateTime?      @map("answered_at")
+  answeredNote       String?        @map("answered_note") @db.Text
+  scriptureReference String?        @map("scripture_reference")
+  isPublic           Boolean        @default(false) @map("is_public")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+  supports      PrayerSupport[]
+
+  @@index([userId, date])
+  @@index([userId, status])
+  @@map("prayers")
+}
+
+model PrayerSupport {
+  id        String   @id
+  prayerId  String   @map("prayer_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  prayer Prayer @relation(fields: [prayerId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([prayerId, userId])
+  @@index([prayerId])
+  @@map("prayer_supports")
 }
 
 model VerificationToken {

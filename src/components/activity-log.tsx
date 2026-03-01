@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar as CalendarIcon, Plus, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon, Users, HandHeart } from "lucide-react";
 import { EntryCard } from "@/components/entry-card";
+import { PrayerEntryCard } from "@/components/prayer-entry-card";
 import { FriendEntryCard } from "@/components/friend-entry-card";
-import type { ReadingEntry, FriendsActivityEntry } from "@/lib/types";
+import { FabDropdown } from "@/components/fab-dropdown";
+import type { ReadingEntry, Prayer, FriendsActivityEntry } from "@/lib/types";
 
 export type ActivityTab = "my" | "friends";
 
@@ -15,9 +16,13 @@ interface ActivityLogProps {
   entries: ReadingEntry[];
   friendsEntries: FriendsActivityEntry[];
   onAddEntry: () => void;
+  onAddPrayer?: () => void;
   onEditEntry: (entry: ReadingEntry) => void;
   onDeleteEntry: (id: string) => void;
   onUpdateNotes: (entryId: string, notes: string) => void;
+  prayers?: Prayer[];
+  onEditPrayer?: (prayer: Prayer) => void;
+  onDeletePrayer?: (id: string) => void;
   isInBottomSheet?: boolean;
   /** Controlled tab state for bottom sheet (lifted to parent) */
   activeTab?: ActivityTab;
@@ -30,9 +35,13 @@ export function ActivityLog({
   entries,
   friendsEntries,
   onAddEntry,
+  onAddPrayer,
   onEditEntry,
   onDeleteEntry,
   onUpdateNotes,
+  prayers = [],
+  onEditPrayer,
+  onDeletePrayer,
   isInBottomSheet = false,
   activeTab: controlledTab,
   onTabChange,
@@ -55,8 +64,11 @@ export function ActivityLog({
     selectedDate.getMonth() === today.getMonth() &&
     selectedDate.getFullYear() === today.getFullYear();
 
-  // Should pulse when viewing today with no entries
-  const shouldPulse = isToday && entries.length === 0 && activeTab === "my";
+  // Should pulse when viewing today with no entries and no prayers
+  const shouldPulse = isToday && entries.length === 0 && prayers.length === 0 && activeTab === "my";
+  const hasReadings = entries.length > 0;
+  const hasPrayers = prayers.length > 0;
+  const hasActivity = hasReadings || hasPrayers;
 
   return (
     <>
@@ -113,14 +125,12 @@ export function ActivityLog({
                 </button>
               </div>
               {activeTab === "my" && (
-                <Button
-                  onClick={onAddEntry}
-                  variant="primary"
-                  icon={Plus}
-                  className={`rounded-2xl hidden sm:flex ${shouldPulse ? "animate-pulse-subtle" : ""}`}
-                >
-                  Log Entry
-                </Button>
+                <FabDropdown
+                  onLogReading={onAddEntry}
+                  onLogPrayer={onAddPrayer ?? onAddEntry}
+                  className={`hidden sm:block ${shouldPulse ? "animate-pulse-subtle" : ""}`}
+                  shouldPulse={shouldPulse}
+                />
               )}
             </div>
 
@@ -144,29 +154,51 @@ export function ActivityLog({
 
         <div className="lg:flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
           {activeTab === "my" ? (
-            entries.length === 0 ? (
+            !hasActivity ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
                 <div className="bg-stone-100 p-4 rounded-full mb-4">
                   <CalendarIcon size={32} className="text-stone-400" />
                 </div>
                 <p className="text-stone-500 font-medium">
-                  No reading logged for this day.
+                  No activity logged for this day.
                 </p>
                 <p className="text-stone-400 text-sm mt-2">
                   Take a moment to read and reflect.
                 </p>
               </div>
             ) : (
-              entries.map((entry) => (
-                <EntryCard
-                  key={entry.id}
-                  entry={entry}
-                  username={username}
-                  onEdit={onEditEntry}
-                  onDelete={onDeleteEntry}
-                  onUpdateNotes={onUpdateNotes}
-                />
-              ))
+              <>
+                {entries.map((entry) => (
+                  <EntryCard
+                    key={entry.id}
+                    entry={entry}
+                    username={username}
+                    onEdit={onEditEntry}
+                    onDelete={onDeleteEntry}
+                    onUpdateNotes={onUpdateNotes}
+                  />
+                ))}
+
+                {hasReadings && hasPrayers && (
+                  <div className="flex items-center gap-3 py-1">
+                    <div className="flex-1 h-px bg-stone-200" />
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-stone-400 uppercase tracking-wider">
+                      <HandHeart size={12} />
+                      Prayers
+                    </span>
+                    <div className="flex-1 h-px bg-stone-200" />
+                  </div>
+                )}
+
+                {onEditPrayer && onDeletePrayer && prayers.map((prayer) => (
+                  <PrayerEntryCard
+                    key={prayer.id}
+                    prayer={prayer}
+                    onEdit={onEditPrayer}
+                    onDelete={onDeletePrayer}
+                  />
+                ))}
+              </>
             )
           ) : friendsEntries.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
@@ -201,14 +233,12 @@ export function ActivityLog({
 
       {/* Floating button for mobile - only shows on My Activity tab, hidden in bottom sheet */}
       {activeTab === "my" && !isInBottomSheet && (
-        <Button
-          onClick={onAddEntry}
-          variant="primary"
-          icon={Plus}
-          className={`fixed bottom-6 right-6 rounded-2xl shadow-lg sm:hidden z-50 ${shouldPulse ? "animate-pulse-subtle" : ""}`}
-        >
-          Log Entry
-        </Button>
+        <FabDropdown
+          onLogReading={onAddEntry}
+          onLogPrayer={onAddPrayer ?? onAddEntry}
+          className="fixed bottom-6 right-6 sm:hidden z-50"
+          shouldPulse={shouldPulse}
+        />
       )}
     </div>
     </>

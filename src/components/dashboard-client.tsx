@@ -1,21 +1,24 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Calendar } from "@/components/calendar";
 import { Stats } from "@/components/stats";
 import { ActivityLog } from "@/components/activity-log";
 import { BottomSheet } from "@/components/bottom-sheet";
-import { Button } from "@/components/ui/button";
 import { EntryForm } from "@/components/entry-form";
+import { PrayerForm } from "@/components/prayer-form";
+import { FabDropdown } from "@/components/fab-dropdown";
 import { useBottomSheet } from "@/hooks/use-bottom-sheet";
+import { usePrayers } from "@/hooks/use-prayers";
+import { parseLocalDate } from "@/lib/date-utils";
 import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
-import type { ReadingEntry, EntryFormData, FriendsActivityEntry } from "@/lib/types";
+import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer } from "@/lib/types";
 
 function MobileSheetHeader({
   selectedDate,
@@ -74,7 +77,7 @@ function MobileSheetHeader({
 
 function getEntriesForDate(entries: ReadingEntry[], date: Date) {
   return entries.filter((e) => {
-    const entryDate = new Date(e.date);
+    const entryDate = parseLocalDate(e.date);
     return (
       entryDate.getDate() === date.getDate() &&
       entryDate.getMonth() === date.getMonth() &&
@@ -90,6 +93,7 @@ interface DashboardClientProps {
   calendarDisplayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays: boolean;
   unreadNotificationCount: number;
+  initialPrayers?: Prayer[];
 }
 
 export function DashboardClient({
@@ -99,6 +103,7 @@ export function DashboardClient({
   calendarDisplayMode,
   showMissedDays,
   unreadNotificationCount,
+  initialPrayers = [],
 }: DashboardClientProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -106,6 +111,26 @@ export function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  const getDateForCreate = useCallback(
+    () => selectedDate.toISOString(),
+    [selectedDate],
+  );
+
+  const {
+    prayers,
+    isModalOpen: isPrayerModalOpen,
+    editingPrayerId,
+    formData: prayerFormData,
+    setFormData: setPrayerFormData,
+    handleOpenModal: handleOpenPrayerModal,
+    handleCloseModal: handleClosePrayerModal,
+    handleEditPrayer,
+    handleSavePrayer,
+    handleDeletePrayer,
+  } = usePrayers({ initialPrayers, getDateForCreate });
+
+  const prayerDates = useMemo(() => prayers.map((p) => p.date), [prayers]);
   // Default to the last book read so users can continue where they left off
   const lastBookRead = useMemo(() => {
     if (entries.length === 0) return "Genesis";
@@ -258,6 +283,18 @@ export function DashboardClient({
   };
 
   const selectedDateEntries = getEntriesForDate(entries, selectedDate);
+  const selectedDatePrayers = useMemo(
+    () =>
+      prayers.filter((p) => {
+        const d = parseLocalDate(p.date);
+        return (
+          d.getDate() === selectedDate.getDate() &&
+          d.getMonth() === selectedDate.getMonth() &&
+          d.getFullYear() === selectedDate.getFullYear()
+        );
+      }),
+    [prayers, selectedDate]
+  );
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
@@ -277,6 +314,7 @@ export function DashboardClient({
               onMonthSelect={handleMonthSelect}
               displayMode={calendarDisplayMode}
               showMissedDays={showMissedDays}
+              prayerDates={prayerDates}
             />
             <Stats stats={stats} />
           </div>
@@ -289,9 +327,13 @@ export function DashboardClient({
               entries={selectedDateEntries}
               friendsEntries={initialFriendsActivity}
               onAddEntry={() => setIsModalOpen(true)}
+              onAddPrayer={handleOpenPrayerModal}
               onEditEntry={handleEditEntry}
               onDeleteEntry={handleDeleteEntry}
               onUpdateNotes={handleUpdateNotes}
+              prayers={selectedDatePrayers}
+              onEditPrayer={handleEditPrayer}
+              onDeletePrayer={handleDeletePrayer}
             />
           </div>
         </div>
@@ -310,14 +352,10 @@ export function DashboardClient({
         }
         fab={
           mobileTab === "my" ? (
-            <Button
-              onClick={() => { bottomSheet.expand(); setIsModalOpen(true); }}
-              variant="primary"
-              icon={Plus}
-              className="rounded-full shadow-lg ring-2 ring-white px-4"
-            >
-              Log Entry
-            </Button>
+            <FabDropdown
+              onLogReading={() => { bottomSheet.expand(); setIsModalOpen(true); }}
+              onLogPrayer={() => { bottomSheet.expand(); handleOpenPrayerModal(); }}
+            />
           ) : undefined
         }
       >
@@ -327,9 +365,13 @@ export function DashboardClient({
           entries={selectedDateEntries}
           friendsEntries={initialFriendsActivity}
           onAddEntry={() => setIsModalOpen(true)}
+          onAddPrayer={handleOpenPrayerModal}
           onEditEntry={handleEditEntry}
           onDeleteEntry={handleDeleteEntry}
           onUpdateNotes={handleUpdateNotes}
+          prayers={selectedDatePrayers}
+          onEditPrayer={handleEditPrayer}
+          onDeletePrayer={handleDeletePrayer}
           isInBottomSheet
           activeTab={mobileTab}
           onTabChange={setMobileTab}
@@ -365,6 +407,15 @@ export function DashboardClient({
         onFormChange={setFormData}
         onSave={handleSaveEntry}
         isEditing={!!editingEntryId}
+      />
+
+      <PrayerForm
+        isOpen={isPrayerModalOpen}
+        onClose={handleClosePrayerModal}
+        formData={prayerFormData}
+        onFormChange={setPrayerFormData}
+        onSave={handleSavePrayer}
+        isEditing={!!editingPrayerId}
       />
     </div>
   );

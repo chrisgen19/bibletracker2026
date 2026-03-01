@@ -32,7 +32,7 @@ export interface FriendUser {
 
 export interface NotificationItem {
   id: string;
-  type: "FOLLOW";
+  type: "FOLLOW" | "PRAYER_SHARED" | "PRAYED_FOR";
   read: boolean;
   createdAt: string;
   actor: {
@@ -42,6 +42,51 @@ export interface NotificationItem {
     lastName: string;
     isFollowing: boolean;
   };
+  prayer?: {
+    id: string;
+    title: string;
+  };
+}
+
+export type PrayerCategory =
+  | "PERSONAL"
+  | "FAMILY"
+  | "FRIENDS"
+  | "CHURCH"
+  | "MISSIONS"
+  | "HEALTH"
+  | "WORK"
+  | "OTHER";
+
+export type PrayerStatus = "ACTIVE" | "ANSWERED" | "NO_LONGER_PRAYING";
+
+export interface Prayer {
+  id: string;
+  date: string;
+  title: string;
+  content: string;
+  category: PrayerCategory;
+  status: PrayerStatus;
+  answeredAt: string | null;
+  answeredNote: string | null;
+  scriptureReference: string | null;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PrayerFormData {
+  title: string;
+  content: string;
+  category: PrayerCategory;
+  scriptureReference: string;
+  isPublic: boolean;
+}
+
+export interface PublicPrayer extends Prayer {
+  user: { id: string; username: string; firstName: string; lastName: string };
+  supportCount: number;
+  hasPrayed: boolean;
 }
 
 export interface FriendsActivityEntry {
