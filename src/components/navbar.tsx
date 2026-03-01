@@ -18,12 +18,15 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [badgeCount, setBadgeCount] = useState(unreadCount);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const mobileBellRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
       if (
         notificationRef.current &&
-        !notificationRef.current.contains(e.target as Node)
+        !notificationRef.current.contains(target) &&
+        !mobileBellRef.current?.contains(target)
       ) {
         setIsNotificationsOpen(false);
       }
@@ -118,6 +121,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
         <div className="sm:hidden flex items-center gap-2">
           {session?.user && (
             <button
+              ref={mobileBellRef}
               type="button"
               onClick={() => {
                 setIsNotificationsOpen((prev) => {
