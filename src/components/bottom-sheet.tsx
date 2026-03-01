@@ -72,7 +72,7 @@ export function BottomSheet({ sheet, header, fab, children }: BottomSheetProps) 
         >
           {/* Drag handle */}
           <div
-            className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none select-none shrink-0"
+            className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing touch-none select-none shrink-0"
             {...handleProps}
           >
             <div className="w-10 h-1 bg-stone-300 rounded-full" />
