@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [dbEntries, friendsActivity, user, unreadNotificationCount] =
+  const [dbEntries, friendsActivity, user, unreadNotificationCount, dbPrayerDates] =
     await Promise.all([
       prisma.readingEntry.findMany({
         where: { userId: session.user.id },
@@ -26,6 +26,10 @@ export default async function DashboardPage() {
         select: { username: true, calendarDisplayMode: true, showMissedDays: true },
       }),
       getUnreadNotificationCount(),
+      prisma.prayer.findMany({
+        where: { userId: session.user.id },
+        select: { date: true },
+      }),
     ]);
 
   const entries: ReadingEntry[] = dbEntries.map((e) => ({
@@ -37,6 +41,8 @@ export default async function DashboardPage() {
     notes: e.notes,
   }));
 
+  const prayerDates = dbPrayerDates.map((p) => p.date.toISOString());
+
   return (
     <DashboardClient
       username={user?.username ?? ""}
@@ -45,6 +51,7 @@ export default async function DashboardPage() {
       calendarDisplayMode={user?.calendarDisplayMode || "REFERENCES_WITH_DOTS"}
       showMissedDays={user?.showMissedDays ?? true}
       unreadNotificationCount={unreadNotificationCount}
+      prayerDates={prayerDates}
     />
   );
 }

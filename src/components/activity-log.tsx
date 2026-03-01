@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar as CalendarIcon, Plus, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar as CalendarIcon, Users } from "lucide-react";
 import { EntryCard } from "@/components/entry-card";
 import { FriendEntryCard } from "@/components/friend-entry-card";
+import { FabDropdown } from "@/components/fab-dropdown";
 import type { ReadingEntry, FriendsActivityEntry } from "@/lib/types";
 
 export type ActivityTab = "my" | "friends";
@@ -15,6 +15,7 @@ interface ActivityLogProps {
   entries: ReadingEntry[];
   friendsEntries: FriendsActivityEntry[];
   onAddEntry: () => void;
+  onAddPrayer?: () => void;
   onEditEntry: (entry: ReadingEntry) => void;
   onDeleteEntry: (id: string) => void;
   onUpdateNotes: (entryId: string, notes: string) => void;
@@ -30,6 +31,7 @@ export function ActivityLog({
   entries,
   friendsEntries,
   onAddEntry,
+  onAddPrayer,
   onEditEntry,
   onDeleteEntry,
   onUpdateNotes,
@@ -113,14 +115,12 @@ export function ActivityLog({
                 </button>
               </div>
               {activeTab === "my" && (
-                <Button
-                  onClick={onAddEntry}
-                  variant="primary"
-                  icon={Plus}
-                  className={`rounded-2xl hidden sm:flex ${shouldPulse ? "animate-pulse-subtle" : ""}`}
-                >
-                  Log Entry
-                </Button>
+                <FabDropdown
+                  onLogReading={onAddEntry}
+                  onLogPrayer={onAddPrayer ?? onAddEntry}
+                  className={`hidden sm:block ${shouldPulse ? "animate-pulse-subtle" : ""}`}
+                  shouldPulse={shouldPulse}
+                />
               )}
             </div>
 
@@ -201,14 +201,12 @@ export function ActivityLog({
 
       {/* Floating button for mobile - only shows on My Activity tab, hidden in bottom sheet */}
       {activeTab === "my" && !isInBottomSheet && (
-        <Button
-          onClick={onAddEntry}
-          variant="primary"
-          icon={Plus}
-          className={`fixed bottom-6 right-6 rounded-2xl shadow-lg sm:hidden z-50 ${shouldPulse ? "animate-pulse-subtle" : ""}`}
-        >
-          Log Entry
-        </Button>
+        <FabDropdown
+          onLogReading={onAddEntry}
+          onLogPrayer={onAddPrayer ?? onAddEntry}
+          className="fixed bottom-6 right-6 sm:hidden z-50"
+          shouldPulse={shouldPulse}
+        />
       )}
     </div>
     </>

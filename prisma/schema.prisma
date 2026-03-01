@@ -25,6 +25,23 @@ enum CalendarDisplayMode {
   HEATMAP
 }
 
+enum PrayerCategory {
+  PERSONAL
+  FAMILY
+  FRIENDS
+  CHURCH
+  MISSIONS
+  HEALTH
+  WORK
+  OTHER
+}
+
+enum PrayerStatus {
+  ACTIVE
+  ANSWERED
+  NO_LONGER_PRAYING
+}
+
 model User {
   id              String    @id
   email           String    @unique
@@ -49,6 +66,7 @@ model User {
   accounts  Account[]
   sessions  Session[]
   entries   ReadingEntry[]
+  prayers   Prayer[]
   followers     Follow[]       @relation("UserFollowing")
   following     Follow[]       @relation("UserFollowers")
   notifications     Notification[] @relation("NotificationRecipient")
@@ -135,6 +153,28 @@ model Notification {
   @@index([userId, read])
   @@index([actorId])
   @@map("notifications")
+}
+
+model Prayer {
+  id                 String         @id
+  userId             String         @map("user_id")
+  date               DateTime
+  title              String
+  content            String         @default("") @db.Text
+  category           PrayerCategory @default(PERSONAL)
+  status             PrayerStatus   @default(ACTIVE)
+  answeredAt         DateTime?      @map("answered_at")
+  answeredNote       String?        @map("answered_note") @db.Text
+  scriptureReference String?        @map("scripture_reference")
+  isPublic           Boolean        @default(false) @map("is_public")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([userId, status])
+  @@map("prayers")
 }
 
 model VerificationToken {

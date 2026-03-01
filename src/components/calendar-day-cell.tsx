@@ -1,5 +1,6 @@
 "use client";
 
+import { HandHeart } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
 import { formatReferenceShort } from "@/lib/constants";
 
@@ -15,6 +16,7 @@ interface DayCellProps {
   interactive: boolean;
   displayMode: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   isStreakDay: boolean;
+  hasPrayer?: boolean;
   onDayClick?: (day: number) => void;
   onFocus?: (day: number) => void;
 }
@@ -42,6 +44,7 @@ export function DayCell({
   interactive,
   displayMode,
   isStreakDay,
+  hasPrayer = false,
   onDayClick,
   onFocus,
   year,
@@ -64,7 +67,7 @@ export function DayCell({
       : missed
         ? " — no reading"
         : ""
-  }`;
+  }${hasPrayer ? " — has prayer" : ""}`;
 
   return (
     <DayTag
@@ -132,6 +135,13 @@ export function DayCell({
             </div>
           )}
         </>
+      )}
+
+      {/* Prayer indicator — small icon in top-right corner */}
+      {hasPrayer && (
+        <div className="absolute top-0.5 right-0.5 pointer-events-none">
+          <HandHeart size={10} className={selected ? "text-amber-300" : "text-amber-500"} />
+        </div>
       )}
 
       {/* Streak indicator — subtle gradient rising from bottom of cell */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, HandHeart } from "lucide-react";
 import type { ReadingEntry } from "@/lib/types";
 import { DayCell } from "@/components/calendar-day-cell";
 import { MonthPicker } from "@/components/calendar-month-picker";
@@ -52,6 +52,7 @@ interface CalendarProps {
   displayMode?: "DOTS_ONLY" | "REFERENCES_WITH_DOTS" | "REFERENCES_ONLY" | "HEATMAP";
   showMissedDays?: boolean;
   isLoading?: boolean;
+  prayerDates?: string[];
 }
 
 const isTodayDate = (date: Date) => {
@@ -80,6 +81,7 @@ export function Calendar({
   displayMode = "REFERENCES_WITH_DOTS",
   showMissedDays = true,
   isLoading = false,
+  prayerDates = [],
 }: CalendarProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -88,6 +90,16 @@ export function Calendar({
 
   // Pre-compute entry lookup map — O(1) per cell instead of O(n) filtering
   const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
+
+  // Build prayer day lookup set — keyed by "YYYY-M-D" for O(1) access
+  const prayerDaySet = useMemo(() => {
+    const set = new Set<string>();
+    for (const dateStr of prayerDates) {
+      const d = parseLocalDate(dateStr);
+      set.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    }
+    return set;
+  }, [prayerDates]);
 
   // Compute current reading streak as a Set of "YYYY-M-D" keys
   const streakDays = useMemo(() => {
@@ -388,6 +400,7 @@ export function Calendar({
                   interactive={!!onDayClick}
                   displayMode={displayMode}
                   isStreakDay={streakDays.has(`${year}-${month}-${day}`)}
+                  hasPrayer={prayerDaySet.has(`${year}-${month}-${day}`)}
                   onDayClick={onDayClick}
                   onFocus={setFocusedDay}
                 />
@@ -427,6 +440,12 @@ export function Calendar({
                   <div className="absolute inset-0 bg-gradient-to-t from-teal-200/40 via-teal-100/15 to-transparent" />
                 </div>
                 <span>Streak</span>
+              </div>
+            )}
+            {prayerDaySet.size > 0 && (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <HandHeart size={10} className="text-amber-500" />
+                <span>Prayer</span>
               </div>
             )}
             {onDayClick && (
