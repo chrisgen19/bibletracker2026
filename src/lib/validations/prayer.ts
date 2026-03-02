@@ -25,7 +25,7 @@ export const createPrayerSchema = z.object({
     .max(100, "Scripture reference must be 100 characters or less")
     .optional()
     .or(z.literal("")),
-  isPublic: z.boolean(),
+  visibility: z.enum(["PRIVATE", "FOLLOWERS", "PUBLIC"]),
 });
 
 export type CreatePrayerFormData = z.infer<typeof createPrayerSchema>;

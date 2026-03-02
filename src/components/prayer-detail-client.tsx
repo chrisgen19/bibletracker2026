@@ -96,6 +96,7 @@ export function PrayerDetailClient({
   const router = useRouter();
   const [supportCount, setSupportCount] = useState(prayer.supportCount);
   const [hasPrayed, setHasPrayed] = useState(prayer.hasPrayed);
+  const [supporters, setSupporters] = useState(prayer.supporters);
   const [isPending, startTransition] = useTransition();
 
   const formattedDate = new Date(prayer.date).toLocaleDateString("en-US", {
@@ -108,6 +109,7 @@ export function PrayerDetailClient({
   const handlePrayForUser = () => {
     setSupportCount((c) => c + 1);
     setHasPrayed(true);
+    setSupporters((prev) => [{ id: "me", firstName: "You", lastName: "" }, ...prev]);
 
     startTransition(async () => {
       try {
@@ -115,6 +117,7 @@ export function PrayerDetailClient({
       } catch {
         setSupportCount((c) => c - 1);
         setHasPrayed(false);
+        setSupporters((prev) => prev.filter((s) => s.id !== "me"));
         toast.error("Failed to record your support. Please try again.");
       }
     });
@@ -202,6 +205,7 @@ export function PrayerDetailClient({
 
               {isLoggedIn && !isOwnPrayer && (
                 <button
+                  type="button"
                   onClick={handlePrayForUser}
                   disabled={hasPrayed || isPending}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -215,6 +219,28 @@ export function PrayerDetailClient({
                 </button>
               )}
             </div>
+
+            {/* Supporters list */}
+            {supporters.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-stone-100">
+                <p className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">
+                  People who prayed
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {supporters.map((s) => (
+                    <span
+                      key={s.id}
+                      className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 text-sm px-3 py-1 rounded-full"
+                    >
+                      <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs font-semibold text-amber-600">
+                        {s.firstName.charAt(0)}
+                      </span>
+                      {s.lastName ? `${s.firstName} ${s.lastName}` : s.firstName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
