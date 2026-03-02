@@ -205,6 +205,7 @@ export function PrayerDetailClient({
 
               {isLoggedIn && !isOwnPrayer && (
                 <button
+                  type="button"
                   onClick={handlePrayForUser}
                   disabled={hasPrayed || isPending}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${

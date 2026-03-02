@@ -25,7 +25,7 @@ interface PrayerWithCounts {
   updatedAt: Date;
   userId: string;
   _count: { supports: number };
-  supports: { id: string; userId: string; user: { id: string; firstName: string; lastName: string } }[] | boolean;
+  supports: { id: string; userId: string; user: { id: string; firstName: string; lastName: string } }[];
 }
 
 const serializePublicPrayer = (
@@ -47,12 +47,8 @@ const serializePublicPrayer = (
   createdAt: prayer.createdAt.toISOString(),
   updatedAt: prayer.updatedAt.toISOString(),
   user: { id: user.id, username: user.username, firstName: user.firstName, lastName: user.lastName },
-  hasPrayed: Array.isArray(prayer.supports)
-    ? prayer.supports.some((s) => s.userId === currentUserId)
-    : false,
-  supporters: Array.isArray(prayer.supports)
-    ? prayer.supports.map((s) => ({ id: s.user.id, firstName: s.user.firstName, lastName: s.user.lastName }))
-    : [],
+  hasPrayed: prayer.supports.some((s) => s.userId === currentUserId),
+  supporters: prayer.supports.map((s) => ({ id: s.user.id, firstName: s.user.firstName, lastName: s.user.lastName })),
 });
 
 async function getPrayerWithUser(
@@ -118,17 +114,32 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { username, prayerId } = await params;
+
+  // Check if this is a FOLLOWERS-only prayer (getPrayerWithUser returns null
+  // for FOLLOWERS prayers when currentUserId is null). Show generic metadata
+  // instead of "Prayer Not Found" so shared links look correct.
+  const prayer = await prisma.prayer.findUnique({
+    where: { id: prayerId },
+    select: { visibility: true },
+  });
+  if (prayer?.visibility === "FOLLOWERS") {
+    return {
+      title: "Prayer Request — Sola Scriptura",
+      description: "A shared prayer request visible to followers.",
+    };
+  }
+
   const result = await getPrayerWithUser(username, prayerId, null);
 
   if (!result) {
     return { title: "Prayer Not Found" };
   }
 
-  const { prayer, authorName } = result;
-  const title = `${prayer.title} — ${authorName}`;
-  const description = prayer.content
-    ? extractPlainText(prayer.content).slice(0, 160)
-    : `${authorName}'s prayer request: ${prayer.title}`;
+  const { prayer: prayerData, authorName } = result;
+  const title = `${prayerData.title} — ${authorName}`;
+  const description = prayerData.content
+    ? extractPlainText(prayerData.content).slice(0, 160)
+    : `${authorName}'s prayer request: ${prayerData.title}`;
 
   return { title, description, openGraph: { title, description } };
 }

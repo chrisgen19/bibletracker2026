@@ -279,10 +279,12 @@ export async function getCommunityPrayers(): Promise<PublicPrayer[]> {
   const followedIds = following.map((f) => f.followingId);
 
   // Fetch FOLLOWERS prayers from followed users + PUBLIC prayers from everyone else
+  // Only include prayers from users with public profiles
   const prayers = await prisma.prayer.findMany({
     where: {
       userId: { not: userId },
       status: "ACTIVE",
+      user: { isProfilePublic: true },
       OR: [
         { visibility: "FOLLOWERS", userId: { in: followedIds } },
         { visibility: "PUBLIC" },
