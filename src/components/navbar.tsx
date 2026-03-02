@@ -18,6 +18,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [badgeCount, setBadgeCount] = useState(unreadCount);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const mobileNotificationRef = useRef<HTMLDivElement>(null);
   const mobileBellRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
       if (
         notificationRef.current &&
         !notificationRef.current.contains(target) &&
+        !mobileNotificationRef.current?.contains(target) &&
         !mobileBellRef.current?.contains(target)
       ) {
         setIsNotificationsOpen(false);
@@ -169,7 +171,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
 
       {/* Mobile notification dropdown */}
       {isNotificationsOpen && !isMenuOpen && (
-        <div className="sm:hidden border-t border-stone-200 bg-gradient-to-b from-stone-50/95 to-white/95 backdrop-blur-md px-4 py-4">
+        <div ref={mobileNotificationRef} className="sm:hidden border-t border-stone-200 bg-gradient-to-b from-stone-50/95 to-white/95 backdrop-blur-md px-4 py-4">
           <div className="rounded-2xl border border-stone-200 bg-white/90 shadow-lg shadow-stone-200/50 overflow-hidden">
             <NotificationDropdown
               onClose={() => setIsNotificationsOpen(false)}
