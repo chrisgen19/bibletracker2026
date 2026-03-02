@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   BookOpen,
@@ -87,12 +88,12 @@ interface PrayerDetailClientProps {
 }
 
 export function PrayerDetailClient({
-  username,
   authorName,
   prayer,
   isLoggedIn,
   isOwnPrayer,
 }: PrayerDetailClientProps) {
+  const router = useRouter();
   const [supportCount, setSupportCount] = useState(prayer.supportCount);
   const [hasPrayed, setHasPrayed] = useState(prayer.hasPrayed);
   const [isPending, startTransition] = useTransition();
@@ -158,13 +159,14 @@ export function PrayerDetailClient({
       </nav>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <Link
-          href={`/u/${username}`}
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mb-6"
         >
           <ArrowLeft size={16} />
-          {authorName}&apos;s profile
-        </Link>
+          Back
+        </button>
 
         <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-6 sm:p-8 border border-stone-100">
           {/* Header */}

@@ -267,13 +267,23 @@ export async function getUnreadNotificationCount(): Promise<number> {
 }
 
 export async function getNotifications(): Promise<NotificationItem[]> {
+  return fetchNotifications(20);
+}
+
+export async function getAllNotifications(): Promise<NotificationItem[]> {
+  return fetchNotifications(100);
+}
+
+async function fetchNotifications(
+  limit: number
+): Promise<NotificationItem[]> {
   const session = await auth();
   if (!session?.user?.id) return [];
 
   const notifications = await prisma.notification.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
-    take: 20,
+    take: limit,
     include: {
       actor: {
         select: {
@@ -293,14 +303,31 @@ export async function getNotifications(): Promise<NotificationItem[]> {
   });
 
   const actorIds = notifications.map((n) => n.actorId);
-  const followingActors = await prisma.follow.findMany({
-    where: {
-      followerId: session.user.id,
-      followingId: { in: actorIds },
-    },
-    select: { followingId: true },
-  });
+  const prayerIds = notifications
+    .filter((n) => n.type === "PRAYER_SHARED" && n.prayerId)
+    .map((n) => n.prayerId!);
+
+  const [followingActors, prayerSupports] = await Promise.all([
+    prisma.follow.findMany({
+      where: {
+        followerId: session.user.id,
+        followingId: { in: actorIds },
+      },
+      select: { followingId: true },
+    }),
+    prayerIds.length > 0
+      ? prisma.prayerSupport.findMany({
+          where: {
+            userId: session.user.id,
+            prayerId: { in: prayerIds },
+          },
+          select: { prayerId: true },
+        })
+      : [],
+  ]);
+
   const followingSet = new Set(followingActors.map((f) => f.followingId));
+  const prayedSet = new Set(prayerSupports.map((s) => s.prayerId));
 
   return notifications.map((n) => ({
     id: n.id,
@@ -314,7 +341,13 @@ export async function getNotifications(): Promise<NotificationItem[]> {
       lastName: n.actor.lastName,
       isFollowing: followingSet.has(n.actor.id),
     },
-    ...(n.prayer && { prayer: { id: n.prayer.id, title: n.prayer.title } }),
+    ...(n.prayer && {
+      prayer: {
+        id: n.prayer.id,
+        title: n.prayer.title,
+        hasPrayed: prayedSet.has(n.prayer.id),
+      },
+    }),
   }));
 }
 

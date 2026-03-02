@@ -45,6 +45,7 @@ export interface NotificationItem {
   prayer?: {
     id: string;
     title: string;
+    hasPrayed?: boolean;
   };
 }
 
