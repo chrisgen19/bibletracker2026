@@ -194,6 +194,7 @@ export function ActivityLog({
                   <PrayerEntryCard
                     key={prayer.id}
                     prayer={prayer}
+                    username={username}
                     onEdit={onEditPrayer}
                     onDelete={onDeletePrayer}
                   />
