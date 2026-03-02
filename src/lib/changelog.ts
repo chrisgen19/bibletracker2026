@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.0";
+export const APP_VERSION = "0.6.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,36 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+    version: "0.6.0",
+    date: "2026-03-02",
+    changes: [
+      { type: "feat", description: "3-level prayer visibility: Private, Followers, and Public" },
+      { type: "feat", description: "Community prayers feed with shared prayer requests from followed users" },
+      { type: "feat", description: "'I Prayed For You' support button with optimistic UI" },
+      { type: "feat", description: "Prayer detail page with supporter list at /u/[username]/prayers/[id]" },
+      { type: "feat", description: "Notifications page with full history and filters at /notifications" },
+      { type: "fix", description: "Privacy leak: community feed now respects isProfilePublic setting" },
+      { type: "fix", description: "FOLLOWERS access control enforced in prayForPrayer server action" },
+      { type: "fix", description: "Race condition in prayer support records using atomic createMany" },
+      { type: "fix", description: "Dashboard prayer cards now link to prayer detail page instead of modal" },
+      { type: "fix", description: "Mobile notification link taps no longer intercepted by click-outside handler" },
+    ],
+  },
+  {
+    version: "0.5.0",
+    date: "2026-03-01",
+    changes: [
+      { type: "feat", description: "Prayer tracking with full CRUD, categories, and calendar integration" },
+      { type: "feat", description: "Prayer sharing notifications and 'Prayed For You' support system" },
+      { type: "feat", description: "Prayer content viewer with clickable previews in activity log" },
+      { type: "feat", description: "Terms of Service and Privacy Policy pages" },
+      { type: "feat", description: "OpenGraph image and social media metadata" },
+      { type: "feat", description: "Improved mobile landing page with hero visual and steps section" },
+      { type: "fix", description: "Signup terms checkbox label now properly associated with input" },
+      { type: "fix", description: "Legal links open in new tab" },
+    ],
+  },
   {
     version: "0.4.0",
     date: "2026-03-01",
