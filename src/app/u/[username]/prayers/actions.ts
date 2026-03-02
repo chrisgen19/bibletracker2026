@@ -21,10 +21,10 @@ export async function prayForPrayer(prayerId: string, prayerOwnerId: string) {
 
   const prayer = await prisma.prayer.findUnique({
     where: { id: parsed.data.prayerId },
-    select: { id: true, userId: true, isPublic: true, user: { select: { username: true } } },
+    select: { id: true, userId: true, visibility: true, user: { select: { username: true } } },
   });
 
-  if (!prayer || !prayer.isPublic) {
+  if (!prayer || prayer.visibility === "PRIVATE") {
     throw new Error("Prayer not found or is private");
   }
 

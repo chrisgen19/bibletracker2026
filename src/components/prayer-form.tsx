@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { NotesEditor } from "@/components/notes-editor";
 import { extractPlainText } from "@/lib/notes";
-import type { PrayerFormData, PrayerCategory } from "@/lib/types";
+import type { PrayerFormData, PrayerCategory, PrayerVisibility } from "@/lib/types";
 
 const CATEGORY_OPTIONS: { value: PrayerCategory; label: string }[] = [
   { value: "PERSONAL", label: "Personal" },
@@ -137,19 +137,43 @@ export function PrayerForm({
           />
         </div>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.isPublic}
-            onChange={(e) =>
-              onFormChange({ ...formData, isPublic: e.target.checked })
-            }
-            className="w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-900"
-          />
-          <span className="text-sm text-stone-600">
-            Make this prayer public
-          </span>
-        </label>
+        <div>
+          <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
+            Visibility
+          </label>
+          <div className="flex rounded-xl border border-stone-200 overflow-hidden">
+            {(
+              [
+                { value: "PRIVATE", label: "Private" },
+                { value: "FOLLOWERS", label: "Followers" },
+                { value: "PUBLIC", label: "Public" },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() =>
+                  onFormChange({
+                    ...formData,
+                    visibility: opt.value as PrayerVisibility,
+                  })
+                }
+                className={`flex-1 px-3 py-2.5 text-sm font-medium transition-colors ${
+                  formData.visibility === opt.value
+                    ? "bg-stone-900 text-white"
+                    : "bg-stone-50 text-stone-600 hover:bg-stone-100"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-stone-400 mt-1.5">
+            {formData.visibility === "PRIVATE" && "Only you can see this prayer."}
+            {formData.visibility === "FOLLOWERS" && "Your followers can see this prayer with your full name."}
+            {formData.visibility === "PUBLIC" && "Everyone can see this prayer with your first name only."}
+          </p>
+        </div>
 
         <div className="pt-2">
           <Button onClick={onSave} className="w-full py-3 text-lg" icon={Check}>

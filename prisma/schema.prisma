@@ -44,6 +44,12 @@ enum PrayerStatus {
   NO_LONGER_PRAYING
 }
 
+enum PrayerVisibility {
+  PRIVATE
+  FOLLOWERS
+  PUBLIC
+}
+
 model User {
   id              String    @id
   email           String    @unique
@@ -171,7 +177,7 @@ model Prayer {
   answeredAt         DateTime?      @map("answered_at")
   answeredNote       String?        @map("answered_note") @db.Text
   scriptureReference String?        @map("scripture_reference")
-  isPublic           Boolean        @default(false) @map("is_public")
+  visibility         PrayerVisibility @default(PRIVATE) @map("visibility")
   createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt          DateTime       @updatedAt @map("updated_at")
 

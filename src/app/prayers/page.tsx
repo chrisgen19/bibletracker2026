@@ -3,8 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PrayerList } from "@/components/prayer-list";
 import { getUnreadNotificationCount } from "@/app/friends/actions";
+import { getCommunityPrayers } from "@/app/prayers/actions";
 import { computeStats } from "@/lib/stats";
-import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
+import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus, PrayerVisibility } from "@/lib/types";
 
 export default async function PrayersPage() {
   const session = await auth();
@@ -12,16 +13,22 @@ export default async function PrayersPage() {
     redirect("/login");
   }
 
-  const [dbPrayers, dbEntries, unreadNotificationCount] = await Promise.all([
+  const [dbPrayers, dbEntries, unreadNotificationCount, user, communityPrayers] = await Promise.all([
     prisma.prayer.findMany({
       where: { userId: session.user.id },
       orderBy: { date: "desc" },
+      include: { _count: { select: { supports: true } } },
     }),
     prisma.readingEntry.findMany({
       where: { userId: session.user.id },
       orderBy: { date: "desc" },
     }),
     getUnreadNotificationCount(),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { username: true },
+    }),
+    getCommunityPrayers(),
   ]);
 
   const prayers: Prayer[] = dbPrayers.map((p) => ({
@@ -34,7 +41,8 @@ export default async function PrayersPage() {
     answeredAt: p.answeredAt?.toISOString() ?? null,
     answeredNote: p.answeredNote,
     scriptureReference: p.scriptureReference,
-    isPublic: p.isPublic,
+    visibility: p.visibility as PrayerVisibility,
+    supportCount: p._count.supports,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   }));
@@ -53,8 +61,10 @@ export default async function PrayersPage() {
   return (
     <PrayerList
       initialPrayers={prayers}
+      communityPrayers={communityPrayers}
       stats={stats}
       unreadNotificationCount={unreadNotificationCount}
+      username={user?.username ?? ""}
     />
   );
 }

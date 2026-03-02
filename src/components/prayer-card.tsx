@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Pencil,
   Trash2,
@@ -8,6 +9,8 @@ import {
   XCircle,
   RotateCcw,
   BookOpen,
+  ChevronRight,
+  HandHeart,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -17,6 +20,7 @@ import type { Prayer } from "@/lib/types";
 
 interface PrayerCardProps {
   prayer: Prayer;
+  username: string;
   onEdit: (prayer: Prayer) => void;
   onDelete: (id: string) => void;
   onMarkAnswered: (id: string, note?: string) => void;
@@ -26,6 +30,7 @@ interface PrayerCardProps {
 
 export function PrayerCard({
   prayer,
+  username,
   onEdit,
   onDelete,
   onMarkAnswered,
@@ -52,9 +57,12 @@ export function PrayerCard({
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h3 className="font-serif font-bold text-lg text-stone-900 truncate">
+              <Link
+                href={`/u/${username}/prayers/${prayer.id}`}
+                className="font-serif font-bold text-lg text-stone-900 truncate hover:text-emerald-700 transition-colors"
+              >
                 {prayer.title}
-              </h3>
+              </Link>
               {prayer.status === "ANSWERED" && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
                   <CheckCircle2 size={12} />
@@ -128,18 +136,33 @@ export function PrayerCard({
         </div>
 
         {contentPreview && (
-          <div className="relative pl-4 mt-3">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
+          <Link
+            href={`/u/${username}/prayers/${prayer.id}`}
+            className="block relative pl-4 mt-3 group/notes"
+          >
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
+            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
               &ldquo;{contentPreview}&rdquo;
             </p>
-          </div>
+            <span className="flex items-center gap-1 mt-1.5 text-xs text-stone-400 group-hover/notes:text-emerald-600 transition-colors">
+              View prayer <ChevronRight size={12} />
+            </span>
+          </Link>
         )}
 
         {prayer.scriptureReference && (
           <div className="flex items-center gap-1.5 mt-3 text-xs text-stone-400">
             <BookOpen size={12} />
             <span>{prayer.scriptureReference}</span>
+          </div>
+        )}
+
+        {prayer.supportCount > 0 && (
+          <div className="flex items-center gap-1.5 mt-3 text-xs text-stone-400">
+            <HandHeart size={12} className="text-amber-500" />
+            <span>
+              {prayer.supportCount} {prayer.supportCount === 1 ? "person" : "people"} prayed for this
+            </span>
           </div>
         )}
 

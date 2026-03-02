@@ -61,6 +61,8 @@ export type PrayerCategory =
 
 export type PrayerStatus = "ACTIVE" | "ANSWERED" | "NO_LONGER_PRAYING";
 
+export type PrayerVisibility = "PRIVATE" | "FOLLOWERS" | "PUBLIC";
+
 export interface Prayer {
   id: string;
   date: string;
@@ -71,7 +73,8 @@ export interface Prayer {
   answeredAt: string | null;
   answeredNote: string | null;
   scriptureReference: string | null;
-  isPublic: boolean;
+  visibility: PrayerVisibility;
+  supportCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,13 +84,19 @@ export interface PrayerFormData {
   content: string;
   category: PrayerCategory;
   scriptureReference: string;
-  isPublic: boolean;
+  visibility: PrayerVisibility;
+}
+
+export interface PrayerSupporter {
+  id: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface PublicPrayer extends Prayer {
   user: { id: string; username: string; firstName: string; lastName: string };
-  supportCount: number;
   hasPrayed: boolean;
+  supporters: PrayerSupporter[];
 }
 
 export interface FriendsActivityEntry {

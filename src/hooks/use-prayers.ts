@@ -17,7 +17,7 @@ const DEFAULT_FORM_DATA: PrayerFormData = {
   content: "",
   category: "PERSONAL",
   scriptureReference: "",
-  isPublic: false,
+  visibility: "PRIVATE",
 };
 
 interface UsePrayersOptions {
@@ -50,7 +50,7 @@ export function usePrayers({ initialPrayers, getDateForCreate }: UsePrayersOptio
       content: prayer.content,
       category: prayer.category,
       scriptureReference: prayer.scriptureReference ?? "",
-      isPublic: prayer.isPublic,
+      visibility: prayer.visibility,
     });
     setIsModalOpen(true);
   };
@@ -71,7 +71,7 @@ export function usePrayers({ initialPrayers, getDateForCreate }: UsePrayersOptio
                 content: data.content,
                 category: data.category,
                 scriptureReference: data.scriptureReference || null,
-                isPublic: data.isPublic,
+                visibility: data.visibility,
               }
             : p,
         ),
@@ -106,7 +106,8 @@ export function usePrayers({ initialPrayers, getDateForCreate }: UsePrayersOptio
         answeredAt: null,
         answeredNote: null,
         scriptureReference: data.scriptureReference || null,
-        isPublic: data.isPublic,
+        visibility: data.visibility,
+        supportCount: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

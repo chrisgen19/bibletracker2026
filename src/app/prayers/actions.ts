@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateId } from "@/lib/ulid";
 import { createPrayerSchema, answerPrayerSchema } from "@/lib/validations/prayer";
-import type { Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
+import type { Prayer, PrayerCategory, PrayerStatus, PrayerVisibility, PublicPrayer } from "@/lib/types";
 
 const serializePrayer = (p: {
   id: string;
@@ -17,9 +17,10 @@ const serializePrayer = (p: {
   answeredAt: Date | null;
   answeredNote: string | null;
   scriptureReference: string | null;
-  isPublic: boolean;
+  visibility: string;
   createdAt: Date;
   updatedAt: Date;
+  _count?: { supports: number };
 }): Prayer => ({
   id: p.id,
   date: p.date.toISOString(),
@@ -30,7 +31,8 @@ const serializePrayer = (p: {
   answeredAt: p.answeredAt?.toISOString() ?? null,
   answeredNote: p.answeredNote,
   scriptureReference: p.scriptureReference,
-  isPublic: p.isPublic,
+  visibility: p.visibility as PrayerVisibility,
+  supportCount: p._count?.supports ?? 0,
   createdAt: p.createdAt.toISOString(),
   updatedAt: p.updatedAt.toISOString(),
 });
@@ -40,7 +42,7 @@ function revalidate() {
   revalidatePath("/dashboard");
 }
 
-/** Notify all followers when a prayer is made public */
+/** Notify all followers when a prayer is shared (FOLLOWERS or PUBLIC) */
 async function notifyFollowersOfPrayer(userId: string, prayerId: string) {
   const followers = await prisma.follow.findMany({
     where: { followingId: userId },
@@ -91,11 +93,12 @@ export async function createPrayer(
       content: parsed.data.content,
       category: parsed.data.category,
       scriptureReference: parsed.data.scriptureReference || null,
-      isPublic: parsed.data.isPublic,
+      visibility: parsed.data.visibility,
     },
+    include: { _count: { select: { supports: true } } },
   });
 
-  if (prayer.isPublic) {
+  if (prayer.visibility !== "PRIVATE") {
     await notifyFollowersOfPrayer(session.user.id, prayer.id);
   }
 
@@ -119,6 +122,7 @@ export async function getPrayers(filters?: {
   const prayers = await prisma.prayer.findMany({
     where,
     orderBy: { date: "desc" },
+    include: { _count: { select: { supports: true } } },
   });
 
   return prayers.map(serializePrayer);
@@ -138,10 +142,10 @@ export async function updatePrayer(
     throw new Error(parsed.error.issues[0]?.message ?? "Invalid prayer data");
   }
 
-  // Fetch current state to detect public/private transitions
+  // Fetch current state to detect visibility transitions
   const current = await prisma.prayer.findUnique({
     where: { id: prayerId, userId: session.user.id },
-    select: { isPublic: true },
+    select: { visibility: true },
   });
   if (!current) throw new Error("Prayer not found");
 
@@ -152,14 +156,20 @@ export async function updatePrayer(
       content: parsed.data.content,
       category: parsed.data.category,
       scriptureReference: parsed.data.scriptureReference || null,
-      isPublic: parsed.data.isPublic,
+      visibility: parsed.data.visibility,
     },
+    include: { _count: { select: { supports: true } } },
   });
 
-  // Handle public/private transitions
-  if (!current.isPublic && parsed.data.isPublic) {
+  // Handle visibility transitions
+  const wasShared = current.visibility !== "PRIVATE";
+  const isNowShared = parsed.data.visibility !== "PRIVATE";
+
+  if (!wasShared && isNowShared) {
+    // Went from private → shared: notify followers
     await notifyFollowersOfPrayer(session.user.id, prayer.id);
-  } else if (current.isPublic && !parsed.data.isPublic) {
+  } else if (wasShared && !isNowShared) {
+    // Went from shared → private: remove share notifications
     await prisma.notification.deleteMany({
       where: { prayerId: prayer.id, type: "PRAYER_SHARED" },
     });
@@ -203,6 +213,7 @@ export async function markPrayerAnswered(
       answeredAt: new Date(),
       answeredNote: parsed.data.answeredNote || null,
     },
+    include: { _count: { select: { supports: true } } },
   });
 
   revalidate();
@@ -220,6 +231,7 @@ export async function markPrayerNoLongerPraying(
   const prayer = await prisma.prayer.update({
     where: { id: prayerId, userId: session.user.id },
     data: { status: "NO_LONGER_PRAYING" },
+    include: { _count: { select: { supports: true } } },
   });
 
   revalidate();
@@ -239,8 +251,81 @@ export async function reactivatePrayer(prayerId: string): Promise<Prayer> {
       answeredAt: null,
       answeredNote: null,
     },
+    include: { _count: { select: { supports: true } } },
   });
 
   revalidate();
   return serializePrayer(prayer);
+}
+
+/**
+ * Fetch community prayers visible to the current user:
+ * - FOLLOWERS prayers from users the current user follows
+ * - PUBLIC prayers from all other users
+ * Excludes own prayers. For PUBLIC prayers from non-followed users,
+ * only firstName is exposed (lastName/username redacted).
+ */
+export async function getCommunityPrayers(): Promise<PublicPrayer[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const userId = session.user.id;
+
+  // Get IDs of users the current user follows
+  const following = await prisma.follow.findMany({
+    where: { followerId: userId },
+    select: { followingId: true },
+  });
+  const followedIds = following.map((f) => f.followingId);
+
+  // Fetch FOLLOWERS prayers from followed users + PUBLIC prayers from everyone else
+  const prayers = await prisma.prayer.findMany({
+    where: {
+      userId: { not: userId },
+      status: "ACTIVE",
+      OR: [
+        { visibility: "FOLLOWERS", userId: { in: followedIds } },
+        { visibility: "PUBLIC" },
+      ],
+    },
+    include: {
+      user: { select: { id: true, username: true, firstName: true, lastName: true } },
+      _count: { select: { supports: true } },
+      supports: {
+        include: { user: { select: { id: true, firstName: true, lastName: true } } },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+
+  return prayers.map((p) => {
+    const isFollowed = followedIds.includes(p.userId);
+    const hasPrayed = p.supports.some((s) => s.userId === userId);
+
+    return {
+      id: p.id,
+      date: p.date.toISOString(),
+      title: p.title,
+      content: p.content,
+      category: p.category as PrayerCategory,
+      status: p.status as PrayerStatus,
+      answeredAt: p.answeredAt?.toISOString() ?? null,
+      answeredNote: p.answeredNote,
+      scriptureReference: p.scriptureReference,
+      visibility: p.visibility as PrayerVisibility,
+      supportCount: p._count.supports,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      user: isFollowed
+        ? { id: p.user.id, username: p.user.username ?? "", firstName: p.user.firstName, lastName: p.user.lastName }
+        : { id: p.user.id, username: "", firstName: p.user.firstName, lastName: "" },
+      hasPrayed,
+      supporters: p.supports.map((s) => ({
+        id: s.user.id,
+        firstName: s.user.firstName,
+        lastName: s.user.lastName,
+      })),
+    };
+  });
 }

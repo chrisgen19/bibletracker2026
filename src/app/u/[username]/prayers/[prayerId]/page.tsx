@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { extractPlainText } from "@/lib/notes";
 import { PrayerDetailClient } from "@/components/prayer-detail-client";
-import type { PublicPrayer, PrayerCategory, PrayerStatus } from "@/lib/types";
+import type { PublicPrayer, PrayerCategory, PrayerStatus, PrayerVisibility } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ username: string; prayerId: string }>;
@@ -20,17 +20,18 @@ interface PrayerWithCounts {
   answeredAt: Date | null;
   answeredNote: string | null;
   scriptureReference: string | null;
-  isPublic: boolean;
+  visibility: string;
   createdAt: Date;
   updatedAt: Date;
   userId: string;
   _count: { supports: number };
-  supports: { id: string }[] | boolean;
+  supports: { id: string; userId: string; user: { id: string; firstName: string; lastName: string } }[] | boolean;
 }
 
 const serializePublicPrayer = (
   prayer: PrayerWithCounts,
   user: { id: string; username: string; firstName: string; lastName: string },
+  currentUserId: string | null,
 ): PublicPrayer => ({
   id: prayer.id,
   date: prayer.date.toISOString(),
@@ -41,12 +42,17 @@ const serializePublicPrayer = (
   answeredAt: prayer.answeredAt?.toISOString() ?? null,
   answeredNote: prayer.answeredNote,
   scriptureReference: prayer.scriptureReference,
-  isPublic: prayer.isPublic,
+  visibility: prayer.visibility as PrayerVisibility,
+  supportCount: prayer._count.supports,
   createdAt: prayer.createdAt.toISOString(),
   updatedAt: prayer.updatedAt.toISOString(),
   user: { id: user.id, username: user.username, firstName: user.firstName, lastName: user.lastName },
-  supportCount: prayer._count.supports,
-  hasPrayed: Array.isArray(prayer.supports) ? prayer.supports.length > 0 : false,
+  hasPrayed: Array.isArray(prayer.supports)
+    ? prayer.supports.some((s) => s.userId === currentUserId)
+    : false,
+  supporters: Array.isArray(prayer.supports)
+    ? prayer.supports.map((s) => ({ id: s.user.id, firstName: s.user.firstName, lastName: s.user.lastName }))
+    : [],
 });
 
 async function getPrayerWithUser(
@@ -65,15 +71,45 @@ async function getPrayerWithUser(
     where: { id: prayerId },
     include: {
       _count: { select: { supports: true } },
-      supports: currentUserId ? { where: { userId: currentUserId }, take: 1 } : false,
+      supports: {
+        include: { user: { select: { id: true, firstName: true, lastName: true } } },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 
-  if (!prayer || prayer.userId !== user.id || !prayer.isPublic) return null;
+  if (!prayer || prayer.userId !== user.id || prayer.visibility === "PRIVATE") return null;
+
+  // For FOLLOWERS visibility, verify the viewer is a follower or the owner
+  if (prayer.visibility === "FOLLOWERS") {
+    const isOwner = currentUserId === user.id;
+    if (!isOwner) {
+      if (!currentUserId) return null;
+      const isFollowing = await prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: currentUserId, followingId: user.id } },
+      });
+      if (!isFollowing) return null;
+    }
+  }
+
+  // For PUBLIC visibility from non-followed users, show first name only
+  let displayUser = { id: user.id, username: user.username!, firstName: user.firstName, lastName: user.lastName };
+  if (prayer.visibility === "PUBLIC" && currentUserId !== user.id) {
+    const isFollowing = currentUserId
+      ? await prisma.follow.findUnique({
+          where: { followerId_followingId: { followerId: currentUserId, followingId: user.id } },
+        })
+      : null;
+    if (!isFollowing) {
+      displayUser = { id: user.id, username: "", firstName: user.firstName, lastName: "" };
+    }
+  }
 
   return {
-    prayer: serializePublicPrayer(prayer, { ...user, username: user.username! }),
-    authorName: `${user.firstName} ${user.lastName}`,
+    prayer: serializePublicPrayer(prayer, displayUser, currentUserId),
+    authorName: displayUser.lastName
+      ? `${displayUser.firstName} ${displayUser.lastName}`
+      : displayUser.firstName,
     isOwnPrayer: currentUserId === user.id,
   };
 }

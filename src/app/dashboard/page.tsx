@@ -6,7 +6,7 @@ import {
   getFriendsActivity,
   getUnreadNotificationCount,
 } from "@/app/friends/actions";
-import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus } from "@/lib/types";
+import type { ReadingEntry, Prayer, PrayerCategory, PrayerStatus, PrayerVisibility } from "@/lib/types";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -29,6 +29,7 @@ export default async function DashboardPage() {
       prisma.prayer.findMany({
         where: { userId: session.user.id },
         orderBy: { date: "desc" },
+        include: { _count: { select: { supports: true } } },
       }),
     ]);
 
@@ -51,7 +52,8 @@ export default async function DashboardPage() {
     answeredAt: p.answeredAt?.toISOString() ?? null,
     answeredNote: p.answeredNote,
     scriptureReference: p.scriptureReference,
-    isPublic: p.isPublic,
+    visibility: p.visibility as PrayerVisibility,
+    supportCount: p._count.supports,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   }));
