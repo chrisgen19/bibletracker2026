@@ -18,7 +18,7 @@ import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
-import { cacheEntries } from "@/lib/offline-storage";
+import { cacheEntries, getCachedEntries } from "@/lib/offline-storage";
 import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer } from "@/lib/types";
 
 function MobileSheetHeader({
@@ -113,11 +113,24 @@ export function DashboardClient({
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
+  // Hydrate from IndexedDB when offline (server HTML may have stale data)
+  useEffect(() => {
+    if (!navigator.onLine && initialEntries.length === 0) {
+      getCachedEntries()
+        .then((cached) => {
+          if (cached.length > 0) setEntries(cached);
+        })
+        .catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Cache entries to IndexedDB for offline access
   useEffect(() => {
-    cacheEntries(entries).catch(() => {
-      // Silently fail — offline caching is best-effort
-    });
+    if (entries.length > 0) {
+      cacheEntries(entries).catch(() => {
+        // Silently fail — offline caching is best-effort
+      });
+    }
   }, [entries]);
 
   const getDateForCreate = useCallback(

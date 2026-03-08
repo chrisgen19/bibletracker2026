@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
-import { cachePrayers } from "@/lib/offline-storage";
+import { cachePrayers, getCachedPrayers } from "@/lib/offline-storage";
 import {
   createPrayer,
   updatePrayer,
@@ -30,11 +30,24 @@ interface UsePrayersOptions {
 export function usePrayers({ initialPrayers, getDateForCreate }: UsePrayersOptions) {
   const [prayers, setPrayers] = useState(initialPrayers);
 
+  // Hydrate from IndexedDB when offline (server HTML may have stale data)
+  useEffect(() => {
+    if (!navigator.onLine && initialPrayers.length === 0) {
+      getCachedPrayers()
+        .then((cached) => {
+          if (cached.length > 0) setPrayers(cached);
+        })
+        .catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Cache prayers to IndexedDB for offline access
   useEffect(() => {
-    cachePrayers(prayers).catch(() => {
-      // Silently fail — offline caching is best-effort
-    });
+    if (prayers.length > 0) {
+      cachePrayers(prayers).catch(() => {
+        // Silently fail — offline caching is best-effort
+      });
+    }
   }, [prayers]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -44,7 +44,7 @@ export function OfflineIndicator() {
       ) : (
         <>
           <WifiOff className="h-4 w-4" />
-          You&apos;re offline — viewing cached data
+          You&apos;re offline — some features unavailable
         </>
       )}
     </div>
