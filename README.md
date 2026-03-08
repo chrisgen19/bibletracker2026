@@ -119,6 +119,8 @@ src/
 │   │   └── login-form.tsx          # Login form component
 │   ├── changelog/
 │   │   └── page.tsx                # Changelog / version history page
+│   ├── offline/
+│   │   └── page.tsx                # PWA offline fallback page
 │   ├── terms/
 │   │   └── page.tsx                # Terms of Service
 │   ├── privacy/
@@ -132,6 +134,8 @@ src/
 │   │   └── modal.tsx               # Reusable modal
 │   ├── providers/
 │   │   └── session-provider.tsx    # NextAuth session wrapper
+│   ├── offline-indicator.tsx        # Floating online/offline status pill
+│   ├── sw-register.tsx              # Service worker registration
 │   ├── navbar.tsx                  # Navigation bar (desktop + mobile menu)
 │   ├── dashboard-client.tsx        # Dashboard client component (interactive state)
 │   ├── profile-client.tsx          # Profile page client component
@@ -168,7 +172,8 @@ src/
 │   ├── stats.tsx                   # Stats cards
 │   └── skeletons.tsx               # Loading skeleton components
 ├── hooks/
-│   └── use-prayers.ts              # Prayer state management hook (CRUD + optimistic UI)
+│   ├── use-prayers.ts              # Prayer state management hook (CRUD + optimistic UI)
+│   └── use-online-status.ts        # Online/offline detection hook (useSyncExternalStore)
 ├── lib/
 │   ├── auth.ts                     # NextAuth configuration
 │   ├── db.ts                       # Prisma client singleton
@@ -176,6 +181,7 @@ src/
 │   ├── types.ts                    # TypeScript interfaces
 │   ├── stats.ts                    # Shared stats computation
 │   ├── changelog.ts                # App version and changelog data
+│   ├── offline-storage.ts           # IndexedDB wrapper for offline caching (entries + prayers)
 │   ├── notes.ts                    # Rich text notes utilities (parse, serialize, extract plain text)
 │   ├── constants.ts                # Bible books list, abbreviations, prayer categories, and reference formatter
 │   ├── constants/
@@ -191,7 +197,16 @@ src/
 
 scripts/
 ├── db-migrate-safe.sh              # Auto-recover failed migrations before deploying
-└── reset-password.ts               # Admin CLI to reset user passwords
+├── reset-password.ts               # Admin CLI to reset user passwords
+└── generate-icons.ts               # Generate PWA icons from icon.svg (via sharp)
+
+public/
+├── manifest.json                   # PWA web app manifest
+├── sw.js                           # Service worker (caching + offline fallback)
+├── icon-192x192.png                # PWA icon (Android)
+├── icon-512x512.png                # PWA icon (splash screen)
+├── apple-touch-icon.png            # iOS home screen icon (180x180)
+└── maskable-icon-512x512.png       # Adaptive icon with safe zone padding
 
 prisma/
 ├── schema.prisma                   # Database schema (User, ReadingEntry, Prayer, PrayerSupport, Follow, Notification, enums)
@@ -254,6 +269,16 @@ prisma/
 - **Toast Notifications** - Success/error feedback on all actions (sonner)
 - **Loading Skeletons** - Smooth loading states for dashboard and profile
 - **Mobile Navigation** - Responsive hamburger menu with streak, profile, and sign out
+
+### Progressive Web App (PWA)
+- **Installable** - Add to home screen on mobile and desktop with standalone display mode
+- **Service Worker** - Caches static assets and pages for faster loads and offline navigation
+- **Offline Reading History** - Reading calendar cached to IndexedDB, viewable without internet
+- **Offline Prayer Journal** - Prayer entries cached to IndexedDB, viewable without internet
+- **Offline Status Indicator** - Floating pill shows when offline and confirms reconnection
+- **Offline Fallback Page** - Graceful fallback when navigating to uncached pages offline
+- **PWA Icons** - Multiple sizes (192px, 512px, maskable) plus Apple touch icon
+- **Dark Theme Status Bar** - Dark stone (`#1c1917`) status bar in standalone mode
 
 ### Technical
 - **Authentication** - Email/password signup and login with email verification
@@ -357,7 +382,7 @@ prisma/
 - [x] **Terms & Privacy** - Terms of Service and Privacy Policy pages
 - [ ] **Go-live SEO switch** - Remove temporary `noindex, nofollow` from `src/app/layout.tsx` and update `src/app/robots.ts` to allow crawling when the app is publicly launched
 - [ ] **Dark mode** - Toggle between light and dark themes
-- [ ] **PWA support** - Install as a mobile app with offline access
+- [x] **PWA support** - Install as a mobile app with offline access
 - [ ] **Push notifications** - Daily reading reminders
 - [ ] **Analytics dashboard** - Reading trends, weekly/monthly summaries
 - [ ] **Rate limiting** - Protect auth endpoints from brute force

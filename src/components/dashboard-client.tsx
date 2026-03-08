@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo, useCallback } from "react";
+import { useState, useTransition, useMemo, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -11,6 +11,7 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { EntryForm } from "@/components/entry-form";
 import { PrayerForm } from "@/components/prayer-form";
 import { FabDropdown } from "@/components/fab-dropdown";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import { useBottomSheet } from "@/hooks/use-bottom-sheet";
 import { usePrayers } from "@/hooks/use-prayers";
 import { parseLocalDate } from "@/lib/date-utils";
@@ -18,6 +19,7 @@ import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
+import { cacheEntries, getCachedEntries } from "@/lib/offline-storage";
 import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer } from "@/lib/types";
 
 function MobileSheetHeader({
@@ -111,6 +113,26 @@ export function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  // Hydrate from IndexedDB when offline (server HTML may have stale data)
+  useEffect(() => {
+    if (!navigator.onLine && initialEntries.length === 0) {
+      getCachedEntries()
+        .then((cached) => {
+          if (cached.length > 0) setEntries(cached);
+        })
+        .catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Cache entries to IndexedDB for offline access
+  useEffect(() => {
+    if (entries.length > 0) {
+      cacheEntries(entries).catch(() => {
+        // Silently fail — offline caching is best-effort
+      });
+    }
+  }, [entries]);
 
   const getDateForCreate = useCallback(
     () => selectedDate.toISOString(),
@@ -417,6 +439,8 @@ export function DashboardClient({
         onSave={handleSavePrayer}
         isEditing={!!editingPrayerId}
       />
+
+      <PwaInstallPrompt />
     </div>
   );
 }

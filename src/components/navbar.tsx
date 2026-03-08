@@ -40,7 +40,7 @@ export function Navbar({ stats, unreadCount }: NavbarProps) {
   }, [isNotificationsOpen]);
 
   return (
-    <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
+    <nav className="sticky top-0 z-30 bg-stone-50/80 backdrop-blur-md border-b border-stone-200 pwa-safe-top">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-3">
           <div className="bg-stone-900 text-white p-2 rounded-xl">

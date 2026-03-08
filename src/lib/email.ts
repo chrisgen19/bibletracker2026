@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { Resend } from "resend";
 import { env } from "@/env";
 
@@ -5,8 +6,17 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 const FROM_EMAIL = "Sola Scriptura <noreply@support.cgdiomampo.dev>";
 
+async function getBaseUrl(): Promise<string> {
+  if (env.AUTH_URL) return env.AUTH_URL;
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
+
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const verifyUrl = `${env.AUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+  const baseUrl = await getBaseUrl();
+  const verifyUrl = `${baseUrl}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
   await resend.emails.send({
     from: FROM_EMAIL,
@@ -30,7 +40,8 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetUrl = `${env.AUTH_URL}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+  const baseUrl = await getBaseUrl();
+  const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
   await resend.emails.send({
     from: FROM_EMAIL,
