@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.6.0";
+export const APP_VERSION = "0.7.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+    version: "0.7.0",
+    date: "2026-03-08",
+    changes: [
+      { type: "feat", description: "Progressive Web App — installable on mobile and desktop with standalone mode" },
+      { type: "feat", description: "Service worker with asset caching and offline navigation fallback" },
+      { type: "feat", description: "Offline reading history — cached calendar viewable without internet" },
+      { type: "feat", description: "Offline prayer journal — cached prayers viewable without internet" },
+      { type: "feat", description: "Online/offline status indicator with reconnection feedback" },
+      { type: "feat", description: "PWA icons (192px, 512px, maskable) and Apple touch icon" },
+      { type: "feat", description: "Offline fallback page when navigating to uncached pages" },
+    ],
+  },
   {
     version: "0.6.0",
     date: "2026-03-02",
