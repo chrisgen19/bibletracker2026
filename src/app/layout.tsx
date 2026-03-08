@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { OfflineIndicator } from "@/components/offline-indicator";
+import { ServiceWorkerRegister } from "@/components/sw-register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,6 +20,14 @@ const SITE_TITLE = "Sola Scriptura — Bible Reading Tracker";
 const SITE_DESCRIPTION =
   "Track your daily Bible reading, build streaks, and reflect on Scripture with a simple, beautiful journal.";
 
+export const viewport: Viewport = {
+  themeColor: "#1c1917",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.AUTH_URL ?? "http://localhost:3000"),
   title: {
@@ -25,6 +35,12 @@ export const metadata: Metadata = {
     template: "%s | Sola Scriptura",
   },
   description: SITE_DESCRIPTION,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Scriptura",
+  },
   openGraph: {
     type: "website",
     siteName: "Sola Scriptura",
@@ -59,6 +75,8 @@ export default function RootLayout({
       >
         <SessionProvider>{children}</SessionProvider>
         <Toaster position="bottom-right" richColors />
+        <OfflineIndicator />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

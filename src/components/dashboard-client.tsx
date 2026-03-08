@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo, useCallback } from "react";
+import { useState, useTransition, useMemo, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -18,6 +18,7 @@ import type { ActivityTab } from "@/components/activity-log";
 import { createEntry, updateEntry, deleteEntry } from "@/app/dashboard/actions";
 import { computeStats } from "@/lib/stats";
 import { APP_VERSION } from "@/lib/changelog";
+import { cacheEntries } from "@/lib/offline-storage";
 import type { ReadingEntry, EntryFormData, FriendsActivityEntry, Prayer } from "@/lib/types";
 
 function MobileSheetHeader({
@@ -111,6 +112,13 @@ export function DashboardClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+
+  // Cache entries to IndexedDB for offline access
+  useEffect(() => {
+    cacheEntries(entries).catch(() => {
+      // Silently fail — offline caching is best-effort
+    });
+  }, [entries]);
 
   const getDateForCreate = useCallback(
     () => selectedDate.toISOString(),
