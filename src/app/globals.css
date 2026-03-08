@@ -562,3 +562,15 @@ body {
 .landing-delay-3 {
   animation-delay: 0.4s;
 }
+
+/* PWA install prompt slide-up entrance */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

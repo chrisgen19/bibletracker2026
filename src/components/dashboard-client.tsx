@@ -11,6 +11,7 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { EntryForm } from "@/components/entry-form";
 import { PrayerForm } from "@/components/prayer-form";
 import { FabDropdown } from "@/components/fab-dropdown";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import { useBottomSheet } from "@/hooks/use-bottom-sheet";
 import { usePrayers } from "@/hooks/use-prayers";
 import { parseLocalDate } from "@/lib/date-utils";
@@ -438,6 +439,8 @@ export function DashboardClient({
         onSave={handleSavePrayer}
         isEditing={!!editingPrayerId}
       />
+
+      <PwaInstallPrompt />
     </div>
   );
 }
