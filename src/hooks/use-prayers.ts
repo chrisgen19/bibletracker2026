@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
+import { cachePrayers } from "@/lib/offline-storage";
 import {
   createPrayer,
   updatePrayer,
@@ -28,6 +29,14 @@ interface UsePrayersOptions {
 
 export function usePrayers({ initialPrayers, getDateForCreate }: UsePrayersOptions) {
   const [prayers, setPrayers] = useState(initialPrayers);
+
+  // Cache prayers to IndexedDB for offline access
+  useEffect(() => {
+    cachePrayers(prayers).catch(() => {
+      // Silently fail — offline caching is best-effort
+    });
+  }, [prayers]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPrayerId, setEditingPrayerId] = useState<string | null>(null);
   const [formData, setFormData] = useState<PrayerFormData>(DEFAULT_FORM_DATA);
