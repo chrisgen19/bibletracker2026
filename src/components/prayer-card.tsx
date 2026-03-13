@@ -23,6 +23,12 @@ interface PrayerCardProps {
   onReactivate: (id: string) => void;
 }
 
+const ACCENT_COLOR: Record<string, string> = {
+  ACTIVE: "bg-amber-400 group-hover:bg-amber-500",
+  ANSWERED: "bg-emerald-400 group-hover:bg-emerald-500",
+  NO_LONGER_PRAYING: "bg-stone-300 group-hover:bg-stone-400",
+};
+
 export function PrayerCard({
   prayer,
   username,
@@ -42,103 +48,120 @@ export function PrayerCard({
     year: "numeric",
   });
 
-  const canLink = username && prayer.visibility !== "PRIVATE";
+  const hasLink = !!username;
 
   return (
-    <>
-      <div className="group bg-white rounded-2xl p-5 shadow-sm border border-stone-100 hover:shadow-md transition-all duration-300">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              {canLink ? (
-                <Link
-                  href={`/u/${username}/prayers/${prayer.id}`}
-                  className="font-serif font-bold text-lg text-stone-900 truncate hover:text-emerald-700 transition-colors"
+    <div className="group bg-white rounded-2xl shadow-sm border border-stone-100 hover:shadow-md transition-all duration-300 overflow-hidden">
+      <div className="flex items-stretch">
+        {/* Left accent strip — color reflects prayer status */}
+        <div className={`w-1 shrink-0 transition-colors ${ACCENT_COLOR[prayer.status]}`} />
+
+        <div className="flex-1 p-4 pl-4">
+          {/* Header: title + meta stacked, actions on right */}
+          <div className="flex justify-between items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                {hasLink ? (
+                  <Link
+                    href={`/u/${username}/prayers/${prayer.id}`}
+                    className="font-serif font-bold text-[1.1rem] leading-tight text-stone-900 truncate hover:text-emerald-700 transition-colors"
+                  >
+                    {prayer.title}
+                  </Link>
+                ) : (
+                  <h3 className="font-serif font-bold text-[1.1rem] leading-tight text-stone-900 truncate">
+                    {prayer.title}
+                  </h3>
+                )}
+                {prayer.status === "ANSWERED" && (
+                  <span className="inline-flex items-center gap-1 text-[0.65rem] font-semibold uppercase tracking-wide bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full shrink-0">
+                    <CheckCircle2 size={10} />
+                    Answered
+                  </span>
+                )}
+                {prayer.status === "NO_LONGER_PRAYING" && (
+                  <span className="inline-flex items-center gap-1 text-[0.65rem] font-semibold uppercase tracking-wide bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-full shrink-0">
+                    <XCircle size={10} />
+                    Closed
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span
+                  className={`text-xs font-medium px-2 py-0.5 rounded-md ${PRAYER_CATEGORY_COLORS[prayer.category]}`}
                 >
-                  {prayer.title}
-                </Link>
-              ) : (
-                <span className="font-serif font-bold text-lg text-stone-900 truncate">
-                  {prayer.title}
+                  {PRAYER_CATEGORY_LABELS[prayer.category]}
                 </span>
-              )}
-              {prayer.status === "ANSWERED" && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
-                  <CheckCircle2 size={12} />
-                  Answered
-                </span>
-              )}
-              {prayer.status === "NO_LONGER_PRAYING" && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full">
-                  <XCircle size={12} />
-                  Closed
-                </span>
-              )}
+                <span className="text-xs text-stone-400">{formattedDate}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-md ${PRAYER_CATEGORY_COLORS[prayer.category]}`}
+            <div className="shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <PrayerCardActions
+                prayer={prayer}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onMarkAnswered={onMarkAnswered}
+                onMarkNoLongerPraying={onMarkNoLongerPraying}
+                onReactivate={onReactivate}
+              />
+            </div>
+          </div>
+
+          {/* Content preview */}
+          {contentPreview && (
+            hasLink ? (
+              <Link
+                href={`/u/${username}/prayers/${prayer.id}`}
+                className="block mt-3 pt-3 border-t border-stone-100 group/notes"
               >
-                {PRAYER_CATEGORY_LABELS[prayer.category]}
-              </span>
-              <span className="text-xs text-stone-400">{formattedDate}</span>
+                <p className="text-stone-500 text-[0.8rem] leading-relaxed line-clamp-2 group-hover/notes:text-stone-700 transition-colors">
+                  {contentPreview}
+                </p>
+                <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-medium text-amber-600/70 group-hover/notes:text-amber-600 transition-colors">
+                  View prayer <ChevronRight size={11} />
+                </span>
+              </Link>
+            ) : (
+              <div className="mt-3 pt-3 border-t border-stone-100">
+                <p className="text-stone-500 text-[0.8rem] leading-relaxed line-clamp-2">
+                  {contentPreview}
+                </p>
+                <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-medium text-amber-600/70">
+                  View prayer <ChevronRight size={11} />
+                </span>
+              </div>
+            )
+          )}
+
+          {/* Footer meta: scripture + support count */}
+          {(prayer.scriptureReference || prayer.supportCount > 0) && (
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {prayer.scriptureReference && (
+                <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                  <BookOpen size={12} />
+                  <span>{prayer.scriptureReference}</span>
+                </div>
+              )}
+              {prayer.supportCount > 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                  <HandHeart size={12} className="text-amber-500" />
+                  <span>
+                    {prayer.supportCount} {prayer.supportCount === 1 ? "person" : "people"} prayed
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-          <PrayerCardActions
-            prayer={prayer}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onMarkAnswered={onMarkAnswered}
-            onMarkNoLongerPraying={onMarkNoLongerPraying}
-            onReactivate={onReactivate}
-          />
+          )}
+
+          {/* Answered note */}
+          {prayer.status === "ANSWERED" && prayer.answeredNote && (
+            <div className="mt-3 bg-emerald-50/50 rounded-xl p-3 text-[0.8rem] text-emerald-800 leading-relaxed">
+              <span className="font-semibold">How God answered: </span>
+              {prayer.answeredNote}
+            </div>
+          )}
         </div>
-
-        {contentPreview && canLink ? (
-          <Link
-            href={`/u/${username}/prayers/${prayer.id}`}
-            className="block relative pl-4 mt-3 group/notes"
-          >
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
-            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
-              &ldquo;{contentPreview}&rdquo;
-            </p>
-            <span className="flex items-center gap-1 mt-1.5 text-xs text-stone-400 group-hover/notes:text-emerald-600 transition-colors">
-              View prayer <ChevronRight size={12} />
-            </span>
-          </Link>
-        ) : contentPreview ? (
-          <div className="relative pl-4 mt-3">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full" />
-            <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2">
-              &ldquo;{contentPreview}&rdquo;
-            </p>
-          </div>
-        ) : null}
-
-        {prayer.scriptureReference && (
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-stone-400">
-            <BookOpen size={12} />
-            <span>{prayer.scriptureReference}</span>
-          </div>
-        )}
-
-        {prayer.supportCount > 0 && (
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-stone-400">
-            <HandHeart size={12} className="text-amber-500" />
-            <span>
-              {prayer.supportCount} {prayer.supportCount === 1 ? "person" : "people"} prayed for this
-            </span>
-          </div>
-        )}
-
-        {prayer.status === "ANSWERED" && prayer.answeredNote && (
-          <div className="mt-3 bg-emerald-50/50 rounded-xl p-3 text-sm text-emerald-800">
-            <span className="font-medium">How God answered: </span>
-            {prayer.answeredNote}
-          </div>
-        )}
       </div>
-    </>
+    </div>
   );
 }

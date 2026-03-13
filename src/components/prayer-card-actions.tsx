@@ -35,13 +35,13 @@ export function PrayerCardActions({
 
   return (
     <>
-      <div className="flex items-center gap-1 ml-2 shrink-0">
+      <div className="flex items-center gap-0.5">
         {prayer.status === "ACTIVE" && (
           <>
             <button
               type="button"
               onClick={() => onEdit(prayer)}
-              className="p-1.5 text-stone-300 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+              className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
               title="Edit"
             >
               <Pencil size={14} />
@@ -49,7 +49,7 @@ export function PrayerCardActions({
             <button
               type="button"
               onClick={() => setShowAnsweredModal(true)}
-              className="p-1.5 text-stone-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              className="p-1.5 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
               title="Mark as Answered"
             >
               <CheckCircle2 size={14} />
@@ -57,7 +57,7 @@ export function PrayerCardActions({
             <button
               type="button"
               onClick={() => onMarkNoLongerPraying(prayer.id)}
-              className="p-1.5 text-stone-300 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+              className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
               title="No Longer Praying"
             >
               <XCircle size={14} />
@@ -68,7 +68,7 @@ export function PrayerCardActions({
           <button
             type="button"
             onClick={() => onReactivate(prayer.id)}
-            className="p-1.5 text-stone-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-1.5 text-stone-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Reactivate"
           >
             <RotateCcw size={14} />
@@ -77,7 +77,7 @@ export function PrayerCardActions({
         <button
           type="button"
           onClick={() => setShowConfirm(true)}
-          className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           title="Delete"
         >
           <Trash2 size={14} />

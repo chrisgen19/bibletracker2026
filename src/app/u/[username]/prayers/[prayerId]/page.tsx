@@ -74,11 +74,15 @@ async function getPrayerWithUser(
     },
   });
 
-  if (!prayer || prayer.userId !== user.id || prayer.visibility === "PRIVATE") return null;
+  if (!prayer || prayer.userId !== user.id) return null;
+
+  const isOwner = currentUserId === user.id;
+
+  // Private prayers are only visible to the owner
+  if (prayer.visibility === "PRIVATE" && !isOwner) return null;
 
   // For FOLLOWERS visibility, verify the viewer is a follower or the owner
   if (prayer.visibility === "FOLLOWERS") {
-    const isOwner = currentUserId === user.id;
     if (!isOwner) {
       if (!currentUserId) return null;
       const isFollowing = await prisma.follow.findUnique({
