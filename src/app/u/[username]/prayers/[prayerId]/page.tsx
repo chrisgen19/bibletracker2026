@@ -121,22 +121,25 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { username, prayerId } = await params;
+  const session = await auth();
+  const currentUserId = session?.user?.id ?? null;
 
-  // Check if this is a FOLLOWERS-only prayer (getPrayerWithUser returns null
-  // for FOLLOWERS prayers when currentUserId is null). Show generic metadata
-  // instead of "Prayer Not Found" so shared links look correct.
-  const prayer = await prisma.prayer.findUnique({
-    where: { id: prayerId },
-    select: { visibility: true },
-  });
-  if (prayer?.visibility === "FOLLOWERS") {
-    return {
-      title: "Prayer Request — Sola Scriptura",
-      description: "A shared prayer request visible to followers.",
-    };
+  // Check if this is a FOLLOWERS-only prayer viewed by a non-authenticated user.
+  // Show generic metadata instead of "Prayer Not Found" so shared links look correct.
+  if (!currentUserId) {
+    const prayer = await prisma.prayer.findUnique({
+      where: { id: prayerId },
+      select: { visibility: true },
+    });
+    if (prayer?.visibility === "FOLLOWERS") {
+      return {
+        title: "Prayer Request — Sola Scriptura",
+        description: "A shared prayer request visible to followers.",
+      };
+    }
   }
 
-  const result = await getPrayerWithUser(username, prayerId, null);
+  const result = await getPrayerWithUser(username, prayerId, currentUserId);
 
   if (!result) {
     return { title: "Prayer Not Found" };
