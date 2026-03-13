@@ -61,7 +61,12 @@ async function getPrayerWithUser(
     select: { id: true, firstName: true, lastName: true, username: true, isProfilePublic: true },
   });
 
-  if (!user || !user.isProfilePublic) return null;
+  if (!user) return null;
+
+  const isOwner = currentUserId === user.id;
+
+  // Non-owners can't access private profiles
+  if (!user.isProfilePublic && !isOwner) return null;
 
   const prayer = await prisma.prayer.findUnique({
     where: { id: prayerId },
@@ -74,11 +79,13 @@ async function getPrayerWithUser(
     },
   });
 
-  if (!prayer || prayer.userId !== user.id || prayer.visibility === "PRIVATE") return null;
+  if (!prayer || prayer.userId !== user.id) return null;
+
+  // Private prayers are only visible to the owner
+  if (prayer.visibility === "PRIVATE" && !isOwner) return null;
 
   // For FOLLOWERS visibility, verify the viewer is a follower or the owner
   if (prayer.visibility === "FOLLOWERS") {
-    const isOwner = currentUserId === user.id;
     if (!isOwner) {
       if (!currentUserId) return null;
       const isFollowing = await prisma.follow.findUnique({
@@ -114,22 +121,25 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { username, prayerId } = await params;
+  const session = await auth();
+  const currentUserId = session?.user?.id ?? null;
 
-  // Check if this is a FOLLOWERS-only prayer (getPrayerWithUser returns null
-  // for FOLLOWERS prayers when currentUserId is null). Show generic metadata
-  // instead of "Prayer Not Found" so shared links look correct.
-  const prayer = await prisma.prayer.findUnique({
-    where: { id: prayerId },
-    select: { visibility: true },
-  });
-  if (prayer?.visibility === "FOLLOWERS") {
-    return {
-      title: "Prayer Request — Sola Scriptura",
-      description: "A shared prayer request visible to followers.",
-    };
+  // Check if this is a FOLLOWERS-only prayer viewed by a non-authenticated user.
+  // Show generic metadata instead of "Prayer Not Found" so shared links look correct.
+  if (!currentUserId) {
+    const prayer = await prisma.prayer.findUnique({
+      where: { id: prayerId },
+      select: { visibility: true },
+    });
+    if (prayer?.visibility === "FOLLOWERS") {
+      return {
+        title: "Prayer Request — Sola Scriptura",
+        description: "A shared prayer request visible to followers.",
+      };
+    }
   }
 
-  const result = await getPrayerWithUser(username, prayerId, null);
+  const result = await getPrayerWithUser(username, prayerId, currentUserId);
 
   if (!result) {
     return { title: "Prayer Not Found" };
