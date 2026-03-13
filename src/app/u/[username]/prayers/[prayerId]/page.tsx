@@ -61,7 +61,12 @@ async function getPrayerWithUser(
     select: { id: true, firstName: true, lastName: true, username: true, isProfilePublic: true },
   });
 
-  if (!user || !user.isProfilePublic) return null;
+  if (!user) return null;
+
+  const isOwner = currentUserId === user.id;
+
+  // Non-owners can't access private profiles
+  if (!user.isProfilePublic && !isOwner) return null;
 
   const prayer = await prisma.prayer.findUnique({
     where: { id: prayerId },
@@ -75,8 +80,6 @@ async function getPrayerWithUser(
   });
 
   if (!prayer || prayer.userId !== user.id) return null;
-
-  const isOwner = currentUserId === user.id;
 
   // Private prayers are only visible to the owner
   if (prayer.visibility === "PRIVATE" && !isOwner) return null;

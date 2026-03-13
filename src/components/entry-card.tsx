@@ -43,7 +43,7 @@ export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: 
                   {chapterLabel}
                 </p>
               </div>
-              <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <div className="flex items-center gap-0.5 shrink-0 hover-actions">
                 <button
                   type="button"
                   onClick={() => onEdit(entry)}

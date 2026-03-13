@@ -95,7 +95,7 @@ export function PrayerCard({
                 <span className="text-xs text-stone-400">{formattedDate}</span>
               </div>
             </div>
-            <div className="shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+            <div className="shrink-0 hover-actions">
               <PrayerCardActions
                 prayer={prayer}
                 onEdit={onEdit}
