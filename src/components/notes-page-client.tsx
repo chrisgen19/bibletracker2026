@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   BookOpen,
@@ -37,18 +36,18 @@ interface NotesPageEntry {
 }
 
 interface NotesPageClientProps {
+  username: string;
   authorName: string;
   entry: NotesPageEntry;
   isLoggedIn: boolean;
 }
 
 export function NotesPageClient({
+  username,
   authorName,
   entry,
   isLoggedIn,
 }: NotesPageClientProps) {
-  const router = useRouter();
-
   const formattedDate = new Date(entry.date).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -82,14 +81,13 @@ export function NotesPageClient({
       </nav>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <button
-          type="button"
-          onClick={() => router.back()}
+        <Link
+          href={`/u/${username}`}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mb-6"
         >
           <ArrowLeft size={16} />
-          Back
-        </button>
+          {authorName}&apos;s profile
+        </Link>
 
         <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-6 sm:p-8 border border-stone-100">
           {/* Header */}
