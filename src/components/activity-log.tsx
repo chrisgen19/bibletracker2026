@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Calendar as CalendarIcon, Users, HandHeart } from "lucide-react";
 import { EntryCard } from "@/components/entry-card";
 import { PrayerEntryCard } from "@/components/prayer-entry-card";
-import { FriendEntryCard } from "@/components/friend-entry-card";
 import { FabDropdown } from "@/components/fab-dropdown";
 import type { ReadingEntry, Prayer, FriendsActivityEntry } from "@/lib/types";
 
@@ -216,7 +215,7 @@ export function ActivityLog({
           ) : (
             <>
               {friendsEntries.slice(0, visibleCount).map((entry) => (
-                <FriendEntryCard key={entry.id} entry={entry} />
+                <EntryCard key={entry.id} variant="friend" entry={entry} />
               ))}
               {visibleCount < friendsEntries.length && (
                 <button
