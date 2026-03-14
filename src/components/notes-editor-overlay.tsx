@@ -22,6 +22,9 @@ import {
   Pencil,
   Link as LinkIcon,
   Check,
+  BookOpenText,
+  Hash,
+  Calendar,
 } from "lucide-react";
 import {
   BlockNoteSchema,
@@ -159,6 +162,20 @@ function Toolbar({ editor }: { editor: EditorType }) {
   );
 }
 
+/** Contextual metadata displayed below the header */
+interface EditorContext {
+  /** Primary label — book name or prayer title */
+  label: string;
+  /** Badges shown as pills next to the label */
+  badges?: Array<{
+    text: string;
+    icon?: "chapter" | "verse" | "category";
+    color?: "emerald" | "amber" | "stone";
+  }>;
+  /** Date to display */
+  date?: string;
+}
+
 interface NotesEditorOverlayProps {
   isOpen: boolean;
   initialNotes: string;
@@ -172,6 +189,8 @@ interface NotesEditorOverlayProps {
   title?: string;
   /** Extra content rendered below the header bar in view mode (e.g. prayer metadata) */
   headerContent?: ReactNode;
+  /** Contextual metadata: book/chapter/verse or prayer title/category */
+  context?: EditorContext;
 }
 
 export function NotesEditorOverlay({
@@ -184,6 +203,7 @@ export function NotesEditorOverlay({
   shareUrl,
   title = "Reflection",
   headerContent,
+  context,
 }: NotesEditorOverlayProps) {
   const [copied, setCopied] = useState(false);
 
@@ -236,69 +256,120 @@ export function NotesEditorOverlay({
     onSave(hasContent ? serializeNotes(blocks) : "");
   };
 
+  const formattedDate = context?.date
+    ? new Date(context.date).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
   return (
     <div className="fixed inset-0 z-60 flex flex-col bg-stone-50">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200 bg-white">
-        {isViewMode ? (
-          <>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-            <h2 className="text-base font-serif font-bold text-stone-900">
-              {title}
-            </h2>
-            <div className="flex items-center gap-1">
-              {shareUrl && (
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="flex items-center gap-1 text-sm font-medium text-stone-400 hover:text-stone-600 transition-colors px-2 py-1.5"
-                  title="Copy shareable link"
-                >
-                  {copied ? <Check size={14} className="text-emerald-600" /> : <LinkIcon size={14} />}
-                  <span className={copied ? "text-emerald-600" : ""}>{copied ? "Copied" : "Share"}</span>
-                </button>
-              )}
-              {onEdit ? (
-                <button
-                  type="button"
-                  onClick={onEdit}
-                  className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-2 py-1.5"
-                >
-                  <Pencil size={14} />
-                  Edit
-                </button>
-              ) : (
-                !shareUrl && <div className="px-3 py-1.5 w-[60px]" />
+      {/* Header bar */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="flex items-center justify-between px-4 py-3">
+          {isViewMode ? (
+            <>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+              <h2 className="text-base font-serif font-bold text-stone-900">
+                {title}
+              </h2>
+              <div className="flex items-center gap-1">
+                {shareUrl && (
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1 text-sm font-medium text-stone-400 hover:text-stone-600 transition-colors px-2 py-1.5"
+                    title="Copy shareable link"
+                  >
+                    {copied ? <Check size={14} className="text-emerald-600" /> : <LinkIcon size={14} />}
+                    <span className={copied ? "text-emerald-600" : ""}>{copied ? "Copied" : "Share"}</span>
+                  </button>
+                )}
+                {onEdit ? (
+                  <button
+                    type="button"
+                    onClick={onEdit}
+                    className="flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-2 py-1.5"
+                  >
+                    <Pencil size={14} />
+                    Edit
+                  </button>
+                ) : (
+                  !shareUrl && <div className="px-3 py-1.5 w-[60px]" />
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
+              >
+                Cancel
+              </button>
+              <h2 className="text-base font-serif font-bold text-stone-900">
+                {title}
+              </h2>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
+              >
+                Done
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Context banner — shows reading/prayer metadata */}
+        {context && (
+          <div className="px-4 pb-3">
+            <div className="max-w-4xl mx-auto flex flex-wrap items-center gap-2 px-1">
+              <span className="font-serif font-bold text-stone-800 text-sm">
+                {context.label}
+              </span>
+              {context.badges?.map((badge, i) => {
+                const colorMap = {
+                  emerald: "bg-emerald-50 text-emerald-700",
+                  amber: "bg-amber-50 text-amber-700",
+                  stone: "bg-stone-100 text-stone-600",
+                };
+                const iconMap = {
+                  chapter: <BookOpenText size={11} />,
+                  verse: <Hash size={11} />,
+                  category: null,
+                };
+                return (
+                  <span
+                    key={i}
+                    className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md ${colorMap[badge.color ?? "stone"]}`}
+                  >
+                    {badge.icon && iconMap[badge.icon]}
+                    {badge.text}
+                  </span>
+                );
+              })}
+              {formattedDate && (
+                <>
+                  <span className="text-stone-300">|</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-stone-400">
+                    <Calendar size={11} />
+                    {formattedDate}
+                  </span>
+                </>
               )}
             </div>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors px-3 py-1.5"
-            >
-              Cancel
-            </button>
-            <h2 className="text-base font-serif font-bold text-stone-900">
-              {title}
-            </h2>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors px-3 py-1.5"
-            >
-              Done
-            </button>
-          </>
+          </div>
         )}
       </div>
 

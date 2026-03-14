@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { BookOpen, ArrowLeft, Loader2, FileText } from "lucide-react";
+import {
+  BookOpen,
+  ArrowLeft,
+  Loader2,
+  FileText,
+  BookOpenText,
+  Hash,
+} from "lucide-react";
 
 const NotesBlockViewer = dynamic(
   () =>
@@ -74,7 +81,6 @@ export function NotesPageClient({
       </nav>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Back link */}
         <Link
           href={`/u/${username}`}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mb-6"
@@ -83,23 +89,28 @@ export function NotesPageClient({
           {authorName}&apos;s profile
         </Link>
 
-        {/* Entry header */}
         <div className="bg-white rounded-3xl shadow-xl shadow-stone-200/50 p-6 sm:p-8 border border-stone-100">
+          {/* Header */}
           <div className="mb-6">
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="font-serif font-bold text-2xl sm:text-3xl text-stone-900">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-stone-900">
                 {entry.book}
+              </h1>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-md">
+                <BookOpenText size={12} />
+                Chapter {entry.chapters}
               </span>
-              <span className="text-emerald-600 font-medium bg-emerald-50 px-2.5 py-0.5 rounded-md text-sm">
-                Ch {entry.chapters}
-                {entry.verses && `: ${entry.verses}`}
-              </span>
+              {entry.verses && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-md">
+                  <Hash size={12} />
+                  Verses {entry.verses}
+                </span>
+              )}
             </div>
             <p className="text-sm text-stone-500">{formattedDate}</p>
             <p className="text-sm text-stone-400 mt-1">by {authorName}</p>
           </div>
 
-          {/* Divider */}
           <div className="border-t border-stone-100 mb-6" />
 
           {/* Notes content */}
@@ -117,6 +128,17 @@ export function NotesPageClient({
               </p>
             </div>
           )}
+
+          {/* Reading context */}
+          <div className="border-t border-stone-100 mt-6 pt-6">
+            <div className="flex items-center gap-2 text-sm text-stone-500">
+              <BookOpenText size={16} className="text-emerald-600" />
+              <span>
+                {entry.book} {entry.chapters}
+                {entry.verses && `:${entry.verses}`}
+              </span>
+            </div>
+          </div>
         </div>
       </main>
     </div>

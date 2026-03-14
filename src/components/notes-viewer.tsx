@@ -33,6 +33,16 @@ interface NotesViewerProps {
   title?: string;
   /** Extra content rendered below the header bar in view mode */
   headerContent?: ReactNode;
+  /** Contextual metadata: book/chapter/verse or prayer title/category */
+  context?: {
+    label: string;
+    badges?: Array<{
+      text: string;
+      icon?: "chapter" | "verse" | "category";
+      color?: "emerald" | "amber" | "stone";
+    }>;
+    date?: string;
+  };
 }
 
 export function NotesViewer({
@@ -43,6 +53,7 @@ export function NotesViewer({
   shareUrl,
   title,
   headerContent,
+  context,
 }: NotesViewerProps) {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -72,6 +83,7 @@ export function NotesViewer({
       shareUrl={shareUrl}
       title={title}
       headerContent={headerContent}
+      context={context}
     />,
     document.body
   );

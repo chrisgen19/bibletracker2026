@@ -113,6 +113,12 @@ export function PrayerForm({
               setNotesEditorOpen(false);
             }}
             onCancel={() => setNotesEditorOpen(false)}
+            context={formData.title ? {
+              label: formData.title,
+              badges: [
+                { text: CATEGORY_OPTIONS.find((o) => o.value === formData.category)?.label ?? formData.category, color: "amber" as const },
+              ],
+            } : undefined}
           />
         </div>
 

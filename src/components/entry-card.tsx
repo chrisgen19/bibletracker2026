@@ -86,6 +86,13 @@ export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: 
         onClose={() => setShowViewer(false)}
         onSave={onUpdateNotes ? (notes) => onUpdateNotes(entry.id, notes) : undefined}
         shareUrl={username ? `/u/${username}/notes/${entry.id}` : undefined}
+        context={{
+          label: entry.book,
+          badges: [
+            { text: `Ch ${entry.chapters}`, icon: "chapter" as const, color: "emerald" as const },
+            ...(entry.verses ? [{ text: `v. ${entry.verses}`, icon: "verse" as const, color: "amber" as const }] : []),
+          ],
+        }}
       />
 
       <Modal

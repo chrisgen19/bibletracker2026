@@ -25,6 +25,15 @@ interface NotesEditorProps {
   onCancel: () => void;
   mode?: "view" | "edit";
   onEdit?: () => void;
+  context?: {
+    label: string;
+    badges?: Array<{
+      text: string;
+      icon?: "chapter" | "verse" | "category";
+      color?: "emerald" | "amber" | "stone";
+    }>;
+    date?: string;
+  };
 }
 
 export function NotesEditor({
@@ -34,6 +43,7 @@ export function NotesEditor({
   onCancel,
   mode = "edit",
   onEdit,
+  context,
 }: NotesEditorProps) {
   // Only render the dynamic import when the overlay is open
   if (!isOpen) return null;
@@ -46,6 +56,7 @@ export function NotesEditor({
       onCancel={onCancel}
       mode={mode}
       onEdit={onEdit}
+      context={context}
     />
   );
 }
