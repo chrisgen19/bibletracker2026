@@ -19,6 +19,7 @@ interface ActivityLogProps {
   onAddPrayer?: () => void;
   onEditEntry: (entry: ReadingEntry) => void;
   onDeleteEntry: (id: string) => void;
+  onUpdateNotes: (entryId: string, notes: string) => void;
   prayers?: Prayer[];
   onEditPrayer?: (prayer: Prayer) => void;
   onDeletePrayer?: (id: string) => void;
@@ -37,6 +38,7 @@ export function ActivityLog({
   onAddPrayer,
   onEditEntry,
   onDeleteEntry,
+  onUpdateNotes,
   prayers = [],
   onEditPrayer,
   onDeletePrayer,
@@ -173,6 +175,7 @@ export function ActivityLog({
                     username={username}
                     onEdit={onEditEntry}
                     onDelete={onDeleteEntry}
+                    onUpdateNotes={onUpdateNotes}
                   />
                 ))}
 

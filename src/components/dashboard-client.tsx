@@ -266,6 +266,27 @@ export function DashboardClient({
     }
   };
 
+  const handleUpdateNotes = (entryId: string, notes: string) => {
+    const originalEntry = entries.find((e) => e.id === entryId);
+    if (!originalEntry) return;
+
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entryId ? { ...e, notes } : e))
+    );
+    toast.success("Reflection updated");
+
+    startTransition(async () => {
+      try {
+        await updateEntry(entryId, { ...originalEntry, notes });
+      } catch {
+        setEntries((prev) =>
+          prev.map((e) => (e.id === entryId && originalEntry ? originalEntry : e))
+        );
+        toast.error("Failed to update reflection");
+      }
+    });
+  };
+
   const handleDeleteEntry = (id: string) => {
     const removedEntry = entries.find((e) => e.id === id);
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -331,6 +352,7 @@ export function DashboardClient({
               onAddPrayer={handleOpenPrayerModal}
               onEditEntry={handleEditEntry}
               onDeleteEntry={handleDeleteEntry}
+              onUpdateNotes={handleUpdateNotes}
               prayers={selectedDatePrayers}
               onEditPrayer={handleEditPrayer}
               onDeletePrayer={handleDeletePrayer}
@@ -368,6 +390,7 @@ export function DashboardClient({
           onAddPrayer={handleOpenPrayerModal}
           onEditEntry={handleEditEntry}
           onDeleteEntry={handleDeleteEntry}
+          onUpdateNotes={handleUpdateNotes}
           prayers={selectedDatePrayers}
           onEditPrayer={handleEditPrayer}
           onDeletePrayer={handleDeletePrayer}
