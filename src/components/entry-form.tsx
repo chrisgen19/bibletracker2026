@@ -109,6 +109,13 @@ export function EntryForm({
               setNotesEditorOpen(false);
             }}
             onCancel={() => setNotesEditorOpen(false)}
+            context={formData.book ? {
+              label: formData.book,
+              badges: [
+                ...(formData.chapters ? [{ text: `Ch ${formData.chapters}`, icon: "chapter" as const, color: "emerald" as const }] : []),
+                ...(formData.verses ? [{ text: `v. ${formData.verses}`, icon: "verse" as const, color: "amber" as const }] : []),
+              ],
+            } : undefined}
           />
         </div>
 
