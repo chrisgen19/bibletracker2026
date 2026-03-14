@@ -46,14 +46,25 @@ interface FriendEntryCardProps {
   onUpdateNotes?: never;
 }
 
-type EntryCardProps = OwnEntryCardProps | FriendEntryCardProps;
+interface PublicEntryCardProps {
+  variant: "public";
+  entry: ReadingEntry;
+  username: string;
+  onEdit?: never;
+  onDelete?: never;
+  onUpdateNotes?: never;
+}
+
+type EntryCardProps = OwnEntryCardProps | FriendEntryCardProps | PublicEntryCardProps;
 
 export function EntryCard(props: EntryCardProps) {
   const { entry, variant = "own" } = props;
   const [showConfirm, setShowConfirm] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
 
+  const isOwn = variant === "own";
   const isFriend = variant === "friend";
+  const isPublic = variant === "public";
   const friendEntry = isFriend ? (entry as FriendsActivityEntry) : null;
 
   const chapterLabel = entry.verses
@@ -64,8 +75,20 @@ export function EntryCard(props: EntryCardProps) {
     ? extractPlainText(entry.notes).slice(0, 150)
     : "";
 
+  // Determine notes link URL for friend/public variants
   const notesUrl = isFriend && friendEntry
     ? `/u/${friendEntry.user.username}/notes/${entry.id}`
+    : isPublic
+      ? `/u/${(props as PublicEntryCardProps).username}/notes/${entry.id}`
+      : null;
+
+  // Public variant shows formatted date
+  const formattedDate = isPublic
+    ? new Date(entry.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : null;
 
   return (
@@ -102,7 +125,7 @@ export function EntryCard(props: EntryCardProps) {
                   {chapterLabel}
                 </p>
               </div>
-              {!isFriend && (
+              {isOwn && (
                 <div className="flex items-center gap-0.5 shrink-0 hover-actions">
                   <button
                     type="button"
@@ -122,9 +145,14 @@ export function EntryCard(props: EntryCardProps) {
               )}
             </div>
 
+            {/* Date for public variant */}
+            {isPublic && formattedDate && (
+              <p className="text-xs text-stone-400 mt-1.5">{formattedDate}</p>
+            )}
+
             {/* Notes preview */}
             {notesPreview && (
-              isFriend && notesUrl ? (
+              notesUrl ? (
                 <Link
                   href={notesUrl}
                   className="block mt-3 pt-3 border-t border-stone-100 group/notes"
@@ -156,7 +184,7 @@ export function EntryCard(props: EntryCardProps) {
       </div>
 
       {/* Own entry: in-place viewer modal */}
-      {!isFriend && (
+      {isOwn && (
         <NotesViewer
           isOpen={showViewer}
           notes={entry.notes ?? ""}
@@ -178,7 +206,7 @@ export function EntryCard(props: EntryCardProps) {
       )}
 
       {/* Own entry: delete confirmation */}
-      {!isFriend && (
+      {isOwn && (
         <Modal
           isOpen={showConfirm}
           onClose={() => setShowConfirm(false)}

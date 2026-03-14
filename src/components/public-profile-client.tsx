@@ -12,8 +12,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Calendar } from "@/components/calendar";
+import { EntryCard } from "@/components/entry-card";
 import { computeStats } from "@/lib/stats";
-import { extractPlainText } from "@/lib/notes";
 import { followUser, unfollowUser } from "@/app/friends/actions";
 import type { ReadingEntry } from "@/lib/types";
 
@@ -277,38 +277,12 @@ export function PublicProfileClient(props: PublicProfileClientProps) {
               </h2>
               <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 {entries.slice(0, 20).map((entry) => (
-                  <div
+                  <EntryCard
                     key={entry.id}
-                    className="bg-stone-50 rounded-2xl p-4 border border-stone-100"
-                  >
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="font-serif font-bold text-lg text-stone-900">
-                        {entry.book}
-                      </span>
-                      <span className="text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-md text-sm">
-                        Ch {entry.chapters}
-                        {entry.verses && `: ${entry.verses}`}
-                      </span>
-                    </div>
-                    <p className="text-xs text-stone-400 mb-2">
-                      {new Date(entry.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                    {entry.notes && (
-                      <Link
-                        href={`/u/${props.username}/notes/${entry.id}`}
-                        className="block w-full text-left relative pl-4 mt-2 group/notes"
-                      >
-                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-stone-200 rounded-full group-hover/notes:bg-emerald-400 transition-colors" />
-                        <p className="text-stone-600 text-sm leading-relaxed italic line-clamp-2 group-hover/notes:text-stone-800 transition-colors">
-                          &ldquo;{extractPlainText(entry.notes).slice(0, 150)}&rdquo;
-                        </p>
-                      </Link>
-                    )}
-                  </div>
+                    variant="public"
+                    entry={entry}
+                    username={props.username}
+                  />
                 ))}
                 {entries.length === 0 && (
                   <div className="text-center py-12">
