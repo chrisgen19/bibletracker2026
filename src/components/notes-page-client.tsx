@@ -37,14 +37,12 @@ interface NotesPageEntry {
 }
 
 interface NotesPageClientProps {
-  username: string;
   authorName: string;
   entry: NotesPageEntry;
   isLoggedIn: boolean;
 }
 
 export function NotesPageClient({
-  username,
   authorName,
   entry,
   isLoggedIn,

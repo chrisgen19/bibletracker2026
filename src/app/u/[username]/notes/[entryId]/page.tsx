@@ -90,7 +90,6 @@ export default async function NotesPage({ params }: PageProps) {
 
   return (
     <NotesPageClient
-      username={username}
       authorName={`${user.firstName} ${user.lastName}`}
       entry={{
         id: entry.id,
