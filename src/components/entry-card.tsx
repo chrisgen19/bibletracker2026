@@ -151,7 +151,7 @@ export function EntryCard(props: EntryCardProps) {
             )}
 
             {/* Notes preview */}
-            {notesPreview && (
+            {entry.notes && (
               notesUrl ? (
                 <Link
                   href={notesUrl}
