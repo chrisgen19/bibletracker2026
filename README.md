@@ -143,7 +143,7 @@ src/
 │   ├── calendar-day-cell.tsx       # Calendar day cell with reading/prayer indicators
 │   ├── calendar-month-picker.tsx   # Month/year picker for calendar navigation
 │   ├── activity-log.tsx            # Daily reading log panel
-│   ├── entry-card.tsx              # Reading entry card with edit/delete and notes viewer
+│   ├── entry-card.tsx              # Unified reading entry card (default, public, friend variants) with edit/delete and notes viewer
 │   ├── entry-form.tsx              # Log/edit reading modal form
 │   ├── bottom-sheet.tsx            # Mobile bottom sheet with swipe-up handle
 │   ├── fab-dropdown.tsx            # Floating action button dropdown
@@ -166,7 +166,6 @@ src/
 │   ├── notifications-client.tsx    # Notifications page client component
 │   ├── friends-client.tsx          # Friends page client component
 │   ├── friend-card.tsx             # Reusable user card with follow button
-│   ├── friend-entry-card.tsx       # Entry card for friends activity feed
 │   ├── public-profile-client.tsx   # Public profile client component
 │   ├── landing-navbar.tsx          # Landing page navigation bar
 │   ├── stats.tsx                   # Stats cards

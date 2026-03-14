@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.7.0";
+export const APP_VERSION = "0.7.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+    version: "0.7.1",
+    date: "2026-03-14",
+    changes: [
+      { type: "fix", description: "Unified EntryCard component — removed separate FriendEntryCard, now uses a single card with default, public, and friend variants" },
+      { type: "fix", description: "Notes visibility check now uses entry.notes instead of notesPreview for accurate detection" },
+    ],
+  },
   {
     version: "0.7.0",
     date: "2026-03-08",
