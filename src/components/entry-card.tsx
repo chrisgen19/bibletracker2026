@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Pencil, Trash2, ChevronRight, BookOpen } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { NotesViewer } from "@/components/notes-viewer";
 import { extractPlainText } from "@/lib/notes";
 import type { ReadingEntry } from "@/lib/types";
 
@@ -13,12 +13,10 @@ interface EntryCardProps {
   username: string;
   onEdit: (entry: ReadingEntry) => void;
   onDelete: (id: string) => void;
-  onUpdateNotes?: (entryId: string, notes: string) => void;
 }
 
-export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: EntryCardProps) {
+export function EntryCard({ entry, username, onEdit, onDelete }: EntryCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showViewer, setShowViewer] = useState(false);
 
   const chapterLabel = entry.verses
     ? `Chapter ${entry.chapters}, v. ${entry.verses}`
@@ -63,10 +61,9 @@ export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: 
 
             {/* Notes preview */}
             {entry.notes && (
-              <button
-                type="button"
-                onClick={() => setShowViewer(true)}
-                className="w-full text-left mt-3 pt-3 border-t border-stone-100 group/notes cursor-pointer"
+              <Link
+                href={`/u/${username}/notes/${entry.id}`}
+                className="block mt-3 pt-3 border-t border-stone-100 group/notes"
               >
                 <p className="text-stone-500 text-[0.8rem] leading-relaxed line-clamp-2 group-hover/notes:text-stone-700 transition-colors">
                   {extractPlainText(entry.notes).slice(0, 150)}
@@ -74,19 +71,11 @@ export function EntryCard({ entry, username, onEdit, onDelete, onUpdateNotes }: 
                 <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-medium text-emerald-600/70 group-hover/notes:text-emerald-600 transition-colors">
                   Read notes <ChevronRight size={11} />
                 </span>
-              </button>
+              </Link>
             )}
           </div>
         </div>
       </div>
-
-      <NotesViewer
-        isOpen={showViewer}
-        notes={entry.notes ?? ""}
-        onClose={() => setShowViewer(false)}
-        onSave={onUpdateNotes ? (notes) => onUpdateNotes(entry.id, notes) : undefined}
-        shareUrl={username ? `/u/${username}/notes/${entry.id}` : undefined}
-      />
 
       <Modal
         isOpen={showConfirm}
