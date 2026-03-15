@@ -265,7 +265,7 @@ export function NotesEditorOverlay({
     : null;
 
   return (
-    <div className="fixed inset-0 z-60 flex flex-col bg-stone-50">
+    <div className="fixed inset-0 z-60 flex flex-col bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       {/* Header bar */}
       <div className="bg-white border-b border-stone-200">
         <div className="flex items-center justify-between px-4 py-3">
