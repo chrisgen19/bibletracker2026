@@ -23,6 +23,7 @@ adapter.createUser = async (data) => {
     firstName,
     lastName,
     image: data.image ?? null,
+    emailVerified: new Date(),
   } as typeof data);
 };
 
@@ -81,25 +82,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider === "google" && user.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { id: true, emailVerified: true, image: true, firstName: true },
+          select: { id: true, image: true },
         });
 
-        if (existingUser) {
-          const updates: Record<string, unknown> = {};
-
-          if (!existingUser.emailVerified) {
-            updates.emailVerified = new Date();
-          }
-          if (!existingUser.image && user.image) {
-            updates.image = user.image;
-          }
-
-          if (Object.keys(updates).length > 0) {
-            await prisma.user.update({
-              where: { id: existingUser.id },
-              data: updates,
-            });
-          }
+        if (existingUser && !existingUser.image && user.image) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { image: user.image },
+          });
         }
       }
       return true;
