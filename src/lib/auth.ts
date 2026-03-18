@@ -23,7 +23,6 @@ adapter.createUser = async (data) => {
     firstName,
     lastName,
     image: data.image ?? null,
-    emailVerified: new Date(),
   } as typeof data);
 };
 
@@ -78,18 +77,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ user, account }) {
-      if (account?.provider === "google" && user.email) {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
-          select: { id: true, image: true },
-        });
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        // Reject if Google says the email is not verified
+        if (!profile?.email_verified) {
+          return false;
+        }
 
-        if (existingUser && !existingUser.image && user.image) {
-          await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { image: user.image },
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, emailVerified: true, image: true, password: true },
           });
+
+          if (dbUser) {
+            // Reject linking to unverified credentials accounts
+            if (!dbUser.emailVerified && dbUser.password) {
+              return "/login?error=OAuthAccountNotLinked";
+            }
+
+            const updates: Record<string, unknown> = {};
+
+            // Verify new Google-only users (just created by adapter, no password)
+            if (!dbUser.emailVerified && !dbUser.password) {
+              updates.emailVerified = new Date();
+            }
+
+            // Backfill profile image
+            if (!dbUser.image && user.image) {
+              updates.image = user.image;
+            }
+
+            if (Object.keys(updates).length > 0) {
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: updates,
+              });
+            }
+          }
         }
       }
       return true;
