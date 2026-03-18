@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import Facebook from "next-auth/providers/facebook";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
@@ -38,6 +39,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: env.AUTH_GOOGLE_SECRET,
       allowDangerousEmailAccountLinking: true,
       authorization: { params: { prompt: "select_account" } },
+    }),
+    Facebook({
+      clientId: env.AUTH_FACEBOOK_ID,
+      clientSecret: env.AUTH_FACEBOOK_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       name: "credentials",
@@ -109,6 +115,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         }
       }
+
+      if (account?.provider === "facebook") {
+        // Facebook only returns email if user has a verified email on FB
+        if (!profile?.email) {
+          return false;
+        }
+
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, emailVerified: true, image: true, password: true },
+          });
+
+          if (dbUser) {
+            // Reject linking to unverified credentials accounts
+            if (!dbUser.emailVerified && dbUser.password) {
+              return "/login?error=OAuthAccountNotLinked";
+            }
+
+            // Backfill profile image
+            if (!dbUser.image && user.image) {
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: { image: user.image },
+              });
+            }
+          }
+        }
+      }
+
       return true;
     },
   },

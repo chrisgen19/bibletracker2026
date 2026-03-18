@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { loginSchema } from "@/lib/validations/auth";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { FacebookSignInButton } from "@/components/facebook-sign-in-button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -146,7 +147,10 @@ export function LoginForm() {
             </div>
           )}
 
-          <GoogleSignInButton callbackUrl={callbackUrl} label="Sign in with Google" />
+          <div className="space-y-3">
+            <GoogleSignInButton callbackUrl={callbackUrl} label="Sign in with Google" />
+            <FacebookSignInButton callbackUrl={callbackUrl} label="Sign in with Facebook" />
+          </div>
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">

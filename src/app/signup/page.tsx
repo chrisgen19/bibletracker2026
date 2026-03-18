@@ -19,6 +19,7 @@ import {
 import { signupSchema } from "@/lib/validations/auth";
 import { COUNTRIES } from "@/lib/constants/countries";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { FacebookSignInButton } from "@/components/facebook-sign-in-button";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -139,7 +140,10 @@ export default function SignupPage() {
             </div>
           )}
 
-          <GoogleSignInButton label="Sign up with Google" />
+          <div className="space-y-3">
+            <GoogleSignInButton label="Sign up with Google" />
+            <FacebookSignInButton label="Sign up with Facebook" />
+          </div>
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
