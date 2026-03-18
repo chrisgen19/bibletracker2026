@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { signupSchema } from "@/lib/validations/auth";
 import { COUNTRIES } from "@/lib/constants/countries";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -137,6 +138,17 @@ export default function SignupPage() {
               {serverError}
             </div>
           )}
+
+          <GoogleSignInButton label="Sign up with Google" />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-stone-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-stone-400">or</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* First Name + Last Name */}

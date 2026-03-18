@@ -14,6 +14,7 @@ import {
   Lock,
 } from "lucide-react";
 import { loginSchema } from "@/lib/validations/auth";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function LoginForm() {
   const registered = searchParams.get("registered");
   const verified = searchParams.get("verified");
   const reset = searchParams.get("reset");
+  const oauthError = searchParams.get("error");
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -132,11 +134,28 @@ export function LoginForm() {
             </div>
           )}
 
+          {oauthError === "OAuthAccountNotLinked" && (
+            <div className="bg-red-50 text-red-700 text-sm rounded-2xl px-4 py-3 mb-6 border border-red-100">
+              This email is already associated with another sign-in method. Please sign in with your original method.
+            </div>
+          )}
+
           {serverError && (
             <div className="bg-red-50 text-red-700 text-sm rounded-2xl px-4 py-3 mb-6 border border-red-100">
               {serverError}
             </div>
           )}
+
+          <GoogleSignInButton callbackUrl={callbackUrl} label="Sign in with Google" />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-stone-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-stone-400">or</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
