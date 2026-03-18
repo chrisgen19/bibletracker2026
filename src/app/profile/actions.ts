@@ -20,6 +20,7 @@ export async function getProfile() {
       lastName: true,
       username: true,
       email: true,
+      password: true,
       phoneNumber: true,
       country: true,
       gender: true,
@@ -35,9 +36,13 @@ export async function getProfile() {
 
   return {
     ...user,
-    birthday: user.birthday.toISOString().split("T")[0],
+    password: undefined,
+    hasPassword: !!user.password,
+    birthday: user.birthday ? user.birthday.toISOString().split("T")[0] : "",
     username: user.username ?? "",
     phoneNumber: user.phoneNumber ?? "",
+    country: user.country ?? "",
+    gender: user.gender ?? ("" as const),
     createdAt: user.createdAt.toISOString(),
     isProfilePublic: user.isProfilePublic,
     calendarDisplayMode: user.calendarDisplayMode,
@@ -103,7 +108,13 @@ export async function changePassword(formData: unknown) {
     select: { password: true },
   });
 
-  if (!user?.password) return { error: "User not found" };
+  if (!user) return { error: "User not found" };
+  if (!user.password) {
+    return {
+      error:
+        "This account uses Google sign-in. Set a password using the forgot password flow.",
+    };
+  }
 
   const isValid = await bcrypt.compare(parsed.data.currentPassword, user.password);
   if (!isValid) return { error: "Current password is incorrect" };
