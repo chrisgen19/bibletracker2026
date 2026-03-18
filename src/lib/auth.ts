@@ -17,12 +17,15 @@ adapter.createUser = async (data) => {
   const firstName = nameParts[0] || "User";
   const lastName = nameParts.slice(1).join(" ") || "";
 
+  // Safe to set emailVerified here — signIn callback runs first and
+  // rejects Google profiles where email_verified is false
   return originalCreateUser({
     ...data,
     id: generateId(),
     firstName,
     lastName,
     image: data.image ?? null,
+    emailVerified: new Date(),
   } as typeof data);
 };
 
@@ -96,22 +99,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               return "/login?error=OAuthAccountNotLinked";
             }
 
-            const updates: Record<string, unknown> = {};
-
-            // Verify new Google-only users (just created by adapter, no password)
-            if (!dbUser.emailVerified && !dbUser.password) {
-              updates.emailVerified = new Date();
-            }
-
             // Backfill profile image
             if (!dbUser.image && user.image) {
-              updates.image = user.image;
-            }
-
-            if (Object.keys(updates).length > 0) {
               await prisma.user.update({
                 where: { id: dbUser.id },
-                data: updates,
+                data: { image: user.image },
               });
             }
           }
